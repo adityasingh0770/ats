@@ -10,15 +10,21 @@ const app = express();
 
 connectDB();
 
-// CLIENT_ORIGIN: comma-separated list, e.g. https://mathmentor.vercel.app,http://localhost:5173
+// CORS: if CLIENT_ORIGIN is set → only those origins (+ localhost for local dev).
+// If unset → reflect the request Origin (so Vercel works without env); set CLIENT_ORIGIN in production to lock this down.
 const defaultOrigins = ['http://localhost:5173', 'http://localhost:5174'];
 const envOrigins = (process.env.CLIENT_ORIGIN || '')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
-const corsOrigins = envOrigins.length > 0 ? [...defaultOrigins, ...envOrigins] : defaultOrigins;
 
-app.use(cors({ origin: corsOrigins, credentials: true }));
+if (envOrigins.length === 0) {
+  app.use(cors({ origin: true, credentials: true }));
+  console.log('CORS: allowing any Origin (reflect). Set CLIENT_ORIGIN on the server to restrict to your frontend URL.');
+} else {
+  const corsOrigins = [...defaultOrigins, ...envOrigins];
+  app.use(cors({ origin: corsOrigins, credentials: true }));
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

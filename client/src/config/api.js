@@ -6,7 +6,9 @@
 export function getApiBaseURL() {
   const raw = import.meta.env.VITE_API_URL;
   if (raw && String(raw).trim()) {
-    return `${String(raw).replace(/\/$/, '')}/api`;
+    let base = String(raw).trim().replace(/\/$/, '');
+    if (base.endsWith('/api')) base = base.slice(0, -4);
+    return `${base}/api`;
   }
   return '/api';
 }

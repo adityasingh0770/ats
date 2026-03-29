@@ -25,7 +25,7 @@ Do this **in order**: API first, then frontend, then add the frontend URL to Ren
    | `JWT_SECRET` | Long random string (32+ characters; keep secret) |
    | `JWT_EXPIRES_IN` | `30d` |
    | `NODE_ENV` | `production` |
-   | `CLIENT_ORIGIN` | Leave **empty** for now; set after Vercel (Part C.5). |
+   | `CLIENT_ORIGIN` | Optional: leave empty → API accepts any browser Origin (simplest for Vercel). Or set to your exact Vercel URL to restrict access. |
 
    **Do not** set `MONGO_URI` — it is not used.
 
@@ -61,13 +61,14 @@ Do this **in order**: API first, then frontend, then add the frontend URL to Ren
 
 4. **Deploy**. When it finishes, copy the production URL, e.g. `https://mathmentor.vercel.app`.
 
-5. **Back on Render** → your Web Service → **Environment** → set:
+5. **Back on Render** (optional hardening) → **Environment** → you may set:
 
    - `CLIENT_ORIGIN` = your Vercel URL, e.g. `https://mathmentor.vercel.app`  
-   - For multiple origins, comma-separate:  
-     `https://mathmentor.vercel.app,https://www.yourdomain.com`
+   - If you leave it empty, CORS still allows your Vercel app (reflect mode). Setting it restricts access to listed origins plus localhost.
 
-6. **Manual Deploy** → **Clear build cache & deploy** (or save env so Render redeploys) so CORS includes the new origin.
+6. **Manual Deploy** → **Clear build cache & deploy** (or save env so Render redeploys).
+
+**`VITE_API_URL` on Vercel:** use `https://YOUR-SERVICE.onrender.com` only — **do not** add `/api` (the app adds it).
 
 ---
 
@@ -75,9 +76,7 @@ Do this **in order**: API first, then frontend, then add the frontend URL to Ren
 
 1. Open `https://YOUR-API.onrender.com/api/health` — should return JSON with `status: OK` (first hit after idle may take 30–60s on free tier).
 2. Open the **Vercel** URL → **Register** → **Login** → **Dashboard** → start a quiz.
-3. If the browser shows **CORS** errors:
-   - `CLIENT_ORIGIN` on Render must **exactly** match the site URL (https, host, no trailing slash).
-   - Redeploy the API after changing env vars.
+3. If the browser shows **CORS** errors and you set **`CLIENT_ORIGIN`** on Render, it must **exactly** match the site URL (https, host, no trailing slash). If `CLIENT_ORIGIN` is empty, the API uses reflect mode and should allow Vercel; redeploy the API after pulling the latest server code.
 
 ---
 
