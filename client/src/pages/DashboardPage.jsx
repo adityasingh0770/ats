@@ -101,13 +101,13 @@ export default function DashboardPage() {
           </motion.div>
         )}
 
-        {/* Mastery + Stats — single row */}
-        <div className="flex gap-2 items-stretch">
+        {/* Mastery + Stats — column on mobile, row on large screens */}
+        <div className="flex flex-col lg:flex-row gap-3 items-stretch min-w-0 w-full">
 
-          {/* Overall Mastery — takes ~55% width */}
+          {/* Overall Mastery — full width mobile, ~55% desktop */}
           {!isNewUser && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="card py-3 px-4 flex flex-col justify-between flex-[3]">
+              className="card py-3 px-4 flex flex-col justify-between w-full min-w-0 lg:flex-[3]">
               <div className="flex items-center justify-between gap-3 mb-2">
                 <div>
                   <p className="text-xs font-semibold text-[#111111]">Overall Mastery</p>
@@ -122,8 +122,8 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
-          {/* Stats — takes ~45% width, each card compact */}
-          <div className="flex gap-2 flex-[2]">
+          {/* Stats — 2×2 grid on small screens, one row on lg+ */}
+          <div className="grid grid-cols-2 gap-2 w-full min-w-0 lg:flex lg:flex-[2] lg:flex-row lg:gap-2">
             <StatsCard Icon={Target}    title="Accuracy"   value={isNewUser ? '—' : `${stats.accuracy}%`} color="#F43F5E" index={0} subtitle="correct / attempts" />
             <StatsCard Icon={PenLine}   title="Attempts"   value={stats.attempts || '0'}                  color="#FF6500" index={1} subtitle="questions answered" />
             <StatsCard Icon={Lightbulb} title="Hints Used" value={stats.hintsUsed || '0'}                 color="#F59E0B" index={2} subtitle="hints requested" />

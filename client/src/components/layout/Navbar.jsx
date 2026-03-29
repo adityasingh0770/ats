@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
-import { LayoutDashboard, BookOpen, LogOut, LogIn, Zap } from 'lucide-react';
+import { LayoutDashboard, BookOpen, LogOut, Zap } from 'lucide-react';
 import { HOME_PATH } from '../../config/routes';
 
 export default function Navbar() {
@@ -53,22 +53,7 @@ export default function Navbar() {
                 <span className="text-xs hidden sm:block">Logout</span>
               </motion.button>
             </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-1 text-[#888888] hover:text-[#111111] transition-colors px-3 py-1.5 rounded-lg text-xs font-medium">
-                  <LogIn className="w-3.5 h-3.5" /> Login
-                </motion.button>
-              </Link>
-              <Link to="/register">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="btn-primary text-xs px-3.5 py-1.5">
-                  Get Started
-                </motion.button>
-              </Link>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </motion.nav>
