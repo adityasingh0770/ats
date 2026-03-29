@@ -2,13 +2,14 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { LayoutDashboard, BookOpen, LogOut, LogIn, Zap } from 'lucide-react';
+import { HOME_PATH } from '../../config/routes';
 
 export default function Navbar() {
   const { token, user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => { logout(); navigate(HOME_PATH); };
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -21,7 +22,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
 
-          <Link to={token ? '/dashboard' : '/'} className="flex items-center gap-2">
+          <Link to={token ? '/dashboard' : HOME_PATH} className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-md flex items-center justify-center bg-[#FFD700]">
               <Zap className="w-3.5 h-3.5 text-black fill-black" />
             </div>

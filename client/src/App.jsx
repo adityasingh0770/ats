@@ -9,6 +9,7 @@ import QuizPage from './pages/QuizPage';
 import ResultPage from './pages/ResultPage';
 import ProfilePage from './pages/ProfilePage';
 import Navbar from './components/layout/Navbar';
+import { HOME_PATH } from './config/routes';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuthStore();
@@ -26,7 +27,8 @@ export default function App() {
       <div className="min-h-screen">
         <Navbar />
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path={HOME_PATH} element={<LandingPage />} />
+          <Route path="/" element={<Navigate to={HOME_PATH} replace />} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
@@ -34,7 +36,7 @@ export default function App() {
           <Route path="/quiz/:topic/:shape" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
           <Route path="/result/:sessionId" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to={HOME_PATH} replace />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, LogIn, AlertCircle, Zap, Eye, EyeOff } from 'lucide-react';
 import { login } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
+import { networkErrorMessage } from '../utils/apiErrors';
 import PageWrapper from '../components/layout/PageWrapper';
 
 export default function LoginPage() {
@@ -33,7 +34,7 @@ export default function LoginPage() {
       const msg    = err.response?.data?.message;
       if (status === 503) setError('Cannot connect to database. Please switch to mobile hotspot and try again.');
       else if (msg) setError(msg);
-      else if (err.code === 'ERR_NETWORK' || !err.response) setError('Cannot reach the server. Please check your connection.');
+      else if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED' || !err.response) setError(networkErrorMessage());
       else setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
