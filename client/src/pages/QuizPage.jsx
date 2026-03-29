@@ -13,6 +13,8 @@ import { FullPageLoader } from '../components/ui/LoadingSpinner';
 import Badge from '../components/ui/Badge';
 import { formatTopicName, formatShapeName, topicColor } from '../utils/masteryCalc';
 import { X, AlertTriangle } from 'lucide-react';
+import CelebrationBurst from '../components/quiz/CelebrationBurst';
+import { playCorrectSoundFX, playIncorrectSoundFX } from '../utils/quizFeedbackAudio';
 
 export default function QuizPage() {
   const { topic, shape } = useParams();
@@ -24,6 +26,7 @@ export default function QuizPage() {
   const [inputKey, setInputKey] = useState(0);
   const [showTerminateModal, setShowTerminateModal] = useState(false);
   const [terminating, setTerminating] = useState(false);
+  const [celebrationBurstId, setCelebrationBurstId] = useState(0);
 
   const {
     sessionId, currentQuestion, conceptMaterial, phase, feedback,
@@ -62,6 +65,12 @@ export default function QuizPage() {
       setLastResponse(res);
       if (res.hint) setHint(res.hint);
       if (res.action === 'remedial' && res.remedialContent) setRemedial(res.remedialContent);
+      if (res.correct) {
+        void playCorrectSoundFX();
+        setCelebrationBurstId((n) => n + 1);
+      } else {
+        void playIncorrectSoundFX();
+      }
       setFeedback({
         correct: res.correct, action: res.action, message: res.message,
         errorInfo: res.errorInfo, masteryUpdate: res.masteryUpdate,
@@ -137,6 +146,7 @@ export default function QuizPage() {
 
   return (
     <PageWrapper>
+      <CelebrationBurst burstId={celebrationBurstId} />
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
 
         {/* Terminate confirmation modal */}
