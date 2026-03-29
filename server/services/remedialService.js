@@ -1,8 +1,8 @@
-const Content = require('../models/Content');
+const { getByConceptKey } = require('../store/contentCache');
 
 const getRemedialContent = async (topic, shape) => {
   const conceptKey = `${topic}_${shape}`;
-  const content = await Content.findOne({ conceptKey });
+  const content = getByConceptKey(conceptKey);
 
   if (!content) {
     return {
@@ -27,7 +27,7 @@ const getRemedialContent = async (topic, shape) => {
 
 const getConceptMaterial = async (topic, shape) => {
   const conceptKey = `${topic}_${shape}`;
-  const content = await Content.findOne({ conceptKey });
+  const content = getByConceptKey(conceptKey);
   if (!content) return null;
 
   return {

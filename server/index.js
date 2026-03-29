@@ -31,5 +31,16 @@ app.get('/api/health', (req, res) => res.json({ status: 'OK', message: 'MathMent
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`MathMentor server running on port ${PORT}`));
+const PORT = Number(process.env.PORT) || 5000;
+const server = app.listen(PORT, () => console.log(`MathMentor server running on port ${PORT}`));
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\nPort ${PORT} is already in use — another process (often an old Node server) is listening.`);
+    console.error('Fix: stop that process, then restart this server.');
+    console.error('  Windows: netstat -ano | findstr :' + PORT + '   → note the PID → taskkill /PID <pid> /F');
+    console.error('  Or set a different PORT in server/.env and match VITE_API_PROXY_TARGET in client/.env\n');
+    process.exit(1);
+  }
+  throw err;
+});

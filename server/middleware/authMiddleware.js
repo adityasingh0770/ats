@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { findUserById, userToPublic } = require('../store/fileStore');
 
 const protect = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -9,7 +9,6 @@ const protect = async (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
 
-  // 1. Verify JWT signature + expiry first (no DB call)
   let decoded;
   try {
     decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -20,16 +19,17 @@ const protect = async (req, res, next) => {
     return res.status(401).json({ message: msg });
   }
 
-  // 2. Then check DB (separately so DB errors don't masquerade as auth errors)
   try {
-    req.user = await User.findById(decoded.id).select('-passwordHash');
-    if (!req.user) {
+    const user = findUserById(decoded.id);
+    if (!user) {
       return res.status(401).json({ message: 'Account not found. Please log in again.' });
     }
+    req.user = userToPublic(user);
+    req.user._id = user._id;
     next();
   } catch (err) {
-    console.error('Auth middleware DB error:', err.message);
-    return res.status(503).json({ message: 'Server unavailable. Please check your connection and try again.' });
+    console.error('Auth middleware error:', err.message);
+    return res.status(500).json({ message: 'Something went wrong. Please try again.' });
   }
 };
 

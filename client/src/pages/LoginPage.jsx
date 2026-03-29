@@ -31,10 +31,12 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err) {
       const status = err.response?.status;
-      const msg    = err.response?.data?.message;
-      if (status === 503) setError('Cannot connect to database. Please switch to mobile hotspot and try again.');
-      else if (msg) setError(msg);
-      else if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED' || !err.response) setError(networkErrorMessage());
+      const msg = err.response?.data?.message;
+      if (msg) setError(msg);
+      else if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED' || !err.response)
+        setError(networkErrorMessage());
+      else if (status === 503)
+        setError('The server is temporarily unavailable. Make sure the API is running on port 5000 and try again.');
       else setError('Login failed. Please try again.');
     } finally {
       setLoading(false);

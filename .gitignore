@@ -6,6 +6,9 @@ node_modules/
 dist/
 **/dist/
 
+# App state (local JSON store — user data)
+server/data/app-state.json
+
 # Secrets — never commit (keep *.example templates tracked)
 .env
 **/.env

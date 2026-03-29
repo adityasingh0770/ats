@@ -1,8 +1,14 @@
-const Question = require('../models/Question');
-const Session = require('../models/Session');
-const LearnerModel = require('../models/LearnerModel');
-const { getConceptMaterial } = require('../services/remedialService');
-const { getRemedialContent } = require('../services/remedialService');
+const {
+  findLearnerByUserId,
+  createSession,
+  findSessionOne,
+  saveSession,
+  saveLearner,
+  getMastery,
+  updateConceptMastery,
+} = require('../store/fileStore');
+const { getNextQuestion, findById } = require('../store/questionBank');
+const { getConceptMaterial, getRemedialContent } = require('../services/remedialService');
 const { handleError } = require('../utils/dbError');
 const { getHint } = require('../services/hintService');
 const { detectError, checkAnswer } = require('../services/errorDetectionService');
@@ -16,16 +22,15 @@ const startQuiz = async (req, res) => {
     const { topic, shape } = req.body;
     if (!topic || !shape) return res.status(400).json({ message: 'Topic and shape are required.' });
 
-    const learner = await LearnerModel.findOne({ userId: req.user._id });
+    const learner = findLearnerByUserId(req.user._id);
     const conceptKey = `${topic}_${shape}`;
-    const masteryScore = learner ? (learner.concept_mastery.get(conceptKey) || 0) : 0;
+    const masteryScore = learner ? getMastery(learner, conceptKey) : 0;
     const startDifficulty = difficultyFromMastery(masteryScore);
 
     const conceptMaterial = await getConceptMaterial(topic, shape);
+    const firstQuestion = getNextQuestion(topic, shape, startDifficulty, []);
 
-    const firstQuestion = await getNextQuestion(topic, shape, startDifficulty, []);
-
-    const session = await Session.create({
+    const session = createSession({
       userId: req.user._id,
       topic,
       shape,
@@ -52,10 +57,10 @@ const submitAnswer = async (req, res) => {
     if (!sessionId || answer === undefined)
       return res.status(400).json({ message: 'sessionId and answer are required.' });
 
-    const session = await Session.findOne({ sessionId, userId: req.user._id, status: 'active' });
+    const session = findSessionOne({ sessionId, userId: req.user._id, status: 'active' });
     if (!session) return res.status(404).json({ message: 'Active session not found.' });
 
-    const question = await Question.findById(session.currentQuestionId);
+    const question = findById(session.currentQuestionId);
     if (!question) return res.status(404).json({ message: 'Current question not found.' });
 
     session.currentAttempts += 1;
@@ -105,7 +110,12 @@ const submitAnswer = async (req, res) => {
           session.consecutiveCorrect = 0;
         }
         session.questionsAsked.push(question._id);
-        nextQuestion = await getNextQuestion(session.topic, session.shape, session.currentDifficulty, session.questionsAsked);
+        nextQuestion = getNextQuestion(
+          session.topic,
+          session.shape,
+          session.currentDifficulty,
+          session.questionsAsked
+        );
 
         if (!nextQuestion) {
           isSessionComplete = true;
@@ -125,15 +135,16 @@ const submitAnswer = async (req, res) => {
       }
 
       if (errorInfo) {
-        const learner = await LearnerModel.findOne({ userId: req.user._id });
-        if (learner && !learner.error_patterns.includes(errorInfo.type)) {
-          learner.error_patterns.push(errorInfo.type);
-          await learner.save();
+        const L = findLearnerByUserId(req.user._id);
+        if (L && !(L.error_patterns || []).includes(errorInfo.type)) {
+          if (!L.error_patterns) L.error_patterns = [];
+          L.error_patterns.push(errorInfo.type);
+          saveLearner(L);
         }
       }
     }
 
-    const learner = await LearnerModel.findOne({ userId: req.user._id });
+    const learner = findLearnerByUserId(req.user._id);
     let masteryAfter = session.masteryBefore;
     if (isCorrect && learner) {
       const conceptKey = `${session.topic}_${session.shape}`;
@@ -149,30 +160,34 @@ const submitAnswer = async (req, res) => {
         avgExpectedTime: question.expectedTime,
       });
 
-      learner.updateConceptMastery(conceptKey, newScore);
-      learner.confidence_score = updateConfidenceScore(learner.confidence_score, isCorrect, session.currentAttempts, session.currentHintsUsed);
-      learner.attempts   += 1;
+      updateConceptMastery(learner, conceptKey, newScore);
+      learner.confidence_score = updateConfidenceScore(
+        learner.confidence_score,
+        isCorrect,
+        session.currentAttempts,
+        session.currentHintsUsed
+      );
+      learner.attempts += 1;
       learner.hints_used += session.currentHintsUsed;
-      // accuracy is now derived from sessions in the dashboard — keep learner.accuracy as a
-      // simple 0-1 running fraction here only for internal mastery weighting (C component)
-      learner.accuracy = Math.min(1, Math.max(0,
-        (learner.accuracy * (learner.attempts - 1) + 1) / learner.attempts
-      ));
-      await learner.save();
-      masteryAfter = learner.concept_mastery.get(conceptKey) || newScore;
+      learner.accuracy = Math.min(
+        1,
+        Math.max(0, (learner.accuracy * (learner.attempts - 1) + 1) / learner.attempts)
+      );
+      saveLearner(learner);
+      masteryAfter = getMastery(learner, conceptKey) || newScore;
     }
 
     if (isSessionComplete) {
       session.status = 'completed';
-      session.endTime = new Date();
+      session.endTime = new Date().toISOString();
       session.masteryAfter = masteryAfter;
       if (learner) {
         learner.total_sessions += 1;
-        await learner.save();
+        saveLearner(learner);
       }
     }
 
-    await session.save();
+    saveSession(session);
 
     let remedialContent = null;
     if (rule.showRemedial) {
@@ -210,16 +225,19 @@ const submitAnswer = async (req, res) => {
 const requestHint = async (req, res) => {
   try {
     const { sessionId, level } = req.query;
-    const session = await Session.findOne({ sessionId, userId: req.user._id });
+    const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
     const hint = await getHint(session.currentQuestionId, level || 1);
     session.currentHintsUsed += 1;
     session.metrics.hintsUsed += 1;
-    await session.save();
+    saveSession(session);
 
-    const learner = await LearnerModel.findOne({ userId: req.user._id });
-    if (learner) { learner.hints_used += 1; await learner.save(); }
+    const learner = findLearnerByUserId(req.user._id);
+    if (learner) {
+      learner.hints_used += 1;
+      saveLearner(learner);
+    }
 
     res.json(hint);
   } catch (err) {
@@ -230,7 +248,7 @@ const requestHint = async (req, res) => {
 const requestRemedial = async (req, res) => {
   try {
     const { sessionId } = req.query;
-    const session = await Session.findOne({ sessionId, userId: req.user._id });
+    const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
     const remedial = await getRemedialContent(session.topic, session.shape);
@@ -238,17 +256,6 @@ const requestRemedial = async (req, res) => {
   } catch (err) {
     handleError(err, res);
   }
-};
-
-const getNextQuestion = async (topic, shape, difficulty, excludeIds) => {
-  const query = { topic, shape, difficulty, _id: { $nin: excludeIds } };
-  const questions = await Question.find(query);
-  if (questions.length === 0) {
-    const fallback = await Question.find({ topic, shape, _id: { $nin: excludeIds } });
-    if (fallback.length === 0) return null;
-    return fallback[Math.floor(Math.random() * fallback.length)];
-  }
-  return questions[Math.floor(Math.random() * questions.length)];
 };
 
 const formatQuestion = (q) => ({
@@ -262,10 +269,7 @@ const formatQuestion = (q) => ({
   unit: q.unit,
   formula: q.formula,
   expectedTime: q.expectedTime,
-  // MCQ — send options but NOT correct_option (prevents cheating)
   options: q.options || null,
-  // True/False — question text already contains the statement
-  // No correct_verdict sent to client
 });
 
 module.exports = { startQuiz, submitAnswer, requestHint, requestRemedial };
