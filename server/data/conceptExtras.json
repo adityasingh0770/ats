@@ -1,0 +1,212 @@
+{
+  "perimeter_square": {
+    "detailParagraphs": [
+      "Perimeter answers: “If I walk once around the edge, how far do I walk?” For a square, that path is four identical straight pieces — so you add them or multiply one side by 4.",
+      "Units stay linear: centimetres, metres, or kilometres — never cm². If a problem mixes mm and cm, convert every length to one unit before you add.",
+      "Inverse idea: if perimeter P is known, each side is s = P ÷ 4. Always sanity-check: 4 × s should come back to P."
+    ],
+    "figures": [
+      {
+        "title": "Square — perimeter (all four sides = s)",
+        "caption": "All four sides match; one trip around the boundary is P = s + s + s + s = 4s.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 150' role='img'><rect x='8' y='28' width='204' height='114' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><rect x='65' y='55' width='90' height='90' rx='4' fill='#FFF7ED' stroke='#FF6500' stroke-width='2.5'/><text x='110' y='48' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#C2410C'>side s (top)</text><text x='110' y='155' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='12' font-weight='700' fill='#EA580C'>s</text><text x='52' y='105' text-anchor='end' font-family='system-ui,Arial,sans-serif' font-size='12' font-weight='700' fill='#EA580C'>s</text><text x='168' y='105' font-family='system-ui,Arial,sans-serif' font-size='12' font-weight='700' fill='#EA580C'>s</text><text x='110' y='105' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' fill='#647585'>P = 4s</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Perimeter", "formula": "P = 4 × s" },
+      { "name": "Side from P", "formula": "s = P ÷ 4" }
+    ]
+  },
+  "perimeter_rectangle": {
+    "detailParagraphs": [
+      "A rectangle has two lengths and two breadths opposite each other. Tracing the boundary: you walk length → breadth → length → breadth, so P = l + b + l + b.",
+      "Factoring gives P = 2(l + b). A common slip is using l × b (that is area, not perimeter).",
+      "If one dimension and P are known, you can solve for the other: for example b = P/2 − l."
+    ],
+    "figures": [
+      {
+        "title": "Rectangle — perimeter (length l, breadth b)",
+        "caption": "Opposite sides are equal: top and bottom = l; left and right = b.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 130' role='img'><rect x='8' y='8' width='244' height='114' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><rect x='45' y='40' width='170' height='60' rx='3' fill='#ECFDF5' stroke='#0D9488' stroke-width='2'/><text x='130' y='32' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>length l</text><text x='228' y='73' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>breadth b</text><text x='130' y='118' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>length l</text><text x='22' y='73' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>breadth b</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Perimeter", "formula": "P = 2(l + b)" },
+      { "name": "Sum of sides", "formula": "P = l + b + l + b" }
+    ]
+  },
+  "perimeter_circle": {
+    "detailParagraphs": [
+      "For circles we call the perimeter the circumference — the length of the boundary if you cut it and straightened it into a line.",
+      "Use radius r with C = 2πr, or diameter d with C = πd because d = 2r. In Grade 8 practice, π is often 22/7 — match what the question states.",
+      "Always check: is the number given a radius (centre to rim) or a diameter (rim to rim across)? Halve the diameter before using 2πr."
+    ],
+    "figures": [
+      {
+        "title": "Circle — circumference (radius r from centre O)",
+        "caption": "Radius r is from centre O to the circle; one full turn around is C = 2πr.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 150' role='img'><rect x='8' y='8' width='204' height='134' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><circle cx='110' cy='80' r='48' fill='#EFF6FF' stroke='#2563EB' stroke-width='2.5'/><line x1='110' y1='80' x2='158' y2='80' stroke='#DC2626' stroke-width='2.5'/><circle cx='110' cy='80' r='5' fill='#FFFFFF' stroke='#334155' stroke-width='1.5'/><text x='106' y='68' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#334155'>O</text><text x='130' y='74' font-family='system-ui,Arial,sans-serif' font-size='12' font-weight='700' fill='#DC2626'>r</text><text x='110' y='26' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' fill='#1D4ED8'>boundary length = C</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Circumference (radius)", "formula": "C = 2πr" },
+      { "name": "Circumference (diameter)", "formula": "C = πd" }
+    ]
+  },
+  "area_square": {
+    "detailParagraphs": [
+      "Area counts how many unit squares (1 cm × 1 cm) tile the region. For a square of side s, you get s rows of s tiles → A = s × s = s².",
+      "Units are always squared: cm², m². If sides are in cm, area is in cm² — never mix with perimeter units.",
+      "If area is given, side length is s = √A (square root). Verify by squaring back."
+    ],
+    "figures": [
+      {
+        "title": "Square — area (tile grid, side s)",
+        "caption": "Think of a grid: s columns and s rows of unit squares — total s².",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' role='img'><rect x='8' y='8' width='204' height='144' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><rect x='50' y='38' width='120' height='120' fill='#FFF7ED' stroke='#FF6500' stroke-width='2'/><g stroke='#FDBA74' stroke-width='1'><line x1='74' y1='38' x2='74' y2='158'/><line x1='98' y1='38' x2='98' y2='158'/><line x1='122' y1='38' x2='122' y2='158'/><line x1='146' y1='38' x2='146' y2='158'/><line x1='50' y1='62' x2='170' y2='62'/><line x1='50' y1='86' x2='170' y2='86'/><line x1='50' y1='110' x2='170' y2='110'/><line x1='50' y1='134' x2='170' y2='134'/></g><text x='110' y='30' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#C2410C'>side s</text><text x='110' y='178' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#C2410C'>side s</text><text x='110' y='105' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' fill='#647585'>A = s²</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Area", "formula": "A = s²" },
+      { "name": "Side from area", "formula": "s = √A" }
+    ]
+  },
+  "area_rectangle": {
+    "detailParagraphs": [
+      "Area of a rectangle is “how much floor space” inside the outline: one way to see it is rows of 1×1 tiles — there are l tiles along one side and b along the other, so A = l × b.",
+      "Given area and one dimension, divide: l = A ÷ b or b = A ÷ l. Sketch a thin vs wide rectangle with same area to build intuition.",
+      "Again, area uses square units; do not confuse with perimeter 2(l + b)."
+    ],
+    "figures": [
+      {
+        "title": "Rectangle — area (l × b region)",
+        "caption": "Region inside the rectangle has area = length × breadth.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 125' role='img'><rect x='8' y='8' width='264' height='109' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><rect x='35' y='35' width='200' height='70' fill='#ECFDF5' stroke='#0D9488' stroke-width='2'/><text x='135' y='28' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>length l</text><text x='252' y='73' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>breadth b</text><text x='135' y='76' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='12' font-weight='700' fill='#334155'>A = l × b</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Area", "formula": "A = l × b" }
+    ]
+  },
+  "area_circle": {
+    "detailParagraphs": [
+      "The circle’s area is all the flat region inside the curve. The formula A = πr² uses the radius squared — if diameter is given, first compute r = d/2.",
+      "Why r²? If you scale a circle’s radius by k, area scales by k² (doubling r multiplies area by 4).",
+      "Watch calculator vs fraction: with π = 22/7, simplify (e.g. cancel 7 with r when r is a multiple of 7)."
+    ],
+    "figures": [
+      {
+        "title": "Circle — area (shaded interior, radius r)",
+        "caption": "Shaded region is πr² — the interior of the circle.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 150' role='img'><rect x='8' y='8' width='204' height='134' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><circle cx='110' cy='82' r='46' fill='#DCFCE7' stroke='#16A34A' stroke-width='2'/><line x1='110' y1='82' x2='156' y2='82' stroke='#DC2626' stroke-width='2'/><text x='128' y='78' font-family='system-ui,Arial,sans-serif' font-size='12' font-weight='700' fill='#DC2626'>r</text><text x='110' y='26' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' font-weight='600' fill='#15803D'>region inside = A = πr²</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Area", "formula": "A = πr²" },
+      { "name": "Radius from diameter", "formula": "r = d ÷ 2" }
+    ]
+  },
+  "surface_area_cube": {
+    "detailParagraphs": [
+      "A cube has six congruent square faces — top, bottom, and four around the sides. Total surface area (TSA) is the sum of the areas of all six faces: TSA = 6s².",
+      "If you see an “unfolded” net of a cube, count six squares — that mental picture helps avoid forgetting a face.",
+      "From TSA back to side: one face area is TSA/6, then s = √(TSA/6)."
+    ],
+    "figures": [
+      {
+        "title": "Cube — total surface (6 equal faces, edge s)",
+        "caption": "One face has area s²; six identical faces → TSA = 6s².",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 145' role='img'><rect x='8' y='8' width='224' height='129' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><path d='M55 50 L120 25 L180 50 L180 100 L115 125 L55 100 Z' fill='#EEF2FF' stroke='#4F46E5' stroke-width='2'/><path d='M55 50 L120 25 L120 75 L55 100 Z' fill='#E0E7FF' stroke='#4F46E5' stroke-width='2'/><path d='M120 25 L180 50 L180 100 L120 75 Z' fill='#C7D2FE' stroke='#4F46E5' stroke-width='2'/><text x='88' y='98' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#4334CE'>edge s</text><text x='120' y='138' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' fill='#647585'>each face: s² → TSA = 6s²</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Total surface area", "formula": "TSA = 6s²" }
+    ]
+  },
+  "surface_area_cuboid": {
+    "detailParagraphs": [
+      "A cuboid has three pairs of rectangles: top/bottom (l×b), front/back (b×h), left/right (l×h). Each pair contributes twice, so TSA = 2(lb + bh + hl).",
+      "Compute the three products lb, bh, and hl first, add, then double — fewer sign errors than expanding in one line.",
+      "Picture a shoebox: you are painting every outer face exactly once when you use TSA."
+    ],
+    "figures": [
+      {
+        "title": "Cuboid — total surface (edges l, b, h)",
+        "caption": "Edges l, b, h meet at a corner; three different face sizes appear in pairs.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 150' role='img'><rect x='8' y='8' width='244' height='134' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><path d='M40 55 L125 30 L185 60 L185 110 L100 135 L40 105 Z' fill='#ECFDF5' stroke='#0D9488' stroke-width='2'/><path d='M40 55 L125 30 L125 90 L40 105 Z' fill='#CCFBF1' stroke='#0D9488' stroke-width='2'/><path d='M125 30 L185 60 L185 110 L125 90 Z' fill='#99F6E4' stroke='#0D9488' stroke-width='2'/><text x='58' y='122' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>l</text><text x='192' y='88' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>b</text><text x='100' y='40' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#047857'>h</text><text x='130' y='145' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='9' fill='#647585'>TSA = 2(lb + bh + hl)</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Total surface area", "formula": "TSA = 2(lb + bh + hl)" }
+    ]
+  },
+  "surface_area_cylinder": {
+    "detailParagraphs": [
+      "A closed cylinder has a curved sleeve plus two circular lids. Curved surface alone is CSA = 2πrh (rectangle when unrolled: width 2πr, height h).",
+      "Total surface adds both circles: TSA = 2πrh + 2πr² = 2πr(r + h). The factor 2πr appears because one circle has area πr².",
+      "If the problem asks only for “lateral” or “curved” area, do not add the two ends."
+    ],
+    "figures": [
+      {
+        "title": "Cylinder — curved surface unrolled to a rectangle",
+        "caption": "Unrolling the curved part: a rectangle with width 2πr and height h.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 120' role='img'><rect x='8' y='8' width='284' height='104' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><text x='150' y='22' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' font-weight='700' fill='#1D4ED8'>3D cylinder (side view)</text><ellipse cx='52' cy='45' rx='32' ry='10' fill='#DBEAFE' stroke='#2563EB' stroke-width='1.5'/><path d='M20 45 L20 78 Q52 88 84 78 L84 45 Q52 35 20 45' fill='none' stroke='#2563EB' stroke-width='1.5'/><ellipse cx='52' cy='78' rx='32' ry='10' fill='#DBEAFE' stroke='#2563EB' stroke-width='1.5'/><text x='145' y='58' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='9' fill='#647585'>unwrap →</text><rect x='170' y='38' width='115' height='48' fill='#EFF6FF' stroke='#1D4ED8' stroke-width='2' stroke-dasharray='5 3'/><text x='227' y='58' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' font-weight='700' fill='#1D4ED8'>width = 2πr</text><text x='288' y='64' font-family='system-ui,Arial,sans-serif' font-size='10' font-weight='700' fill='#DC2626'>h</text><text x='227' y='100' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='9' fill='#647585'>rectangle area = 2πr × h = CSA</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Curved surface", "formula": "CSA = 2πrh" },
+      { "name": "Total surface", "formula": "TSA = 2πr(r + h)" }
+    ]
+  },
+  "volume_cube": {
+    "detailParagraphs": [
+      "Volume is 3D space inside a solid. For a cube, stack s layers of s×s unit cubes in the base — total s × s × s = s³.",
+      "Units: cubic centimetres (cm³). If lengths are in metres, volume is m³; convert consistently in word problems.",
+      "Edge from volume: s = ∛V (cube root). Check by cubing."
+    ],
+    "figures": [
+      {
+        "title": "Cube — volume (edge s, s×s×s unit blocks)",
+        "caption": "s cubes along each edge → s³ small unit cubes inside.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 145' role='img'><rect x='8' y='8' width='224' height='129' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><path d='M58 48 L120 23 L178 48 L178 98 L118 123 L58 98 Z' fill='#FEF9C3' stroke='#CA8A04' stroke-width='2'/><path d='M58 48 L120 23 L120 73 L58 98 Z' fill='#FEF08A' stroke='#CA8A04' stroke-width='2'/><path d='M120 23 L178 48 L178 98 L120 73 Z' fill='#FDE047' stroke='#CA8A04' stroke-width='2'/><text x='95' y='108' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#A16207'>edge s</text><text x='120' y='138' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='10' fill='#647585'>V = s × s × s = s³</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Volume", "formula": "V = s³" }
+    ]
+  },
+  "volume_cuboid": {
+    "detailParagraphs": [
+      "Volume of a cuboid generalises the box idea: how many 1×1×1 blocks fit inside? Count l along one edge, b along another, h upward — V = l × b × h.",
+      "Any order of multiplication works (commutative). If one dimension is unknown, divide volume by the product of the other two.",
+      "Capacity problems sometimes convert m³ to litres: 1 m³ = 1000 L (when taught in your chapter)."
+    ],
+    "figures": [
+      {
+        "title": "Cuboid — volume (edges l, b, h)",
+        "caption": "Orthogonal edges l, b, h fill a rectangular box.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 150' role='img'><rect x='8' y='8' width='244' height='134' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><path d='M38 58 L118 33 L178 58 L178 108 L102 133 L38 108 Z' fill='#EDE9FE' stroke='#7C3AED' stroke-width='2'/><path d='M38 58 L118 33 L118 88 L38 108 Z' fill='#DDD6FE' stroke='#7C3AED' stroke-width='2'/><path d='M118 33 L178 58 L178 108 L118 88 Z' fill='#C4B5FD' stroke='#7C3AED' stroke-width='2'/><text x='52' y='123' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#6D28D9'>l</text><text x='188' y='88' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#6D28D9'>b</text><text x='95' y='38' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#6D28D9'>h</text><text x='130' y='148' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='9' fill='#647585'>V = l × b × h</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Volume", "formula": "V = l × b × h" }
+    ]
+  },
+  "volume_cylinder": {
+    "detailParagraphs": [
+      "Think of a cylinder as a stack of identical circular slices — each slice has area πr², and you stack h of them, so V = πr²h.",
+      "Always use radius in this formula. If the problem gives diameter d, take r = d/2 before squaring.",
+      "Units: length³ (cm³). Real-world tanks may ask for litres; connect via 1000 cm³ = 1 L when applicable."
+    ],
+    "figures": [
+      {
+        "title": "Cylinder — volume (base πr², height h)",
+        "caption": "Base area πr² extended through height h fills the cylinder.",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 150' role='img'><rect x='8' y='8' width='224' height='134' rx='8' fill='#F1F5F9' stroke='#CBD5E1'/><ellipse cx='85' cy='38' rx='42' ry='12' fill='#E0F2FE' stroke='#0289D1' stroke-width='2'/><path d='M43 38 L43 108 Q85 122 127 108 L127 38 Q85 24 43 38' fill='#F0F9FF' stroke='#0289D1' stroke-width='2'/><ellipse cx='85' cy='108' rx='42' ry='12' fill='#E0F2FE' stroke='#0289D1' stroke-width='2'/><line x1='85' y1='38' x2='85' y2='108' stroke='#DC2626' stroke-width='2' stroke-dasharray='4 3'/><text x='92' y='78' font-family='system-ui,Arial,sans-serif' font-size='12' font-weight='700' fill='#DC2626'>h</text><line x1='85' y1='108' x2='127' y2='108' stroke='#EA580C' stroke-width='2'/><text x='102' y='122' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-size='11' font-weight='700' fill='#EA580C'>r</text><text x='175' y='70' font-family='system-ui,Arial,sans-serif' font-size='10' fill='#334155'>V = (πr²) × h</text></svg>"
+      }
+    ],
+    "formulas": [
+      { "name": "Volume", "formula": "V = πr²h" }
+    ]
+  }
+}

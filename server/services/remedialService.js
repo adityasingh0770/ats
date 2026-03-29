@@ -1,4 +1,5 @@
 const { getByConceptKey } = require('../store/contentCache');
+const { buildLessonSlides } = require('../data/conceptLessonBuilder');
 
 const getRemedialContent = async (topic, shape) => {
   const conceptKey = `${topic}_${shape}`;
@@ -30,13 +31,28 @@ const getConceptMaterial = async (topic, shape) => {
   const content = getByConceptKey(conceptKey);
   if (!content) return null;
 
+  const formulasFromExtras = Array.isArray(content.formulas) ? content.formulas : null;
+  const formulas =
+    formulasFromExtras?.length
+      ? formulasFromExtras
+      : content.formula
+        ? [{ name: 'Formula', formula: content.formula }]
+        : [];
+
+  const lessonSlides = buildLessonSlides(conceptKey, content);
+
   return {
     title: content.title,
     explanation: content.explanation,
+    detailParagraphs: content.detailParagraphs || [],
     formula: content.formula,
-    keyFacts: content.keyFacts,
+    formulas,
+    keyFacts: content.keyFacts || [],
     example: content.example,
     visualHint: content.visualHint,
+    tip: content.visualHint,
+    figures: content.figures || [],
+    lessonSlides,
   };
 };
 
