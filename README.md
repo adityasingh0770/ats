@@ -536,7 +536,7 @@ cd ../client && npm install
 Create `server/.env` based on `.env.example`:
 
 ```env
-PORT=5001
+PORT=8787
 JWT_SECRET=your_super_secret_key
 JWT_EXPIRES_IN=7d
 ```
@@ -561,14 +561,14 @@ npm run dev
 ```
 
 Frontend: `http://localhost:5173`
-Backend API: `http://localhost:5001`
+Backend API: `http://localhost:8787`
 
 ---
 
 ## .env.example
 
 ```env
-PORT=5001
+PORT=8787
 JWT_SECRET=replace_with_strong_secret
 JWT_EXPIRES_IN=7d
 ```

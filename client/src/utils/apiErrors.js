@@ -4,7 +4,7 @@ import { getApiBaseURL } from '../config/api';
 export function networkErrorMessage() {
   const base = getApiBaseURL();
   if (!import.meta.env.PROD && base === '/api') {
-    return 'Cannot reach the API. Start the backend (e.g. cd server && npm run dev) so it listens on port 5001, then try again.';
+    return 'Cannot reach the API. Start the backend (e.g. cd server && npm run dev) so it listens on port 8787, then try again.';
   }
   if (import.meta.env.PROD && base === '/api') {
     return 'This build has no API URL. In Vercel → Project → Settings → Environment Variables, set VITE_API_URL to your backend URL (e.g. https://your-api.onrender.com), then redeploy.';

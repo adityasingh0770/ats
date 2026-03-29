@@ -38,7 +38,7 @@ export default function RegisterPage() {
       else if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED' || !err.response)
         setError(networkErrorMessage());
       else if (status === 503)
-        setError('The server is temporarily unavailable. Make sure the API is running on port 5001 and try again.');
+        setError('The server is temporarily unavailable. Make sure the API is running on port 8787 and try again.');
       else setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
