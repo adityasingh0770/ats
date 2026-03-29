@@ -31,7 +31,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'OK', message: 'MathMent
 
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5001;
 const server = app.listen(PORT, () => console.log(`MathMentor server running on port ${PORT}`));
 
 server.on('error', (err) => {
