@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Lock, UserPlus, AlertCircle, Zap, Eye, EyeOff } from 'lucide-react';
 import { register } from '../services/authService';
+import { warmupBackend } from '../services/apiClient';
 import { useAuthStore } from '../store/authStore';
 import { networkErrorMessage } from '../utils/apiErrors';
 import PageWrapper from '../components/layout/PageWrapper';
@@ -14,6 +15,10 @@ export default function RegisterPage() {
   const [showPw, setShowPw] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    warmupBackend();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

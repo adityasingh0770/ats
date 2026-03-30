@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Brain, Zap, Target, ArrowRight, Ruler, Layers, Box, Package } from 'lucide-react';
+import { warmupBackend } from '../services/apiClient';
 
 const highlights = [
   { icon: Brain, text: 'Difficulty adjusts as you learn' },
@@ -16,6 +18,10 @@ const topics = [
 ];
 
 export default function LandingPage() {
+  useEffect(() => {
+    warmupBackend();
+  }, []);
+
   return (
     <div className="min-h-screen pt-16 bg-[#F8F6F3]">
 

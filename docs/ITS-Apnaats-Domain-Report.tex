@@ -1,0 +1,318 @@
+% Apnaats ITS --- Detailed domain report (workspace-accurate; comfortable type size and spacing)
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.8cm, right=2.8cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{ragged2e}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{tcolorbox}
+\usepackage{colortbl}
+\usepackage{titlesec}
+\usepackage{microtype}
+\tcbuselibrary{skins, breakable}
+
+\definecolor{primaryblue}{RGB}{25, 85, 155}
+\definecolor{accentgold}{RGB}{212, 160, 23}
+\definecolor{lightgray}{RGB}{245, 247, 250}
+\definecolor{successgreen}{RGB}{22, 120, 60}
+\definecolor{warnred}{RGB}{180, 30, 30}
+\definecolor{headerbg}{RGB}{25, 85, 155}
+\definecolor{rowhighlight}{RGB}{235, 242, 255}
+
+\titleformat{\section}{\color{primaryblue}\Large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\color{primaryblue}\large\bfseries}{\thesubsection}{0.5em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead[L]{\small\textcolor{primaryblue}{\textbf{Apnaats ITS --- Technical Report}}}
+\fancyhead[R]{\small\textcolor{accentgold}{\textbf{Mensuration G8}}}
+\fancyfoot[C]{\thepage}
+
+\setstretch{1.3}
+\setlength{\parskip}{8pt}
+
+\newtcolorbox{mathbox}[1][]{colback=lightgray, colframe=primaryblue, arc=4pt,
+  boxrule=0.8pt, fonttitle=\bfseries, title=#1, breakable, left=10pt, right=10pt, top=8pt, bottom=8pt}
+
+\newtcolorbox{notebox}[1][]{colback=accentgold!8, colframe=accentgold, arc=4pt, boxrule=0.7pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt, #1}
+
+% Allow line breaks in long IDs
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\do\/\do\_}
+\makeatother
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries\color{primaryblue}Intelligent Tutoring System (Apnaats)}\\[0.2em]
+{\normalsize\bfseries Domain Module: Mensuration (Grade 8)}\\[0.35em]
+{\small\textbf{Repository mapping:} \texttt{content.seed.json}, \texttt{conceptExtras.json},
+\texttt{questions.seed.js} (120 items), \texttt{masteryService.js}, \texttt{fileStore.js},
+\texttt{pedagogyEngine.js}, \texttt{quizController.js}.}\\[0.25em]
+{\small Authors: Aditya Singh $\cdot$ Aadish Jain $\cdot$ Ashok Kumar}
+\end{center}
+
+%=============================================================================
+\section{Content structure and syllabus formulas (all 12 concepts)}
+%=============================================================================
+
+Each learner session selects a pair \texttt{(topic, shape)}. The server forms
+\texttt{conceptKey = topic\_shape}. The \textbf{canonical formula} for each cell matches
+\texttt{content.seed.json}; circle/cylinder items in the question bank use \textbf{$\pi = 22/7$}.
+
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.45}
+\begin{longtable}{@{}p{2.6cm} p{3.8cm} p{1cm} >{\RaggedRight\arraybackslash}p{6.8cm}@{}}
+\toprule
+\rowcolor{headerbg}
+\color{white}\textbf{conceptKey} & \color{white}\textbf{Formula (syllabus)} & \color{white}\textbf{Seed} & \color{white}\textbf{Representative question (\texttt{questions.seed.js})} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{4}{r}{\itshape continued} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+
+\texttt{perimeter\_square} &
+$P = 4s$ \quad\textit{(side $s$)} & P-E-01 &
+Find the perimeter of a square with side 7 cm. \\ \rowcolor{rowhighlight}
+
+\texttt{perimeter\_rectangle} &
+$P = 2(l+b)$ & P-E-02 &
+What is the perimeter of a rectangle with length 8 cm and breadth 5 cm? \\
+
+\texttt{perimeter\_circle} &
+$C = 2\pi r = \pi d$ & P-E-03 &
+The circumference of a circle with radius 7 cm is \underline{\hspace{1.2cm}} cm. ($\pi=22/7$) \\ \rowcolor{rowhighlight}
+
+\texttt{area\_square} &
+$A = s^2$ & A-E-01 &
+Find the area of a square with side 9 cm. \\
+
+\texttt{area\_rectangle} &
+$A = l \times b$ & A-E-02 &
+What is the area of a rectangle with length 12 cm and breadth 7 cm? \\ \rowcolor{rowhighlight}
+
+\texttt{area\_circle} &
+$A = \pi r^2$ & A-E-03 &
+The area of a circle with radius 7 cm is \underline{\hspace{1.2cm}} cm$^2$. ($\pi=22/7$) \\
+
+\texttt{surface\_area\_cube} &
+$\mathrm{TSA} = 6s^2$ & SA-E-01 &
+Find the total surface area of a cube with edge 5 cm. \\ \rowcolor{rowhighlight}
+
+\texttt{surface\_area\_cuboid} &
+$\mathrm{TSA} = 2(lb + bh + hl)$ & SA-E-02 &
+What is the total surface area of a cuboid with $l=6$ cm, $b=4$ cm, $h=3$ cm? \\
+
+\texttt{surface\_area\_cylinder} &
+$\mathrm{CSA} = 2\pi rh$;\ $\mathrm{TSA} = 2\pi r(r+h)$ & SA-E-03 &
+The curved surface area of a cylinder with $r=7$ cm and $h=10$ cm is \underline{\hspace{1.2cm}} cm$^2$. \\ \rowcolor{rowhighlight}
+
+\texttt{volume\_cube} &
+$V = s^3$ & V-E-01 &
+Find the volume of a cube with edge 6 cm. \\
+
+\texttt{volume\_cuboid} &
+$V = l\,b\,h$ & V-E-02 &
+What is the volume of a cuboid with $l=8$ cm, $b=5$ cm, $h=4$ cm? \\ \rowcolor{rowhighlight}
+
+\texttt{volume\_cylinder} &
+$V = \pi r^2 h$ & V-E-03 &
+The volume of a cylinder with $r=7$ cm and $h=10$ cm is \underline{\hspace{1.2cm}} cm$^3$. ($\pi=22/7$) \\
+
+\end{longtable}
+
+\noindent\textit{Note:} Teaching content lists both CSA and TSA for cylinders; the sample row is a \textbf{CSA} item from the seed.
+\begin{notebox}
+\textbf{Question inventory:} $4$ topics $\times$ $3$ shapes $\times$ $3$ difficulties $\times$ $10$
+questions $= \mathbf{120}$ in \texttt{questions.seed.js}. Selection:
+\texttt{getNextQuestion(topic, shape, difficulty, excludeIds)}; empty pool $\Rightarrow$ fallback without difficulty filter.
+\end{notebox}
+
+%=============================================================================
+\section{Learner model: every stored field}
+%=============================================================================
+
+\subsection{Persistent learner document (\texttt{defaultLearner} in \texttt{fileStore.js})}
+
+\renewcommand{\arraystretch}{1.4}
+\noindent\begin{tabularx}{\linewidth}{@{}l >{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\rowcolor{headerbg}
+\color{white}\textbf{JSON field} & \color{white}\textbf{Role in the ITS} \\
+\midrule
+\texttt{userId} & Foreign key to the authenticated user (UUID). \\
+\rowcolor{rowhighlight}
+\texttt{concept\_mastery} & Map \texttt{conceptKey} $\rightarrow$ stored score in $[0,1]$. Updated only after \textbf{correct} graded responses (smoothed, see \S\ref{sec:blend}). \\
+\texttt{attempts} & Global counter; incremented by $+1$ on each \textbf{correct} submission path in \texttt{quizController}. \\
+\rowcolor{rowhighlight}
+\texttt{accuracy} & Scalar in $[0,1]$; running mean of ``success'' over \texttt{attempts} along the \textbf{correct-only} update branch (Eq.~\ref{eq:acclearner}). \\
+\texttt{hints\_used} & Cumulative hints: $+\texttt{currentHintsUsed}$ on each \textbf{correct} submit; also $+1$ per explicit hint API call (\texttt{requestHint}). \\
+\rowcolor{rowhighlight}
+\texttt{time\_taken} & Object placeholder for future per-concept timing (currently not heavily populated in controller). \\
+\texttt{error\_patterns} & String array of detected error \texttt{type} values (e.g.\ \texttt{formula\_swap}); new types appended from \texttt{errorDetectionService}. \\
+\rowcolor{rowhighlight}
+\texttt{confidence\_score} & $C \in [0,1]$; starts at \textbf{0.5}; updated after each \textbf{correct} response via Table~\ref{tab:conf}. \\
+\texttt{total\_sessions} & Incremented when a session reaches \texttt{completed} status. \\
+\rowcolor{rowhighlight}
+\texttt{updatedAt} & ISO timestamp on \texttt{saveLearner}. \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Session document fields used for adaptation (\texttt{createSession})}
+
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\texttt{sessionId}, \texttt{userId}, \texttt{topic}, \texttt{shape}, \texttt{status} \\
+\texttt{currentQuestionId}, \texttt{currentAttempts}, \texttt{currentHintsUsed} \\
+\texttt{currentDifficulty} $\in \{\texttt{beginner},\texttt{intermediate},\texttt{advanced}\}$ \\
+\texttt{consecutiveCorrect}, \texttt{consecutiveWrong} \\
+\texttt{questionsAsked} (ids), \texttt{questionResults} (per-item outcomes) \\
+\texttt{metrics}:\ \texttt{correct}, \texttt{wrong}, \texttt{totalAttempts}, \texttt{hintsUsed}, \texttt{timeSpent} \\
+\texttt{masteryBefore}, \texttt{masteryAfter}, \texttt{startTime}, \texttt{endTime} \\
+\bottomrule
+\end{tabularx}
+
+A standard practice run presents up to \textbf{8} questions (\texttt{MAX\_QUESTIONS\_PER\_SESSION}).
+
+%=============================================================================
+\section{Mastery score: formulas and variables}
+%=============================================================================
+
+\label{sec:mastery}
+On each \textbf{correct} answer, the server computes an \textbf{instantaneous} mastery estimate
+\texttt{newScore} $= M_{\mathrm{inst}}$ using \textbf{session metrics at that moment}:
+
+\begin{mathbox}[Composite mastery $M_{\mathrm{inst}}$ --- \texttt{calculateMastery}]
+\begin{equation}
+\boxed{
+M_{\mathrm{inst}} = 0.40\,A + 0.20\,(1-H) + 0.15\,(1-P_A) + 0.15\,C + 0.10\,T
+}
+\label{eq:mastery}
+\end{equation}
+\end{mathbox}
+
+\noindent\textbf{Inputs (symbols match \texttt{masteryService.js}):}
+
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\linewidth}{@{}c l X@{}}
+\toprule
+\textbf{Sym.} & \textbf{Source in code} & \textbf{Definition} \\
+\midrule
+$A$ & \texttt{correct / totalAttempts} &
+Fraction of \textbf{session} attempts that are correct. If \texttt{totalAttempts}$=0$, $A=0$. \\
+\rowcolor{rowhighlight}
+$H$ & \texttt{hintsUsed / questionsAnswered} &
+Hint rate, capped at $1$. If no questions answered yet, $H=0$. \\
+$P_A$ & \texttt{(totalAttempts - questionsAnswered) / totalAttempts} &
+``Extra attempts'' beyond one success per question, clipped to $[0,1]$. \\
+\rowcolor{rowhighlight}
+$C$ & \texttt{learner.confidence\_score} &
+Clipped to $[0,1]$. \\
+$T$ & \texttt{avgExpectedTime / avgTimeSpent} &
+Time efficiency, capped at $1$; if \texttt{avgTimeSpent}$\le 0$, use $T=0.5$. \\
+\bottomrule
+\end{tabularx}
+
+\noindent Here \texttt{questionsAnswered} $=$ count of completed results in the session;
+\texttt{avgTimeSpent} $=$ \texttt{timeSpent / answered}; \texttt{avgExpectedTime} $=$ \texttt{question.expectedTime} for the item just solved.
+
+\paragraph{Worked example (illustrative).}
+If \texttt{correct}$=3$, \texttt{totalAttempts}$=5$, \texttt{hintsUsed}$=2$, \texttt{questionsAnswered}$=3$,
+$C=0.50$, \texttt{avgTimeSpent}$=50$\,s, \texttt{avgExpectedTime}$=40$\,s: then
+$A=0.60$, $H=\min(1,\,2/3)$, $P_A=(5-3)/5=0.40$, $T=\min(1,\,40/50)=0.80$, and
+$M_{\mathrm{inst}} \approx 0.552$ (falls in the \textbf{Scholar} band $[0.40,0.70]$).
+
+\paragraph{Level mapping (same thresholds as UI ``Explorer / Scholar / Legend'').}
+\[
+\texttt{classifyMastery}(M)=
+\begin{cases}
+\text{Explorer} & M < 0.40 \\
+\text{Scholar} & 0.40 \le M \le 0.70 \\
+\text{Legend} & M > 0.70
+\end{cases}
+\qquad
+\texttt{difficultyFromMastery}(M)=
+\begin{cases}
+\texttt{beginner} & M < 0.40 \\
+\texttt{intermediate} & M \le 0.70 \\
+\texttt{advanced} & M > 0.70
+\end{cases}
+\]
+
+\paragraph{Stored mastery blend per concept.}
+\label{sec:blend}
+\textbf{\texttt{updateConceptMastery}} smooths the new estimate into the map:
+\begin{equation}
+M_{\mathrm{stored}} \leftarrow 0.7\,M_{\mathrm{stored}} + 0.3\,M_{\mathrm{inst}} .
+\label{eq:blend}
+\end{equation}
+
+\paragraph{Global \texttt{accuracy} (learner object).}
+When an answer is correct, the controller updates:
+\begin{equation}
+\texttt{accuracy} \leftarrow \frac{\texttt{accuracy}\times(\texttt{attempts}-1) + 1}{\texttt{attempts}}
+\qquad\text{(clipped to $[0,1]$)}
+\label{eq:acclearner}
+\end{equation}
+\textit{i.e.} a running fraction of ``successful'' learner-level events along the update path (not the same as $A$ unless you align counting).
+
+%=============================================================================
+\section{Confidence updates}
+%=============================================================================
+
+\begin{table}[htbp]
+\centering
+\caption{$\Delta C$ rules in \texttt{updateConfidenceScore} (full function). In \textbf{live quiz submits}, this runs only when the answer is \textbf{correct}; termination / other flows may call it with \texttt{isCorrect=false}, activating the negative rows.}
+\label{tab:conf}
+\renewcommand{\arraystretch}{1.4}
+\setlength{\tabcolsep}{10pt}
+\begin{tabular}{@{}l l c@{}}
+\toprule
+Condition & & $\Delta C$ \\
+\midrule
+Correct, \texttt{attempts}$=1$, \texttt{hintsUsed}$=0$ & & $+0.10$ \\
+Correct, \texttt{attempts}$\le 2$ & & $+0.05$ \\
+Correct (else) & & $+0.02$ \\
+\rowcolor{rowhighlight}
+Wrong, \texttt{attempts}\,$\ge 3$ & & $-0.08$ \\
+Wrong (otherwise) & & $-0.04$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+$C$ is clipped to $[0,1]$ after each update.
+
+%=============================================================================
+\section{Pedagogy (summary)}
+%=============================================================================
+
+\texttt{applyPedagogicalRule} (\texttt{pedagogyEngine.js}):
+\textbf{correct} $\Rightarrow$ praise, \texttt{next\_question}, difficulty hint ``up'' for streak logic;
+\textbf{wrong}: 1st \texttt{retry}; 2nd hint L1; 3rd hint L2; $\ge 4$ \texttt{remedial} + difficulty ``down''.
+If $t_{\mathrm{spent}}/t_{\mathrm{expected}}>2$ and attempts $\ge 2$, force \textbf{hint level 3}.
+
+%=============================================================================
+\section{Closing}
+%=============================================================================
+
+This report ties the \textbf{published PDF narrative} to the running system: twelve
+\texttt{conceptKey}s, explicit \textbf{syllabus formulas}, \textbf{one authenticated seed question per case},
+the \textbf{full mastery linear model} (Eq.~\ref{eq:mastery}), the \textbf{smoothing} (Eq.~\ref{eq:blend}),
+\textbf{confidence deltas} (Table~\ref{tab:conf}), and the \textbf{complete learner JSON fields}.
+
+\end{document}

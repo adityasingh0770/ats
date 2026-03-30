@@ -53,11 +53,21 @@ Do this **in order**: API first, then frontend, then add the frontend URL to Ren
    - **Build Command:** `npm run build` (default)
    - **Output Directory:** `dist` (default)
 
-3. **Environment Variables** → add:
+3. **Environment Variables** — pick **one** approach:
 
+   **A — Direct browser → Render (default)**  
    | Name | Value |
    |------|--------|
    | `VITE_API_URL` | `https://YOUR-RENDER-SERVICE.onrender.com` (same as Part A.7, **no** `/api` suffix) |
+
+   **B — Same-origin proxy (if the live site cannot reach the API / CORS issues)**  
+   Remove `VITE_API_URL` from Vercel. Add a **server-only** variable (not prefixed with `VITE_`):
+
+   | Name | Value |
+   |------|--------|
+   | `RENDER_API_URL` | `https://YOUR-RENDER-SERVICE.onrender.com` (**no** `/api` suffix) |
+
+   The browser calls `/api/...` on your Vercel domain; `client/api/[...slug].js` forwards those requests to Render.
 
 4. **Deploy**. When it finishes, copy the production URL, e.g. `https://mathmentor.vercel.app`.
 
