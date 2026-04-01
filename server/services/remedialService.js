@@ -2,7 +2,7 @@ const { getByConceptKey } = require('../store/contentCache');
 const { buildLessonSlides } = require('../data/conceptLessonBuilder');
 const { getRemedialSimple } = require('../data/remedialSimple');
 const { generateAdaptiveRemedial } = require('./adaptiveRemedialLLMService');
-const { getGeminiKey } = require('../utils/geminiEnv');
+const { getGeminiKey, isGeminiLlmDisabled } = require('../utils/geminiEnv');
 
 let remedialMedia = {};
 try {
@@ -65,7 +65,7 @@ function buildSessionTryDigest(wrongAttempts) {
 }
 
 async function maybeAttachLlmRemedial(base, ctx) {
-  if (!getGeminiKey() || !ctx.llmRemedialInput) return base;
+  if (!getGeminiKey() || isGeminiLlmDisabled() || !ctx.llmRemedialInput) return base;
   const in_ = ctx.llmRemedialInput;
   if (!in_.questionText || in_.studentAnswer === undefined || in_.studentAnswer === null) return base;
   try {

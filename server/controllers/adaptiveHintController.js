@@ -1,6 +1,6 @@
 const { generateAdaptiveHints } = require('../services/adaptiveHintLLMService');
 const { handleError } = require('../utils/dbError');
-const { getGeminiKey } = require('../utils/geminiEnv');
+const { getGeminiKey, isGeminiLlmDisabled } = require('../utils/geminiEnv');
 
 const postAdaptiveHints = async (req, res) => {
   try {
@@ -19,6 +19,11 @@ const postAdaptiveHints = async (req, res) => {
     if (!getGeminiKey()) {
       return res.status(503).json({
         message: 'Adaptive hints require GEMINI_API_KEY on the server.',
+      });
+    }
+    if (isGeminiLlmDisabled()) {
+      return res.status(503).json({
+        message: 'Gemini LLM is disabled (GEMINI_LLM_DISABLED). Built-in hints are used in the quiz flow.',
       });
     }
 

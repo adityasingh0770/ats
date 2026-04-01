@@ -1,6 +1,6 @@
 const { getHint } = require('./hintService');
 const { generateAdaptiveHints } = require('./adaptiveHintLLMService');
-const { getGeminiKey } = require('../utils/geminiEnv');
+const { getGeminiKey, isGeminiLlmDisabled } = require('../utils/geminiEnv');
 
 function cacheValid(cache, questionId, answerKey) {
   return (
@@ -32,6 +32,9 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
 
   if (!getGeminiKey()) {
     return asRules('no_llm_key');
+  }
+  if (isGeminiLlmDisabled()) {
+    return asRules('gemini_llm_disabled');
   }
 
   if (ansKey === undefined || ansKey === null || String(ansKey).trim() === '') {

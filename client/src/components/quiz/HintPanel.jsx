@@ -7,6 +7,8 @@ function builtInWhy(code) {
   const map = {
     no_llm_key:
       'AI hints need GEMINI_API_KEY on the API server (Render → your service → Environment). Save, redeploy, then try again. You can remove OPENAI_API_KEY from env — it is no longer used.',
+    gemini_llm_disabled:
+      'Gemini is turned off on the server (GEMINI_LLM_DISABLED). You are seeing built-in hints only — no API calls, no rate limits.',
     empty_student_answer: 'Built-in hints are shown because no answer was on file for the AI step.',
     llm_empty_level:
       'Gemini returned empty hint text after retries. Check Render logs and GEMINI_MODEL (try gemini-1.5-flash if 2.0 fails).',
