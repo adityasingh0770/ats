@@ -1,10 +1,9 @@
 /**
  * OpenAI-compatible Chat Completions → strict JSON ITS hint payload.
- * Env: OPENAI_API_KEY, OPENAI_MODEL (default gpt-4o-mini), OPENAI_BASE_URL (optional).
+ * Env: OPENAI_API_KEY and/or GEMINI_API_KEY, LLM_PROVIDER (auto|openai|gemini), models — see llmRouter.
  */
 
-const { getOpenAiKey } = require('../utils/openaiEnv');
-const { openaiChatCompletion } = require('../utils/openaiChat');
+const { llmChatCompletion } = require('../utils/llmRouter');
 
 const SYSTEM_PROMPT = `You are an intelligent tutoring system for Grade 8 mensuration.
 
@@ -112,13 +111,6 @@ async function generateAdaptiveHints(
   options = {}
 ) {
   const graderMarkedWrong = options.graderMarkedWrong === true;
-  const key = getOpenAiKey();
-  if (!key) {
-    const err = new Error('OPENAI_API_KEY is not configured');
-    err.code = 'ADAPTIVE_HINTS_DISABLED';
-    throw err;
-  }
-
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
   const payloadObj = {
@@ -143,7 +135,7 @@ async function generateAdaptiveHints(
           ? '\n\nFINAL RETRY: Output valid JSON only. Fill hint_level_1, hint_level_2, hint_level_3 with different strings (each 40+ characters). Reference the student_answer text. Never leave a hint empty.'
           : '';
 
-    const data = await openaiChatCompletion(
+    const data = await llmChatCompletion(
       {
         model,
         temperature: attempt === 0 ? 0.3 : attempt === 1 ? 0.45 : 0.55,

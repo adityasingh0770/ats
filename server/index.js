@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { getOpenAiKey } = require('./utils/openaiEnv');
+const { getGeminiKey } = require('./utils/geminiEnv');
 const { getFetchImpl } = require('./utils/openaiChat');
 
 dotenv.config();
@@ -40,6 +41,8 @@ app.get('/api/health', (req, res) =>
     status: 'OK',
     message: 'MathMentor API running',
     openaiConfigured: Boolean(getOpenAiKey()),
+    geminiConfigured: Boolean(getGeminiKey()),
+    llmProvider: (process.env.LLM_PROVIDER || 'auto').toLowerCase(),
   })
 );
 
@@ -50,7 +53,9 @@ const server = app.listen(PORT, () => {
   const httpClient = getFetchImpl();
   const clientLabel = !httpClient ? 'none' : typeof fetch === 'function' ? 'fetch' : 'node-fetch';
   console.log(`MathMentor server running on port ${PORT}`);
-  console.log(`Node ${process.version}; OpenAI HTTP client: ${clientLabel}; OPENAI key set: ${Boolean(getOpenAiKey())}`);
+  console.log(
+    `Node ${process.version}; HTTP client: ${clientLabel}; keys: openai=${Boolean(getOpenAiKey())} gemini=${Boolean(getGeminiKey())} provider=${(process.env.LLM_PROVIDER || 'auto').toLowerCase()}`
+  );
 });
 
 server.on('error', (err) => {

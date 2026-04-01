@@ -1,6 +1,7 @@
 const { getHint } = require('./hintService');
 const { generateAdaptiveHints } = require('./adaptiveHintLLMService');
 const { getOpenAiKey } = require('../utils/openaiEnv');
+const { getGeminiKey } = require('../utils/geminiEnv');
 
 function cacheValid(cache, questionId, answerKey) {
   return (
@@ -31,8 +32,8 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
     return { ...fb, source: 'rules', llmSkippedReason: reason };
   };
 
-  if (!getOpenAiKey()) {
-    return asRules('no_openai_key');
+  if (!getOpenAiKey() && !getGeminiKey()) {
+    return asRules('no_llm_key');
   }
 
   if (ansKey === undefined || ansKey === null || String(ansKey).trim() === '') {
@@ -98,7 +99,7 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
     if (e.code === 'LLM_TIMEOUT') return asRules('openai_timeout');
     if (e.code === 'LLM_NETWORK') return asRules('openai_network');
     if (e.code === 'LLM_HTTP_ERROR' && e.status === 401) return asRules('openai_auth');
-    if (e.code === 'LLM_HTTP_ERROR' && e.status === 429) return asRules('openai_rate_limit');
+    if (e.code === 'LLM_HTTP_ERROR' && e.status === 429) return asRules('llm_rate_limit');
     return asRules('openai_error');
   }
 

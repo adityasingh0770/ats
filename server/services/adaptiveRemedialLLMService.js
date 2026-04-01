@@ -2,8 +2,7 @@
  * Detailed remedial micro-lesson from OpenAI (JSON). Never echoes the item’s final answer.
  */
 
-const { getOpenAiKey } = require('../utils/openaiEnv');
-const { openaiChatCompletion } = require('../utils/openaiChat');
+const { llmChatCompletion } = require('../utils/llmRouter');
 
 const SYSTEM_PROMPT = `You are an expert Grade 8 mathematics tutor for mensuration (perimeter, area, surface area, volume, circles, solids).
 
@@ -61,13 +60,6 @@ function normalize(parsed) {
  * @param {string[]|null} [input.priorHints] - three hint lines if any
  */
 async function generateAdaptiveRemedial(input) {
-  const key = getOpenAiKey();
-  if (!key) {
-    const err = new Error('OPENAI_API_KEY is not configured');
-    err.code = 'REMEDIAL_LLM_DISABLED';
-    throw err;
-  }
-
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
   const payload = {
@@ -82,7 +74,7 @@ async function generateAdaptiveRemedial(input) {
     prior_hints_shown: Array.isArray(input.priorHints) ? input.priorHints.filter(Boolean) : [],
   };
 
-  const data = await openaiChatCompletion(
+  const data = await llmChatCompletion(
     {
       model,
       temperature: 0.35,

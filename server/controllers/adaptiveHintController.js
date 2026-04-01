@@ -1,6 +1,7 @@
 const { generateAdaptiveHints } = require('../services/adaptiveHintLLMService');
 const { handleError } = require('../utils/dbError');
 const { getOpenAiKey } = require('../utils/openaiEnv');
+const { getGeminiKey } = require('../utils/geminiEnv');
 
 const postAdaptiveHints = async (req, res) => {
   try {
@@ -16,9 +17,9 @@ const postAdaptiveHints = async (req, res) => {
       return res.status(400).json({ message: 'student_answer is required.' });
     }
 
-    if (!getOpenAiKey()) {
+    if (!getOpenAiKey() && !getGeminiKey()) {
       return res.status(503).json({
-        message: 'Adaptive LLM hints are not configured. Set OPENAI_API_KEY on the server.',
+        message: 'Adaptive LLM hints need OPENAI_API_KEY and/or GEMINI_API_KEY on the server.',
       });
     }
 
@@ -32,7 +33,7 @@ const postAdaptiveHints = async (req, res) => {
 
     return res.json(payload);
   } catch (err) {
-    if (err.code === 'ADAPTIVE_HINTS_DISABLED') {
+    if (err.code === 'ADAPTIVE_HINTS_DISABLED' || err.code === 'NO_LLM_KEY') {
       return res.status(503).json({ message: err.message });
     }
     if (err.code === 'LLM_HTTP_ERROR' && err.status === 401) {

@@ -6,7 +6,9 @@ const dotColors = ['bg-[#FF6500]', 'bg-teal-500', 'bg-purple-500'];
 function builtInWhy(code) {
   const map = {
     no_openai_key:
-      'AI hints are off: your API server has no usable OPENAI_API_KEY. In Render: open service “ats” → Environment → add the key (or link your env group) → Save → redeploy.',
+      'AI hints are off: add OPENAI_API_KEY or GEMINI_API_KEY on Render → your service → Environment → Save → redeploy.',
+    no_llm_key:
+      'AI hints are off: set OPENAI_API_KEY and/or GEMINI_API_KEY on the API server (Render → Environment), then redeploy.',
     empty_student_answer: 'Built-in hints are shown because no answer was on file for the AI step.',
     openai_empty_level:
       'OpenAI returned empty hint text after retries. Check Render logs, model name, and billing; built-in text is used for this level.',
@@ -16,7 +18,10 @@ function builtInWhy(code) {
     openai_network:
       'Could not reach OpenAI from the server (network/DNS). Check Render outbound access and OPENAI_BASE_URL if you use a proxy.',
     openai_timeout: 'OpenAI took too long to respond. Retry; if it persists, upgrade Render plan or reduce load.',
-    openai_rate_limit: 'OpenAI rate limit (429). Wait a minute or add billing tier.',
+    openai_rate_limit:
+      'Rate limit (429). Add GEMINI_API_KEY on Render to auto-fallback when OpenAI is busy, or set LLM_PROVIDER=gemini to use only Gemini, or wait / upgrade billing.',
+    llm_rate_limit:
+      'Rate limit (429). Add GEMINI_API_KEY for automatic Gemini fallback after OpenAI limits, or use LLM_PROVIDER=gemini, or wait a minute.',
     fetch_missing:
       'This server build has no fetch. Set Node 18+ on Render (package.json engines) or redeploy after pulling latest dependencies.',
     openai_no_cache: 'Hint cache was missing; built-in text was used.',
