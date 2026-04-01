@@ -1,14 +1,28 @@
 const { getByConceptKey } = require('../store/contentCache');
 const { buildLessonSlides } = require('../data/conceptLessonBuilder');
+const { formatStudentAnswerForUi } = require('./errorDetectionService');
 
-const getRemedialContent = async (topic, shape) => {
+const getRemedialContent = async (topic, shape, ctx = {}) => {
   const conceptKey = `${topic}_${shape}`;
   const content = getByConceptKey(conceptKey);
+
+  const { studentAnswer, errorInfo, question } = ctx;
+  const hasAnswer =
+    studentAnswer !== undefined && studentAnswer !== null && String(studentAnswer).trim() !== '';
+
+  let personalizedBlock = '';
+  if (hasAnswer && errorInfo) {
+    const snippet = formatStudentAnswerForUi(studentAnswer, question?.unit);
+    const lead = errorInfo.remedialLead || errorInfo.feedback;
+    personalizedBlock = `Based on your answer (${snippet})\n\n${lead}\n\n—\n\n`;
+  } else if (errorInfo) {
+    personalizedBlock = `Focus for you\n\n${errorInfo.remedialLead || errorInfo.feedback}\n\n—\n\n`;
+  }
 
   if (!content) {
     return {
       title: `${shape} ${topic}`,
-      explanation: 'Please review the concept before continuing.',
+      explanation: personalizedBlock + 'Please review the concept before continuing.',
       formula: 'Refer to your textbook.',
       formulaBreakdown: '',
       workedExample: '',
@@ -18,7 +32,7 @@ const getRemedialContent = async (topic, shape) => {
 
   return {
     title: content.title,
-    explanation: content.remedial.explanation,
+    explanation: personalizedBlock + content.remedial.explanation,
     formula: content.formula,
     formulaBreakdown: content.remedial.formulaBreakdown,
     workedExample: content.remedial.workedExample,

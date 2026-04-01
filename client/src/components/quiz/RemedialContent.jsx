@@ -35,7 +35,7 @@ export default function RemedialContent({ content, onContinue }) {
       {/* Concept explanation */}
       <div className="card">
         <h3 className="text-sm font-bold text-[#111111] mb-1.5">{content.title}</h3>
-        <p className="text-sm text-[#555555] leading-relaxed">{content.explanation}</p>
+        <p className="text-sm text-[#555555] leading-relaxed whitespace-pre-line">{content.explanation}</p>
       </div>
 
       {/* Formula */}

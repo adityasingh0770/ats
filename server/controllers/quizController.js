@@ -73,13 +73,18 @@ const submitAnswer = async (req, res) => {
     if (!isCorrect) {
       errorInfo = detectError(answer, question.answer, question);
       session.metrics.wrong += 1;
+      session.lastStudentAnswer = answer;
+      session.lastErrorInfo = errorInfo;
     }
 
     const rule = applyPedagogicalRule(session.currentAttempts, isCorrect, timeSpent || 0, question.expectedTime);
 
     let hint = null;
     if (rule.hintLevel) {
-      hint = await getHint(question._id, rule.hintLevel);
+      hint = await getHint(question._id, rule.hintLevel, {
+        studentAnswer: isCorrect ? null : answer,
+        errorInfo: isCorrect ? null : errorInfo,
+      });
       session.currentHintsUsed += 1;
       session.metrics.hintsUsed += 1;
     }
@@ -88,6 +93,8 @@ const submitAnswer = async (req, res) => {
     let isSessionComplete = false;
 
     if (isCorrect) {
+      session.lastStudentAnswer = null;
+      session.lastErrorInfo = null;
       session.metrics.correct += 1;
       session.consecutiveCorrect += 1;
       session.consecutiveWrong = 0;
@@ -191,7 +198,11 @@ const submitAnswer = async (req, res) => {
 
     let remedialContent = null;
     if (rule.showRemedial) {
-      remedialContent = await getRemedialContent(session.topic, session.shape);
+      remedialContent = await getRemedialContent(session.topic, session.shape, {
+        studentAnswer: isCorrect ? null : answer,
+        errorInfo: isCorrect ? null : errorInfo,
+        question,
+      });
     }
 
     res.json({
@@ -228,7 +239,10 @@ const requestHint = async (req, res) => {
     const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    const hint = await getHint(session.currentQuestionId, level || 1);
+    const hint = await getHint(session.currentQuestionId, level || 1, {
+      studentAnswer: session.lastStudentAnswer,
+      errorInfo: session.lastErrorInfo,
+    });
     session.currentHintsUsed += 1;
     session.metrics.hintsUsed += 1;
     saveSession(session);
@@ -251,7 +265,12 @@ const requestRemedial = async (req, res) => {
     const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    const remedial = await getRemedialContent(session.topic, session.shape);
+    const q = findById(session.currentQuestionId);
+    const remedial = await getRemedialContent(session.topic, session.shape, {
+      studentAnswer: session.lastStudentAnswer,
+      errorInfo: session.lastErrorInfo,
+      question: q,
+    });
     res.json(remedial);
   } catch (err) {
     handleError(err, res);

@@ -33,7 +33,7 @@ export default function HintPanel({ hints, currentLevel, maxLevel = 3 }) {
                 <HintIcon className={`w-3 h-3 ${c.text}`} />
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${c.text}`}>{c.label}</span>
               </div>
-              <p className="text-xs text-[#555555] leading-relaxed">{hint}</p>
+              <p className="text-xs text-[#555555] leading-relaxed whitespace-pre-line">{hint}</p>
             </motion.div>
           );
         })}
