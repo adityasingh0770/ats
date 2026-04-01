@@ -43,6 +43,7 @@ app.get('/api/health', (req, res) =>
     openaiConfigured: Boolean(getOpenAiKey()),
     geminiConfigured: Boolean(getGeminiKey()),
     llmProvider: (process.env.LLM_PROVIDER || 'auto').toLowerCase(),
+    llmPrimary: (process.env.LLM_PRIMARY || 'gemini').toLowerCase(),
   })
 );
 

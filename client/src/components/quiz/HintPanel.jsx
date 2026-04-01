@@ -21,7 +21,7 @@ function builtInWhy(code) {
     openai_rate_limit:
       'Rate limit (429). Add GEMINI_API_KEY on Render to auto-fallback when OpenAI is busy, or set LLM_PROVIDER=gemini to use only Gemini, or wait / upgrade billing.',
     llm_rate_limit:
-      'Rate limit (429). Add GEMINI_API_KEY for automatic Gemini fallback after OpenAI limits, or use LLM_PROVIDER=gemini, or wait a minute.',
+      'Rate limit (429). Add GEMINI_API_KEY on Render (same service as the API) and redeploy — with both keys, Gemini runs first by default. Or wait a few minutes / upgrade quota.',
     fetch_missing:
       'This server build has no fetch. Set Node 18+ on Render (package.json engines) or redeploy after pulling latest dependencies.',
     openai_no_cache: 'Hint cache was missing; built-in text was used.',
