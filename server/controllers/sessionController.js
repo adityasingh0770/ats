@@ -8,7 +8,34 @@ const {
   findSessionsForUser,
 } = require('../store/fileStore');
 const { calculateMastery, updateConfidenceScore } = require('../services/masteryService');
+const { buildSessionTryDigest } = require('../services/remedialService');
 const { handleError } = require('../utils/dbError');
+
+function buildSessionSummaryPayload(session) {
+  const qr = session.questionResults || [];
+  const durationMinutes = session.endTime
+    ? Math.round((new Date(session.endTime) - new Date(session.startTime)) / 60000)
+    : 0;
+  const firstTry = qr.filter((r) => r.correct && r.attempts === 1).length;
+  const struggled = qr.filter((r) => !r.correct || r.attempts > 1).length;
+  const masteryAfter = session.masteryAfter ?? session.masteryBefore ?? 0;
+  const masteryBefore = session.masteryBefore ?? 0;
+  return {
+    correct: firstTry,
+    wrong: struggled,
+    questionsCompleted: qr.length,
+    questionsCorrectTotal: session.metrics?.correct ?? 0,
+    totalAttempts: session.metrics?.totalAttempts ?? 0,
+    hintsUsed: session.metrics?.hintsUsed ?? 0,
+    timeSpentSeconds: session.metrics?.timeSpent ?? 0,
+    durationMinutes,
+    accuracy: qr.length > 0 ? Math.round((firstTry / qr.length) * 100) : 0,
+    masteryBefore,
+    masteryAfter,
+    masteryGain: parseFloat((masteryAfter - masteryBefore).toFixed(3)),
+    tryDigest: buildSessionTryDigest(session.wrongAttempts),
+  };
+}
 
 const completeSession = async (req, res) => {
   try {
@@ -50,6 +77,7 @@ const completeSession = async (req, res) => {
         masteryBefore: session.masteryBefore,
         masteryAfter: session.masteryAfter,
         masteryGain: parseFloat((session.masteryAfter - session.masteryBefore).toFixed(3)),
+        tryDigest: buildSessionTryDigest(session.wrongAttempts),
       },
       questionResults: session.questionResults,
     });
@@ -112,7 +140,16 @@ const terminateSession = async (req, res) => {
     }
 
     saveSession(session);
-    res.json({ message: 'Session terminated.', sessionId });
+
+    res.json({
+      message: 'Session terminated.',
+      sessionId: session.sessionId,
+      topic: session.topic,
+      shape: session.shape,
+      status: 'terminated',
+      summary: buildSessionSummaryPayload(session),
+      questionResults: session.questionResults,
+    });
   } catch (err) {
     handleError(err, res);
   }

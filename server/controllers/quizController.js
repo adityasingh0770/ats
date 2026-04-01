@@ -75,6 +75,13 @@ const submitAnswer = async (req, res) => {
       session.metrics.wrong += 1;
       session.lastStudentAnswer = answer;
       session.lastErrorInfo = errorInfo;
+      if (!Array.isArray(session.wrongAttempts)) session.wrongAttempts = [];
+      session.wrongAttempts.push({
+        submittedAnswer: String(answer),
+        errorType: errorInfo?.type || 'unknown',
+        qid: question.qid,
+        atAttemptOnQuestion: session.currentAttempts,
+      });
     }
 
     const rule = applyPedagogicalRule(session.currentAttempts, isCorrect, timeSpent || 0, question.expectedTime);
@@ -199,9 +206,7 @@ const submitAnswer = async (req, res) => {
     let remedialContent = null;
     if (rule.showRemedial) {
       remedialContent = await getRemedialContent(session.topic, session.shape, {
-        studentAnswer: isCorrect ? null : answer,
-        errorInfo: isCorrect ? null : errorInfo,
-        question,
+        wrongAttempts: session.wrongAttempts || [],
       });
     }
 
@@ -265,11 +270,8 @@ const requestRemedial = async (req, res) => {
     const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    const q = findById(session.currentQuestionId);
     const remedial = await getRemedialContent(session.topic, session.shape, {
-      studentAnswer: session.lastStudentAnswer,
-      errorInfo: session.lastErrorInfo,
-      question: q,
+      wrongAttempts: session.wrongAttempts || [],
     });
     res.json(remedial);
   } catch (err) {

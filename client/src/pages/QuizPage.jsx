@@ -111,10 +111,11 @@ export default function QuizPage() {
     if (!sessionId || terminating) return;
     setTerminating(true);
     try {
-      await terminateSession(sessionId);
+      const data = await terminateSession(sessionId);
+      reset();
+      navigate('/session-summary', { replace: true, state: data });
     } catch (err) {
       console.error('Terminate error:', err);
-    } finally {
       setTerminating(false);
       reset();
       navigate('/dashboard');

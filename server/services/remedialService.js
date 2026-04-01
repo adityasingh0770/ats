@@ -1,42 +1,108 @@
 const { getByConceptKey } = require('../store/contentCache');
 const { buildLessonSlides } = require('../data/conceptLessonBuilder');
-const { formatStudentAnswerForUi } = require('./errorDetectionService');
+const { getRemedialSimple } = require('../data/remedialSimple');
+
+let remedialMedia = {};
+try {
+  remedialMedia = require('../data/remedialMedia.json');
+} catch {
+  /* optional file */
+}
+
+const ERROR_TYPE_LABELS = {
+  wrong_option: 'MCQ choice',
+  wrong_verdict: 'True/False',
+  invalid_input: 'Input format',
+  multiply_instead_of_add: 'Used × instead of +',
+  add_instead_of_multiply: 'Used + instead of ×',
+  area_instead_of_perimeter_rect: 'Mixed area with perimeter',
+  perimeter_instead_of_area_rect: 'Mixed perimeter with area',
+  rect_multiply_instead_of_perimeter: 'Used length × breadth for perimeter',
+  rect_sum_only_perimeter: 'Forgot to double (l + b)',
+  rect_perimeter_instead_of_area: 'Used perimeter for area',
+  square_area_instead_of_perimeter: 'Used area idea for perimeter',
+  square_perimeter_instead_of_area: 'Used perimeter idea for area',
+  formula_swap: 'Formula mix-up',
+  radius_diameter_confusion: 'Radius vs diameter',
+  sa_volume_confusion: 'Surface area vs volume',
+  unit_error: 'Units / conversion',
+  arithmetic_mistake: 'Arithmetic slip',
+  partial_formula: 'Incomplete formula',
+  wrong_answer: 'Answer mismatch',
+  unknown: 'Other',
+};
+
+function labelErrorType(type) {
+  return ERROR_TYPE_LABELS[type] || String(type || 'other').replace(/_/g, ' ');
+}
+
+/**
+ * Summarise every wrong submission this session (all tries), for display only.
+ */
+function buildSessionTryDigest(wrongAttempts) {
+  if (!wrongAttempts || !wrongAttempts.length) {
+    return { hasTries: false, totalSubmissions: 0, byType: {}, tries: [] };
+  }
+  const byType = {};
+  const tries = wrongAttempts.map((w, i) => {
+    const t = w.errorType || 'unknown';
+    byType[t] = (byType[t] || 0) + 1;
+    return {
+      n: i + 1,
+      answer: w.submittedAnswer,
+      kind: labelErrorType(t),
+      qid: w.qid || null,
+    };
+  });
+  return {
+    hasTries: true,
+    totalSubmissions: wrongAttempts.length,
+    byType,
+    tries,
+  };
+}
 
 const getRemedialContent = async (topic, shape, ctx = {}) => {
   const conceptKey = `${topic}_${shape}`;
   const content = getByConceptKey(conceptKey);
+  const simple = getRemedialSimple(conceptKey);
+  const digest = buildSessionTryDigest(ctx.wrongAttempts);
+  const media = remedialMedia[conceptKey] || {};
 
-  const { studentAnswer, errorInfo, question } = ctx;
-  const hasAnswer =
-    studentAnswer !== undefined && studentAnswer !== null && String(studentAnswer).trim() !== '';
-
-  let personalizedBlock = '';
-  if (hasAnswer && errorInfo) {
-    const snippet = formatStudentAnswerForUi(studentAnswer, question?.unit);
-    const lead = errorInfo.remedialLead || errorInfo.feedback;
-    personalizedBlock = `Based on your answer (${snippet})\n\n${lead}\n\n—\n\n`;
-  } else if (errorInfo) {
-    personalizedBlock = `Focus for you\n\n${errorInfo.remedialLead || errorInfo.feedback}\n\n—\n\n`;
-  }
+  const figures = Array.isArray(content?.figures) ? content.figures : [];
 
   if (!content) {
     return {
       title: `${shape} ${topic}`,
-      explanation: personalizedBlock + 'Please review the concept before continuing.',
+      tagline: simple.oneLiner,
+      intro: simple.intro,
+      basicsBullets: simple.bullets,
+      explanation: simple.intro,
+      sessionDigest: digest,
       formula: 'Refer to your textbook.',
       formulaBreakdown: '',
       workedExample: '',
       simpleQuestion: null,
+      figures: [],
+      gifUrl: media.gifUrl || null,
+      gifCaption: media.gifCaption || null,
     };
   }
 
   return {
     title: content.title,
-    explanation: personalizedBlock + content.remedial.explanation,
+    tagline: simple.oneLiner,
+    intro: simple.intro,
+    basicsBullets: simple.bullets,
+    explanation: `${simple.intro}\n\n${content.remedial.explanation}`,
+    sessionDigest: digest,
     formula: content.formula,
     formulaBreakdown: content.remedial.formulaBreakdown,
     workedExample: content.remedial.workedExample,
     simpleQuestion: content.remedial.simpleQuestion,
+    figures,
+    gifUrl: media.gifUrl || null,
+    gifCaption: media.gifCaption || null,
   };
 };
 
@@ -70,4 +136,4 @@ const getConceptMaterial = async (topic, shape) => {
   };
 };
 
-module.exports = { getRemedialContent, getConceptMaterial };
+module.exports = { getRemedialContent, getConceptMaterial, buildSessionTryDigest };

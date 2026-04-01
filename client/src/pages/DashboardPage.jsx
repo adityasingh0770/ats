@@ -12,6 +12,7 @@ import { MasteryProgress } from '../components/ui/ProgressBar';
 import Badge from '../components/ui/Badge';
 import { FullPageLoader } from '../components/ui/LoadingSpinner';
 import { BookOpen, ArrowRight, RefreshCw, Brain, Zap, Target, PenLine, Lightbulb, Library } from 'lucide-react';
+import { TOPIC_ORDER, getLastUnlockedTopicIndex, unlockHintForTopic } from '../utils/topicProgression';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -135,12 +136,26 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-[#111111]">Topic Progress</h2>
-            {isNewUser && <span className="text-xs text-[#AAAAAA]">Click any shape to start practising</span>}
+            {isNewUser && (
+              <span className="text-xs text-[#AAAAAA]">Start with Perimeter — other topics unlock as you progress</span>
+            )}
           </div>
           <div className="grid md:grid-cols-2 gap-3">
-            {Object.entries(conceptProgress).map(([topic, shapes], i) => (
-              <TopicCard key={topic} topic={topic} shapes={shapes} index={i} />
-            ))}
+            {TOPIC_ORDER.map((topic, i) => {
+              const shapes = conceptProgress[topic] || {};
+              const lastUnlocked = getLastUnlockedTopicIndex(conceptProgress);
+              const locked = i > lastUnlocked;
+              return (
+                <TopicCard
+                  key={topic}
+                  topic={topic}
+                  shapes={shapes}
+                  index={i}
+                  locked={locked}
+                  lockHint={locked ? unlockHintForTopic(topic) : null}
+                />
+              );
+            })}
           </div>
         </div>
 

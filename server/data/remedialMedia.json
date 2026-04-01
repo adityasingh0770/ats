@@ -1,0 +1,10 @@
+{
+  "perimeter_circle": {
+    "gifUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Pi-unrolled-720.gif",
+    "gifCaption": "How π relates to the distance around a circle (intuition only)."
+  },
+  "area_circle": {
+    "gifUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Pi-unrolled-720.gif",
+    "gifCaption": "Why circle formulas use π — same idea for area and circumference."
+  }
+}

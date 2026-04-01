@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import TopicSelectPage from './pages/TopicSelectPage';
 import QuizPage from './pages/QuizPage';
 import ResultPage from './pages/ResultPage';
+import SessionSummaryPage from './pages/SessionSummaryPage';
 import ProfilePage from './pages/ProfilePage';
 import Navbar from './components/layout/Navbar';
 import { HOME_PATH } from './config/routes';
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/topics" element={<ProtectedRoute><TopicSelectPage /></ProtectedRoute>} />
           <Route path="/quiz/:topic/:shape" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
           <Route path="/result/:sessionId" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
+          <Route path="/session-summary" element={<ProtectedRoute><SessionSummaryPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to={HOME_PATH} replace />} />
         </Routes>

@@ -150,6 +150,7 @@ function createSession(doc) {
     consecutiveWrong: 0,
     questionsAsked: doc.questionsAsked || [],
     questionResults: [],
+    wrongAttempts: [],
     metrics: { correct: 0, wrong: 0, totalAttempts: 0, hintsUsed: 0, timeSpent: 0 },
     masteryBefore: doc.masteryBefore ?? 0,
     masteryAfter: 0,

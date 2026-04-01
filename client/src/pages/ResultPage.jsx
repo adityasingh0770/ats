@@ -111,6 +111,23 @@ export default function ResultPage() {
           })}
         </motion.div>
 
+        {/* Wrong tries this session (aggregated) */}
+        {summary.tryDigest?.hasTries && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }}
+            className="card bg-[#FAFAF9] border-[#E8E5E0] space-y-2">
+            <h3 className="font-semibold text-[#111111] text-xs">Your wrong submissions (this session)</h3>
+            <ul className="space-y-1.5 max-h-36 overflow-y-auto text-[11px] text-[#555555]">
+              {summary.tryDigest.tries.map((t) => (
+                <li key={t.n} className="flex flex-wrap gap-x-2 border-b border-black/5 pb-1.5 last:border-0">
+                  <span className="text-[#AAAAAA]">#{t.n}</span>
+                  <span className="font-mono text-[#111111]">{t.answer}</span>
+                  <span className="text-[#888888]">{t.kind}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+
         {/* Question breakdown */}
         {result.questionResults && result.questionResults.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
