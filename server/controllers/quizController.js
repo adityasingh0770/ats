@@ -240,11 +240,16 @@ const submitAnswer = async (req, res) => {
 
 const requestHint = async (req, res) => {
   try {
-    const { sessionId, level } = req.query;
+    const { sessionId } = req.query;
     const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    const hint = await getHint(session.currentQuestionId, level || 1, {
+    if ((session.currentHintsUsed || 0) >= 3) {
+      return res.status(400).json({ message: 'You already have all hints for this question. Use the review or try again.' });
+    }
+
+    const nextLevel = Math.min((session.currentHintsUsed || 0) + 1, 3);
+    const hint = await getHint(session.currentQuestionId, nextLevel, {
       studentAnswer: session.lastStudentAnswer,
       errorInfo: session.lastErrorInfo,
     });
