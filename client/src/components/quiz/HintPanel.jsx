@@ -1,13 +1,20 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb } from 'lucide-react';
+import { Lightbulb, Bot } from 'lucide-react';
 
 const dotColors = ['bg-[#FF6500]', 'bg-teal-500', 'bg-purple-500'];
 
-export default function HintPanel({ hints, currentLevel, maxLevel = 3 }) {
+export default function HintPanel({ hints, currentLevel, maxLevel = 3, isAI = false }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-[#888888]">Hints for your answer</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-bold text-[#888888]">Hints for your answer</span>
+          {isAI && (
+            <span className="flex items-center gap-0.5 text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full px-1.5 py-0.5">
+              <Bot className="w-2.5 h-2.5" /> AI
+            </span>
+          )}
+        </div>
         <div className="flex gap-1" aria-hidden>
           {[0, 1, 2].map((l) => (
             <div
