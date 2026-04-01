@@ -1,6 +1,7 @@
 const { getByConceptKey } = require('../store/contentCache');
 const { buildLessonSlides } = require('../data/conceptLessonBuilder');
 const { getRemedialSimple } = require('../data/remedialSimple');
+const { generateAdaptiveRemedial } = require('./adaptiveRemedialLLMService');
 
 let remedialMedia = {};
 try {
@@ -62,6 +63,29 @@ function buildSessionTryDigest(wrongAttempts) {
   };
 }
 
+async function maybeAttachLlmRemedial(base, ctx) {
+  if (!process.env.OPENAI_API_KEY || !ctx.llmRemedialInput) return base;
+  const in_ = ctx.llmRemedialInput;
+  if (!in_.questionText || in_.studentAnswer === undefined || in_.studentAnswer === null) return base;
+  try {
+    const llmRemedial = await generateAdaptiveRemedial({
+      questionText: in_.questionText,
+      studentAnswer: in_.studentAnswer,
+      correctAnswer: in_.correctAnswer,
+      topic: in_.topic || base.title,
+      shape: in_.shape || '',
+      formula: in_.formula,
+      errorTypeRuleBased: in_.errorTypeRuleBased,
+      adaptiveMeta: in_.adaptiveMeta,
+      priorHints: in_.priorHints,
+    });
+    return { ...base, llmRemedial };
+  } catch (e) {
+    console.warn('[remedial] LLM personalized block skipped:', e.message);
+    return base;
+  }
+}
+
 const getRemedialContent = async (topic, shape, ctx = {}) => {
   const conceptKey = `${topic}_${shape}`;
   const content = getByConceptKey(conceptKey);
@@ -72,7 +96,7 @@ const getRemedialContent = async (topic, shape, ctx = {}) => {
   const figures = Array.isArray(content?.figures) ? content.figures : [];
 
   if (!content) {
-    return {
+    const base = {
       title: `${shape} ${topic}`,
       tagline: simple.oneLiner,
       intro: simple.intro,
@@ -87,9 +111,10 @@ const getRemedialContent = async (topic, shape, ctx = {}) => {
       gifUrl: media.gifUrl || null,
       gifCaption: media.gifCaption || null,
     };
+    return maybeAttachLlmRemedial(base, ctx);
   }
 
-  return {
+  const base = {
     title: content.title,
     tagline: simple.oneLiner,
     intro: simple.intro,
@@ -104,6 +129,7 @@ const getRemedialContent = async (topic, shape, ctx = {}) => {
     gifUrl: media.gifUrl || null,
     gifCaption: media.gifCaption || null,
   };
+  return maybeAttachLlmRemedial(base, ctx);
 };
 
 const getConceptMaterial = async (topic, shape) => {
