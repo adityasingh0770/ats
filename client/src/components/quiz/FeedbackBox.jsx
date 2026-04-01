@@ -34,9 +34,9 @@ const configs = {
   },
 };
 
-export default function FeedbackBox({ feedback, onNext, onRetry, canRetry }) {
+export default function FeedbackBox({ feedback, onNext, onRetry, canRetry, onRequestEndSession }) {
   if (!feedback) return null;
-  const { action, message, correct_answer, error_type, hint_suggestion } = feedback;
+  const { action, message } = feedback;
   const cfg  = configs[action] || configs.encouragement;
   const Icon = cfg.icon;
 
@@ -56,32 +56,31 @@ export default function FeedbackBox({ feedback, onNext, onRetry, canRetry }) {
 
         {message && <p className="text-sm text-[#555555] leading-relaxed">{message}</p>}
 
-        {correct_answer && !isCorrect && (
-          <div className="p-2.5 rounded-xl bg-white border border-[#E8E5E0]">
-            <span className="text-[10px] text-[#AAAAAA] block mb-0.5">Correct answer</span>
-            <span className="text-sm font-bold text-[#111111]">{correct_answer}</span>
-          </div>
-        )}
-        {error_type && (
-          <div className="text-[10px] text-[#AAAAAA] italic">Error type: {error_type.replace(/_/g, ' ')}</div>
-        )}
-        {hint_suggestion && (
-          <p className="text-xs text-[#FF6500] italic">{hint_suggestion}</p>
-        )}
-
-        <div className="flex gap-2 pt-1">
+        <div className="space-y-2 pt-1">
           {canRetry && !isCorrect && !isFinished && onRetry && (
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              onClick={onRetry} className="btn-secondary flex-1 justify-center py-2 text-xs">
-              <RotateCcw className="w-3.5 h-3.5" /> Try Again
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              onClick={onRetry} className="btn-primary w-full justify-center py-3 text-sm font-bold">
+              <RotateCcw className="w-4 h-4" /> Try Again
             </motion.button>
           )}
           {onNext && (
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              onClick={onNext} className="btn-primary flex-1 justify-center py-2 text-xs">
-              {isFinished ? 'See Results' : isCorrect ? 'Next Question' : 'Skip'}
-              <ChevronRight className="w-3.5 h-3.5" />
-            </motion.button>
+            isCorrect || isFinished ? (
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                onClick={onNext} className="btn-primary w-full justify-center py-3 text-sm font-bold">
+                {isFinished ? 'See Results' : 'Next Question'}
+                <ChevronRight className="w-4 h-4" />
+              </motion.button>
+            ) : (
+              <div className="pt-2 border-t border-black/5">
+                <p className="text-[10px] text-[#AAAAAA] text-center mb-2">Need to stop? This ends your whole session.</p>
+                <button
+                  type="button"
+                  onClick={() => onRequestEndSession?.()}
+                  className="w-full text-[11px] text-[#AAAAAA] hover:text-red-600 border border-dashed border-[#E0DDD8] hover:border-red-200 rounded-xl py-2.5 px-3 transition-colors bg-[#FAFAF9] hover:bg-red-50">
+                  End session…
+                </button>
+              </div>
+            )
           )}
         </div>
       </motion.div>

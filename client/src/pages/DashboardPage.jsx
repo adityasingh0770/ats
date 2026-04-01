@@ -77,7 +77,7 @@ export default function DashboardPage() {
               <Zap className="w-5 h-5 text-[#FF6500] shrink-0 mt-0.5" />
               <div className="flex-1 space-y-2">
                 <h2 className="text-sm font-bold text-[#111111]">Welcome to MathMentor!</h2>
-                <p className="text-[#666666] text-xs leading-relaxed">You haven't started any quiz yet. Pick any topic below to start your first adaptive session!</p>
+                <p className="text-[#666666] text-xs leading-relaxed">Start with <strong className="text-[#444444]">Perimeter</strong>—topics unlock in order (Perimeter → Area → Surface area → Volume) as you build mastery.</p>
                 <div className="grid sm:grid-cols-3 gap-2 mt-2">
                   {[
                     { icon: Brain,      label: 'Adaptive Questions', desc: 'Difficulty adjusts to your level', bg: 'bg-green-100',  icon_c: 'text-green-600' },

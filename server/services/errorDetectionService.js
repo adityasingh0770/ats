@@ -78,36 +78,36 @@ function inferOperationConfusion(ans, correct, questionText) {
       if (near(sum, correct, 0.5) && near(prod, ans, 0.5)) {
         return pack({
           type: 'multiply_instead_of_add',
-          feedback: `⚠️ Your answer (${ans}) equals ${a} × ${b} = ${prod}, but the correct result here is ${a} + ${b} = ${correct}. This question needs addition, not multiplication.`,
-          hintLead: `You multiplied ${a}×${b} to get ${prod}. Here you should add: ${a}+${b}=${correct}.`,
-          remedialLead: `You treated the numbers as factors (${a}×${b}). The situation calls for adding them first (${a}+${b}), then continuing with the full formula if needed.`,
+          feedback: `⚠️ Your answer (${ans}) equals ${a} × ${b} = ${prod}, but this question needs addition, not multiplication. Re-read the formula carefully.`,
+          hintLead: `You multiplied ${a}×${b} to get ${prod}. Think about what operation the formula actually needs — should you be adding or multiplying here?`,
+          remedialLead: `You treated the numbers as factors (${a}×${b}). The situation calls for adding them first, then continuing with the full formula if needed.`,
         });
       }
 
       if (near(prod, correct, 0.5) && near(sum, ans, 0.5)) {
         return pack({
           type: 'add_instead_of_multiply',
-          feedback: `⚠️ Your answer (${ans}) equals ${a} + ${b} = ${sum}, but the correct result uses multiplication: ${a} × ${b} = ${correct}.`,
-          hintLead: `You added ${a}+${b}=${sum}. This step needs multiplication: ${a}×${b}=${correct}.`,
-          remedialLead: `You added the numbers (${a}+${b}). The formula here requires multiplying (${a}×${b}).`,
+          feedback: `⚠️ Your answer (${ans}) equals ${a} + ${b} = ${sum}, but this step uses multiplication, not addition.`,
+          hintLead: `You added ${a}+${b}=${sum}. Check the formula again — does it ask you to add or multiply these values?`,
+          remedialLead: `You added the numbers (${a}+${b}). The formula here requires multiplying them.`,
         });
       }
 
       if (near(perimRect, correct, 0.5) && near(prod, ans, 0.5)) {
         return pack({
           type: 'area_instead_of_perimeter_rect',
-          feedback: `⚠️ Your answer (${ans}) is ${a} × ${b} — that is the area of an ${a} cm by ${b} cm rectangle. This question asks for perimeter, which is 2×(${a}+${b}) = ${perimRect}.`,
-          hintLead: `${a}×${b}=${prod} is area. Perimeter goes around the rectangle: 2×(${a}+${b})=${perimRect}.`,
-          remedialLead: `Multiplying length×breadth gives area (${prod}). Perimeter is the total boundary: 2×(length+breadth)=${perimRect}.`,
+          feedback: `⚠️ Your answer (${ans}) is ${a} × ${b} — that gives the space inside (area). But this question asks about the boundary around the rectangle.`,
+          hintLead: `${a}×${b}=${prod} gives the space inside (area). But this question is about the boundary. How do you find the total distance around a rectangle?`,
+          remedialLead: `Multiplying length×breadth gives area. Perimeter is the total boundary — think about walking around all four sides.`,
         });
       }
 
       if (near(prod, correct, 0.5) && near(perimRect, ans, 0.5)) {
         return pack({
           type: 'perimeter_instead_of_area_rect',
-          feedback: `⚠️ Your answer (${ans}) matches the perimeter 2×(${a}+${b}) = ${perimRect}. This question asks for area = length × breadth = ${a} × ${b} = ${correct}.`,
-          hintLead: `You used the perimeter idea (2×(${a}+${b})). For area, multiply only: ${a}×${b}=${correct}.`,
-          remedialLead: `2×(length+breadth) is perimeter (${perimRect}). Area is length×breadth=${correct}.`,
+          feedback: `⚠️ Your answer (${ans}) matches the perimeter formula. But this question asks for area — the space inside the rectangle.`,
+          hintLead: `You used the perimeter approach (2×(${a}+${b})). But the question asks for the space inside. Which simpler operation on length and breadth gives area?`,
+          remedialLead: `2×(length+breadth) is perimeter. Area is about the space inside — think about what operation on length and breadth gives that.`,
         });
       }
     }
@@ -153,17 +153,17 @@ const detectError = (studentAnswer, correctAnswer, question) => {
     const correctLabel = opts[correctLetter] || 'the correct option';
     let feedback = `❌ Incorrect. Think about the formula for ${question.shape} ${String(question.topic || '').replace('_', ' ')}.`;
     if (chosen) {
-      feedback = `❌ You chose ${letter} (${chosen}). The correct choice is ${correctLetter} (${correctLabel}). Compare the values with the formula ${question.formula || ''}.`;
+      feedback = `❌ You chose ${letter} (${chosen}). Try plugging the values into the formula ${question.formula || ''} and compare each option.`;
     }
     return pack({
       type: 'wrong_option',
       feedback,
       hintLead: chosen
-        ? `Option ${letter} (${chosen}) does not match ${question.formula || 'the right formula'}. Compare with ${correctLabel}.`
-        : feedback,
+        ? `Option ${letter} (${chosen}) doesn't match when you work through the formula. Try plugging the question's values into ${question.formula || 'the formula'} and compare each option.`
+        : `Think about the formula for ${question.shape} ${String(question.topic || '').replace('_', ' ')}. Work through it with the given values and see which option matches.`,
       remedialLead: chosen
         ? `You selected ${letter}: "${chosen}". Walk through ${question.formula || 'the formula'} with the numbers in the question and see which option matches.`
-        : feedback,
+        : `Review the formula for ${question.shape} ${String(question.topic || '').replace('_', ' ')} and apply it step by step.`,
     });
   }
 
@@ -197,17 +197,17 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (near(ans, prod, 0.5) && !near(ans, correct, 0.5)) {
         return pack({
           type: 'rect_multiply_instead_of_perimeter',
-          feedback: `⚠️ ${l}×${b} = ${prod} is area, not perimeter. For perimeter use 2×(${l}+${b}) = ${perim}.`,
-          hintLead: `You computed ${l}×${b}=${prod}. Perimeter = 2×(length+breadth)=${perim}.`,
-          remedialLead: `Your answer matches length×breadth (area). This question needs the perimeter: add length and breadth, then multiply by 2.`,
+          feedback: `⚠️ ${l}×${b} = ${prod} is area, not perimeter. For perimeter, think about the distance around all four sides.`,
+          hintLead: `You computed ${l}×${b}=${prod} — that's the area formula. For perimeter, think about walking around all four sides of the rectangle.`,
+          remedialLead: `Your answer matches length×breadth (area). This question needs the perimeter: the total distance around all four sides.`,
         });
       }
       if (near(ans, sum, 0.5) && !near(ans, correct, 0.5)) {
         return pack({
           type: 'rect_sum_only_perimeter',
-          feedback: `⚠️ ${l}+${b} = ${sum} adds the sides once, but the full perimeter is 2×(${l}+${b}) = ${perim}.`,
-          hintLead: `You stopped at ${l}+${b}=${sum}. Multiply that sum by 2 for perimeter: 2×${sum}=${perim}.`,
-          remedialLead: `Perimeter is the whole boundary: you need both pairs of opposite sides, so 2×(length+breadth).`,
+          feedback: `⚠️ ${l}+${b} = ${sum} adds the sides once, but a rectangle has four sides, not two.`,
+          hintLead: `You got ${l}+${b}=${sum} — that covers just one length and one breadth. A rectangle has four sides. What's the next step?`,
+          remedialLead: `Perimeter is the whole boundary: you need both pairs of opposite sides, not just one of each.`,
         });
       }
     }
@@ -221,9 +221,9 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (near(ans, perim, 0.5) && !near(ans, correct, 0.5)) {
         return pack({
           type: 'rect_perimeter_instead_of_area',
-          feedback: `⚠️ Your answer matches perimeter 2×(${l}+${b})=${perim}. This question asks for area = ${l}×${b}=${l * b}.`,
-          hintLead: `2×(${l}+${b}) is perimeter. Area is ${l}×${b}.`,
-          remedialLead: `You used the perimeter formula. For area, multiply length by breadth only.`,
+          feedback: `⚠️ Your answer matches the perimeter formula. But this question asks for the space inside the rectangle, not the boundary.`,
+          hintLead: `You used 2×(${l}+${b}) — that's the perimeter formula. For area, think about what simpler operation on length and breadth gives the space inside.`,
+          remedialLead: `You used the perimeter formula. For area, you only need to combine length and breadth in a simpler way.`,
         });
       }
     }
@@ -236,9 +236,9 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (near(ans, area, 0.5) && !near(ans, correct, 0.5)) {
         return pack({
           type: 'square_area_instead_of_perimeter',
-          feedback: `⚠️ ${s}×${s} = ${area} is the area of the square. Perimeter is 4×${s} = ${4 * s}.`,
-          hintLead: `You squared the side (area). Perimeter uses 4×side.`,
-          remedialLead: `Area = side×side; perimeter = 4×side — don't mix them.`,
+          feedback: `⚠️ ${s}×${s} = ${area} gives the space inside the square. But this question asks about the boundary.`,
+          hintLead: `You squared the side — that gives area (space inside). For perimeter, think about all four equal sides of the square.`,
+          remedialLead: `Squaring the side gives area. Perimeter is about the total boundary — a square has four equal sides.`,
         });
       }
     }
@@ -251,9 +251,9 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (near(ans, perim, 0.5) && !near(ans, correct, 0.5)) {
         return pack({
           type: 'square_perimeter_instead_of_area',
-          feedback: `⚠️ 4×${s} = ${perim} is perimeter. Area is side×side = ${s}×${s} = ${s * s}.`,
-          hintLead: `4×side is perimeter. Area is side×side.`,
-          remedialLead: `You used perimeter (4a). Area needs a×a.`,
+          feedback: `⚠️ Your answer matches the perimeter formula. But this question asks for the space the square covers.`,
+          hintLead: `4×side gives the boundary length (perimeter). For area, think about how much space the square covers — what operation on the side gives that?`,
+          remedialLead: `You used the perimeter formula. Area is about the space inside — think about what you do with the side length to find that.`,
         });
       }
     }
@@ -285,8 +285,8 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (a && near(ans, a, Math.abs(a) * TOL_RATIO)) {
         return pack({
           type: 'formula_swap',
-          feedback: `⚠️ Formula mix-up! You calculated the AREA instead of the PERIMETER. For ${shape}: Perimeter = ${formula}. Area uses a different formula.`,
-          hintLead: `Your number matches area, not perimeter. Use: ${formula}.`,
+          feedback: `⚠️ Formula mix-up! You calculated the space inside instead of the boundary. Re-read what the question is asking for.`,
+          hintLead: `Your answer matches the area formula, not perimeter. Go back to the perimeter formula and try applying it step by step.`,
           remedialLead: `Compare perimeter vs area for this shape — your answer fits the area idea.`,
         });
       }
@@ -299,8 +299,8 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (p && near(ans, p, Math.abs(p) * TOL_RATIO)) {
         return pack({
           type: 'formula_swap',
-          feedback: `⚠️ Formula mix-up! You calculated the PERIMETER instead of the AREA. For ${shape}: Area = ${formula}. Perimeter uses a different formula.`,
-          hintLead: `Your number matches perimeter, not area. Use: ${formula}.`,
+          feedback: `⚠️ Formula mix-up! You calculated the boundary instead of the space inside. Re-read what the question is asking for.`,
+          hintLead: `Your answer matches the perimeter formula, not area. Go back to the area formula and try applying it step by step.`,
           remedialLead: `You applied a boundary-length idea; this question needs the inside space (area).`,
         });
       }
@@ -311,8 +311,8 @@ const detectError = (studentAnswer, correctAnswer, question) => {
     if (correct !== 0 && Math.abs(ans - correct) > Math.abs(correct) * 0.5) {
       return pack({
         type: 'sa_volume_confusion',
-        feedback: `⚠️ Did you mix up Surface Area and Volume formulas? Make sure to use the correct formula for ${String(topic).replace('_', ' ')}.`,
-        hintLead: `Re-read whether the question wants total surface area or space inside (volume).`,
+        feedback: `⚠️ Did you mix up Surface Area and Volume formulas? Re-read what the question is asking for.`,
+        hintLead: `Re-read the question carefully — does it ask for the outer covering (surface area) or the space inside (volume)? They use very different formulas.`,
         remedialLead: `Your answer is far from the mark — surface area and volume use different formulas for the same solid.`,
       });
     }
@@ -333,7 +333,7 @@ const detectError = (studentAnswer, correctAnswer, question) => {
     return pack({
       type: 'arithmetic_mistake',
       feedback: '⚠️ You seem to have the right idea but made a calculation error. Re-check your arithmetic step by step.',
-      hintLead: `Your answer (${ans}) is close to ${correct} — redo the middle steps carefully.`,
+      hintLead: `Your approach seems right but there's a small calculation slip. Try redoing each step carefully and double-check your arithmetic.`,
       remedialLead: `The right formula is probably in reach; a small arithmetic slip changed the final value.`,
     });
   }
@@ -342,7 +342,7 @@ const detectError = (studentAnswer, correctAnswer, question) => {
     return pack({
       type: 'partial_formula',
       feedback: `⚠️ Partial formula used! Your answer is smaller than expected. Did you apply the complete formula? Formula: ${formula}`,
-      hintLead: `Your value is smaller than expected — check you used the full formula: ${formula}.`,
+      hintLead: `Your answer is lower than expected. Make sure you completed every part of the formula: ${formula}. Did you miss a step or factor?`,
       remedialLead: `You may have stopped halfway through the formula or left out a factor.`,
     });
   }
@@ -350,7 +350,7 @@ const detectError = (studentAnswer, correctAnswer, question) => {
   return pack({
     type: 'wrong_answer',
     feedback: `❌ Incorrect. The formula to use is: ${formula}. Review the concept and try again.`,
-    hintLead: `Compare your steps with ${formula}.`,
+    hintLead: `Try working through ${formula} step by step using the values from the question. Write down each step to spot where things go differently.`,
     remedialLead: `Your answer doesn't match the expected result. Review ${formula} with the numbers given.`,
   });
 };

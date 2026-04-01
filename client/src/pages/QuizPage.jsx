@@ -164,8 +164,8 @@ export default function QuizPage() {
                     <AlertTriangle className="w-5 h-5 text-red-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[#111111]">Terminate Quiz?</p>
-                    <p className="text-xs text-[#888888]">Your progress so far will still count towards your mastery.</p>
+                    <p className="text-sm font-bold text-[#111111]">End session?</p>
+                    <p className="text-xs text-[#888888]">You’ll leave this quiz. Progress so far still counts toward mastery.</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -190,10 +190,13 @@ export default function QuizPage() {
             <span className="text-xs text-[#AAAAAA]">{formatTopicName(topic)} › {formatShapeName(shape)}</span>
             <Badge label={currentDifficulty} type={currentDifficulty} size="xs" />
           </div>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="button"
             onClick={() => setShowTerminateModal(true)}
-            className="flex items-center gap-1 text-xs text-[#AAAAAA] hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50">
-            <X className="w-3.5 h-3.5" /> End Quiz
+            className="flex items-center gap-1 text-[10px] sm:text-xs text-[#BBBBBB] hover:text-red-600 border border-transparent hover:border-red-100 hover:bg-red-50/90 px-2 py-1.5 rounded-lg transition-colors">
+            <X className="w-3 h-3 opacity-70 shrink-0" aria-hidden /> End session
           </motion.button>
         </div>
 
@@ -254,6 +257,7 @@ export default function QuizPage() {
                     feedback={feedback}
                     onNext={handleNextQuestion}
                     onRetry={handleRetry}
+                    onRequestEndSession={() => setShowTerminateModal(true)}
                     canRetry={
                       feedback.action === 'encouragement' ||
                       feedback.action === 'hint' ||

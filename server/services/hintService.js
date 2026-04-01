@@ -15,11 +15,11 @@ const getHint = async (questionId, level, ctx = {}) => {
 
   if (hasAnswer && errorInfo) {
     const snippet = formatStudentAnswerForUi(studentAnswer, question.unit);
-    const lead = errorInfo.hintLead || errorInfo.feedback;
-    content = `Your answer: ${snippet}\n\n${lead}\n\nHint (step ${validLevel}):\n${content}`;
+    const lead = errorInfo.hintLead || 'Let me help you think about this differently.';
+    content = `I see you got ${snippet}. ${lead}\n\n${content}`;
   } else if (hasAnswer) {
     const snippet = formatStudentAnswerForUi(studentAnswer, question.unit);
-    content = `Your answer: ${snippet}\n\n${content}`;
+    content = `I see you got ${snippet}. Let me guide you:\n\n${content}`;
   }
 
   return {
