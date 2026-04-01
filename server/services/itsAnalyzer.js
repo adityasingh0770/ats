@@ -3,137 +3,281 @@
  *
  * Analyzes a student's answer, infers the most likely mistake pattern,
  * and generates 3 adaptive hint levels WITHOUT revealing the correct answer.
- * No external API or LLM used — purely rule-based.
+ * 100% rule-based — no external API or LLM.
  *
  * Output format:
  * {
  *   is_correct        : boolean,
  *   error_type        : string,   // human-readable mistake category
- *   detected_pattern  : string,   // how the student likely arrived at their answer
+ *   detected_pattern  : string,   // how the student likely arrived at their wrong answer
  *   confidence        : 'low' | 'medium' | 'high',
  *   message           : string,   // encouragement if correct, else ''
- *   hint_level_1      : string,   // subtle nudge
- *   hint_level_2      : string,   // more specific direction
- *   hint_level_3      : string,   // near-direct (no answer given)
+ *   hint_level_1      : string,
+ *   hint_level_2      : string,
+ *   hint_level_3      : string,
  * }
  */
 
 const { checkAnswer, detectError } = require('./errorDetectionService');
-const { buildPersonalizedHint } = require('./personalizedHintService');
+const { buildPersonalizedHint }    = require('./personalizedHintService');
 
-// ── Encouragement pool (shown when answer is correct) ────────────────────────
+// ── Encouragement pool ────────────────────────────────────────────────────────
 const CORRECT_MESSAGES = [
   "Great job! That's exactly right.",
   "Correct! You've got a solid understanding of this concept.",
   "Well done! Your approach was spot on.",
   "Perfect! Keep up the great work.",
   "Excellent! You applied the formula correctly.",
+  "Brilliant! Right on target.",
 ];
 
-// ── Map internal error types → human-readable mistake category ───────────────
+// ── Human-readable error category labels ─────────────────────────────────────
 const ERROR_TYPE_LABEL = {
-  multiply_instead_of_add:           'Wrong operation (multiplication instead of addition)',
-  add_instead_of_multiply:           'Wrong operation (addition instead of multiplication)',
-  area_instead_of_perimeter_rect:    'Wrong formula (area formula used for perimeter)',
-  rect_multiply_instead_of_perimeter:'Wrong formula (multiplied dimensions instead of finding perimeter)',
-  perimeter_instead_of_area_rect:    'Wrong formula (perimeter formula used for area)',
-  rect_perimeter_instead_of_area:    'Wrong formula (perimeter-style calculation used for area)',
-  rect_sum_only_perimeter:           'Partial/incomplete solving (l + b not doubled)',
-  square_area_instead_of_perimeter:  'Wrong formula (area formula used for perimeter)',
-  square_perimeter_instead_of_area:  'Wrong formula (perimeter formula used for area)',
-  radius_diameter_confusion:         'Unit/measurement error (radius and diameter confused)',
-  formula_swap:                      'Wrong formula or concept (formulas swapped)',
-  sa_volume_confusion:               'Wrong formula (surface area and volume swapped)',
-  unit_error:                        'Unit/place value error',
-  arithmetic_mistake:                'Arithmetic/calculation error',
-  partial_formula:                   'Partial/incomplete solving (formula applied incompletely)',
-  wrong_option:                      'Wrong formula or concept (MCQ selection)',
-  wrong_verdict:                     'Wrong formula or concept (True/False reversal)',
-  invalid_input:                     'Invalid input format',
-  wrong_answer:                      'Answer mismatch — specific pattern unclear',
-  unknown:                           'Answer mismatch — specific pattern unclear',
+  // Perimeter — Square
+  square_two_sides_perimeter:          'Counted only 2 sides instead of 4 (perimeter of square)',
+  square_area_instead_of_perimeter:    'Used area formula (s²) for perimeter of square',
+
+  // Perimeter — Rectangle
+  multiply_instead_of_add:             'Wrong operation — multiplied where addition was needed',
+  add_instead_of_multiply:             'Wrong operation — added where multiplication was needed',
+  area_instead_of_perimeter_rect:      'Used area formula (l×b) for perimeter of rectangle',
+  perimeter_instead_of_area_rect:      'Used perimeter formula 2(l+b) for area of rectangle',
+  rect_multiply_instead_of_perimeter:  'Multiplied length×breadth (area) for perimeter question',
+  rect_sum_only_perimeter:             'Added l+b once — forgot to double for full perimeter',
+  rect_perimeter_instead_of_area:      'Used perimeter formula for area question (rectangle)',
+
+  // Perimeter — Circle
+  circle_forgot_multiply_by_2:         'Used πr instead of 2πr for circumference',
+  circle_area_for_circumference:       'Used area formula (πr²) for circumference',
+  forgot_pi_circumference:             'Forgot π — computed 2r instead of 2πr',
+
+  // Area — Square
+  square_perimeter_instead_of_area:    'Used perimeter formula (4s) for area of square',
+
+  // Area — Circle
+  circle_circumference_for_area:       'Used circumference formula (2πr) for area',
+  circle_forgot_square_radius:         'Used πr instead of πr² for circle area',
+  forgot_pi_area:                      'Forgot π — computed r² instead of πr²',
+
+  // Surface Area — Cube
+  cube_one_face_sa:                    'Calculated area of only 1 face (s²) instead of 6s²',
+  cube_two_faces_sa:                   'Calculated area of only 2 faces (2s²) instead of 6s²',
+  cube_four_faces_sa:                  'Used lateral SA (4s²) instead of total SA (6s²)',
+  cube_volume_for_sa:                  'Used volume formula (s³) for surface area of cube',
+  cube_linear_sa:                      'Multiplied 6×edge linearly — forgot to square edge',
+
+  // Surface Area — Cuboid
+  cuboid_no_factor_2_sa:               'Forgot the factor of 2 — computed lb+bh+lh instead of 2(lb+bh+lh)',
+  cuboid_volume_for_sa:                'Used volume formula (l×b×h) for surface area of cuboid',
+  cuboid_partial_sa:                   'Only computed one pair of faces (e.g., 2lb) instead of all three pairs',
+
+  // Surface Area — Cylinder
+  cylinder_lateral_only_sa:            'Used only CSA (2πrh) instead of TSA (2πr(r+h))',
+  cylinder_only_circles_sa:            'Computed only the two circular bases (2πr²) — forgot curved surface',
+  cylinder_volume_for_sa:              'Used volume formula (πr²h) for surface area of cylinder',
+  cylinder_forgot_factor_2_csa:        'Used πrh instead of 2πrh for CSA — forgot the factor 2',
+
+  // Volume — Cube
+  cube_sa_for_volume:                  'Used surface area formula (6s²) for volume of cube',
+  cube_squared_for_volume:             'Squared the edge (s²) instead of cubing (s³) for volume',
+  cube_linear_for_volume:              'Used a linear expression (6s) instead of s³ for volume',
+
+  // Volume — Cuboid
+  cuboid_forgot_height_volume:         'Used only l×b (base area) — forgot height for cuboid volume',
+  cuboid_sa_for_volume:                'Used surface area formula for volume of cuboid',
+  cuboid_added_dims_volume:            'Added l+b+h instead of multiplying for cuboid volume',
+
+  // Volume — Cylinder
+  cylinder_forgot_height_volume:       'Used only πr² (base area) — forgot height for cylinder volume',
+  cylinder_csa_for_volume:             'Used CSA formula (2πrh) for volume of cylinder',
+  cylinder_tsa_for_volume:             'Used TSA formula (2πr(r+h)) for volume of cylinder',
+  cylinder_forgot_square_r:            'Used πrh instead of πr²h — forgot to square the radius',
+
+  // General
+  radius_diameter_confusion:           'Radius and diameter confused — used one where the other was needed',
+  formula_swap:                        'Wrong formula type used (e.g., perimeter formula for area question)',
+  sa_volume_confusion:                 'Surface area and volume formulas swapped',
+  unit_error:                          'Unit/place-value error (e.g., cm vs m mixed up)',
+  arithmetic_mistake:                  'Arithmetic/calculation error (right approach, wrong computation)',
+  partial_formula:                     'Incomplete formula — stopped partway through or skipped a factor',
+  wrong_option:                        'Incorrect MCQ option selected',
+  wrong_verdict:                       'Incorrect True/False verdict',
+  invalid_input:                       'Non-numeric or unreadable input entered',
+  wrong_answer:                        'Answer mismatch — specific pattern could not be identified',
+  unknown:                             'Answer mismatch — specific pattern could not be identified',
 };
 
 // ── Confidence levels per error type ─────────────────────────────────────────
 const CONFIDENCE_LEVEL = {
-  multiply_instead_of_add:           'high',
-  add_instead_of_multiply:           'high',
-  area_instead_of_perimeter_rect:    'high',
-  rect_multiply_instead_of_perimeter:'high',
-  perimeter_instead_of_area_rect:    'high',
-  rect_perimeter_instead_of_area:    'high',
-  rect_sum_only_perimeter:           'high',
-  square_area_instead_of_perimeter:  'high',
-  square_perimeter_instead_of_area:  'high',
-  radius_diameter_confusion:         'high',
-  formula_swap:                      'high',
-  sa_volume_confusion:               'high',
-  unit_error:                        'medium',
-  arithmetic_mistake:                'medium',
-  partial_formula:                   'medium',
-  wrong_option:                      'medium',
-  wrong_verdict:                     'medium',
-  invalid_input:                     'high',
-  wrong_answer:                      'low',
-  unknown:                           'low',
+  // High confidence: specific value-matched detections
+  square_two_sides_perimeter:          'high',
+  square_area_instead_of_perimeter:    'high',
+  multiply_instead_of_add:             'high',
+  add_instead_of_multiply:             'high',
+  area_instead_of_perimeter_rect:      'high',
+  perimeter_instead_of_area_rect:      'high',
+  rect_multiply_instead_of_perimeter:  'high',
+  rect_sum_only_perimeter:             'high',
+  rect_perimeter_instead_of_area:      'high',
+  circle_forgot_multiply_by_2:         'high',
+  circle_area_for_circumference:       'high',
+  forgot_pi_circumference:             'high',
+  square_perimeter_instead_of_area:    'high',
+  circle_circumference_for_area:       'high',
+  circle_forgot_square_radius:         'high',
+  forgot_pi_area:                      'high',
+  cube_one_face_sa:                    'high',
+  cube_two_faces_sa:                   'high',
+  cube_four_faces_sa:                  'high',
+  cube_volume_for_sa:                  'high',
+  cube_linear_sa:                      'high',
+  cuboid_no_factor_2_sa:               'high',
+  cuboid_volume_for_sa:                'high',
+  cuboid_partial_sa:                   'high',
+  cylinder_lateral_only_sa:            'high',
+  cylinder_only_circles_sa:            'high',
+  cylinder_volume_for_sa:              'high',
+  cylinder_forgot_factor_2_csa:        'high',
+  cube_sa_for_volume:                  'high',
+  cube_squared_for_volume:             'high',
+  cube_linear_for_volume:              'high',
+  cuboid_forgot_height_volume:         'high',
+  cuboid_sa_for_volume:                'high',
+  cuboid_added_dims_volume:            'high',
+  cylinder_forgot_height_volume:       'high',
+  cylinder_csa_for_volume:             'high',
+  cylinder_tsa_for_volume:             'high',
+  cylinder_forgot_square_r:            'high',
+  radius_diameter_confusion:           'high',
+  formula_swap:                        'high',
+
+  // Medium confidence: approximate or general detections
+  sa_volume_confusion:                 'medium',
+  unit_error:                          'medium',
+  arithmetic_mistake:                  'medium',
+  partial_formula:                     'medium',
+  wrong_option:                        'medium',
+  wrong_verdict:                       'medium',
+  invalid_input:                       'high',
+
+  // Low confidence: no specific pattern found
+  wrong_answer:                        'low',
+  unknown:                             'low',
 };
 
-// ── Detected-pattern descriptions (how the student likely got their answer) ──
+// ── Detected-pattern descriptions ────────────────────────────────────────────
 const DETECTED_PATTERN = {
+  square_two_sides_perimeter:
+    'Student likely multiplied 2 × side, counting only two sides of the square instead of all four.',
+  square_area_instead_of_perimeter:
+    'Student squared the side (s²), computing area instead of the boundary (perimeter = 4s).',
   multiply_instead_of_add:
-    'Student multiplied two values that should be added first — common when mixing up area and perimeter operations.',
+    'Student multiplied two values that the formula required to be added — common formula-reading error.',
   add_instead_of_multiply:
-    'Student added values that should be multiplied, possibly misreading the formula.',
+    'Student added values that should have been multiplied — likely misread the formula structure.',
   area_instead_of_perimeter_rect:
-    'Student applied the area formula (l × b) when perimeter (2(l + b)) was required.',
+    'Student multiplied l × b (area formula) when the perimeter formula 2(l+b) was required.',
+  perimeter_instead_of_area_rect:
+    'Student applied 2(l+b) (perimeter) when the area formula l × b was required.',
   rect_multiply_instead_of_perimeter:
     'Student multiplied length × breadth (giving area) when perimeter was asked.',
-  perimeter_instead_of_area_rect:
-    'Student applied the perimeter formula (2(l + b)) when area (l × b) was required.',
-  rect_perimeter_instead_of_area:
-    'Student used a perimeter-style calculation (adding/doubling) instead of multiplying for area.',
   rect_sum_only_perimeter:
-    'Student added l + b once but forgot to multiply by 2, giving half the actual perimeter.',
-  square_area_instead_of_perimeter:
-    'Student squared the side (s²) as for area when perimeter (4 × s) was needed.',
+    'Student added l + b once, giving only two of the four sides — forgot to multiply by 2.',
+  rect_perimeter_instead_of_area:
+    'Student used the perimeter formula for a rectangle area question.',
+  circle_forgot_multiply_by_2:
+    'Student applied πr instead of 2πr — the factor of 2 in the circumference formula was omitted.',
+  circle_area_for_circumference:
+    'Student used the area formula (πr²) when circumference (2πr) was required.',
+  forgot_pi_circumference:
+    'Student computed 2r without multiplying by π — the π constant was omitted from the circumference.',
   square_perimeter_instead_of_area:
-    'Student used 4 × s (perimeter) when area (s²) was required.',
+    'Student applied 4 × side (perimeter) when the area formula (s²) was required.',
+  circle_circumference_for_area:
+    'Student used the circumference formula (2πr) when the area formula (πr²) was required.',
+  circle_forgot_square_radius:
+    'Student applied πr instead of πr² — forgot to square the radius in the area formula.',
+  forgot_pi_area:
+    'Student computed r² without multiplying by π — the π constant was omitted from the area formula.',
+  cube_one_face_sa:
+    'Student computed a² (area of one face) instead of 6a² (total surface area of all 6 faces).',
+  cube_two_faces_sa:
+    'Student computed 2a² (top + bottom only) instead of 6a² (all 6 faces).',
+  cube_four_faces_sa:
+    'Student computed 4a² (lateral SA — 4 side faces) instead of 6a² (total SA including top and bottom).',
+  cube_volume_for_sa:
+    'Student applied the volume formula (a³) instead of the surface area formula (6a²).',
+  cube_linear_sa:
+    'Student multiplied 6 × a linearly without squaring — did not compute a² for each face area.',
+  cuboid_no_factor_2_sa:
+    'Student computed lb + bh + lh without the factor of 2 — forgot that each face pair appears twice.',
+  cuboid_volume_for_sa:
+    'Student applied l × b × h (volume) instead of 2(lb + bh + lh) (surface area).',
+  cuboid_partial_sa:
+    'Student computed only one pair of face areas (e.g., 2lb) — missed the other two pairs.',
+  cylinder_lateral_only_sa:
+    'Student computed CSA = 2πrh (curved surface only) when TSA = 2πr(r+h) was required — forgot circular bases.',
+  cylinder_only_circles_sa:
+    'Student computed 2πr² (two circular bases only) — forgot the curved surface (2πrh).',
+  cylinder_volume_for_sa:
+    'Student applied the volume formula (πr²h) instead of the surface area formula.',
+  cylinder_forgot_factor_2_csa:
+    'Student computed πrh instead of 2πrh — the factor of 2 in the CSA formula was omitted.',
+  cube_sa_for_volume:
+    'Student applied the surface area formula (6a²) instead of the volume formula (a³).',
+  cube_squared_for_volume:
+    'Student squared the edge (a²) instead of cubing (a³) — stopped one dimension short.',
+  cube_linear_for_volume:
+    'Student used a linear expression (e.g., 6a) — did not cube the edge for volume.',
+  cuboid_forgot_height_volume:
+    'Student multiplied only two of the three dimensions (e.g., l × b), omitting height from the volume.',
+  cuboid_sa_for_volume:
+    'Student applied the surface area formula 2(lb+bh+lh) instead of volume (l×b×h).',
+  cuboid_added_dims_volume:
+    'Student added l + b + h instead of multiplying all three dimensions for volume.',
+  cylinder_forgot_height_volume:
+    'Student computed πr² (base area) without multiplying by height — forgot h in V = πr²h.',
+  cylinder_csa_for_volume:
+    'Student used the curved surface area formula (2πrh) instead of volume (πr²h).',
+  cylinder_tsa_for_volume:
+    'Student used the total surface area formula 2πr(r+h) instead of volume (πr²h).',
+  cylinder_forgot_square_r:
+    'Student computed πrh instead of πr²h — did not square the radius in the volume formula.',
   radius_diameter_confusion:
-    'Student likely used the diameter where radius was needed (or vice versa), doubling or halving the correct value.',
+    'Student likely confused radius and diameter — used one where the other was required.',
   formula_swap:
-    'Student used a formula for a different measurement type (e.g., perimeter formula in an area question).',
+    'Student applied the wrong formula type (e.g., perimeter formula for an area question).',
   sa_volume_confusion:
-    'Student confused the surface area formula with the volume formula, or the other way around.',
+    'Student confused surface area and volume formulas for a solid shape.',
   unit_error:
-    'Student may have mixed units (cm vs m, or cm² vs m²) without converting — scaling error visible in the result.',
+    'Student likely mixed measurement units (cm vs m, cm² vs m²) without converting.',
   arithmetic_mistake:
-    'Student used the right approach but made a calculation error in an arithmetic step.',
+    'Student used the correct approach but made a calculation error in an arithmetic step.',
   partial_formula:
     'Student applied only part of the formula — likely stopped one step early or omitted a factor.',
   wrong_option:
-    'Student selected an MCQ option that does not match what the formula produces for the given values.',
+    'Student selected an MCQ option that does not match the formula result for the given values.',
   wrong_verdict:
     'Student gave the opposite True/False verdict from what the calculation actually shows.',
   invalid_input:
-    'Student entered a non-numeric value or text that could not be interpreted as a number.',
+    'Student entered a non-numeric value that could not be interpreted as a number.',
   wrong_answer:
-    'Student answer does not match the correct result; specific mistake pattern could not be determined.',
+    'Student answer does not match the correct result — specific mistake pattern could not be identified.',
   unknown:
-    'Student answer does not match the correct result; specific mistake pattern could not be determined.',
+    'Student answer does not match the correct result — specific mistake pattern could not be identified.',
 };
 
 // ── Main analyzer ─────────────────────────────────────────────────────────────
 
 /**
- * Analyze a student's answer and produce the full ITS result.
+ * Analyze a student's answer and return the full ITS result.
  *
- * @param {object}      question           - Full question object from the question bank
- * @param {string|number} studentAnswer    - What the student submitted
- * @param {object|null} precomputedError   - errorInfo from detectError(), if already run
- * @returns {object}  ITS analysis (see format above)
+ * @param {object}       question         - Full question object from question bank
+ * @param {string|number} studentAnswer   - What the student submitted
+ * @param {object|null}  precomputedError - errorInfo from detectError(), if already run
+ * @returns {object}  ITS analysis
  */
 function analyzeAnswer(question, studentAnswer, precomputedError = null) {
-  // ── 1. Check correctness ──────────────────────────────────────────────────
   const isCorrect = checkAnswer(studentAnswer, question.answer, question);
 
   if (isCorrect) {
@@ -149,25 +293,22 @@ function analyzeAnswer(question, studentAnswer, precomputedError = null) {
     };
   }
 
-  // ── 2. Identify mistake ───────────────────────────────────────────────────
+  // Use precomputed error if available (saves re-running detection)
   const errorInfo = precomputedError || detectError(studentAnswer, question.answer, question);
   const errorType = errorInfo?.type || 'wrong_answer';
 
-  // ── 3. Check against common wrong answers (if provided in question bank) ──
-  // question.commonWrongAnswers: { [answer]: errorType } — optional field
+  // Check common wrong answers map if present in question bank
   let resolvedType = errorType;
   if (question.commonWrongAnswers && typeof question.commonWrongAnswers === 'object') {
     const key = String(studentAnswer).trim();
-    if (question.commonWrongAnswers[key]) {
-      resolvedType = question.commonWrongAnswers[key]; // prioritize explicit mapping
-    }
+    if (question.commonWrongAnswers[key]) resolvedType = question.commonWrongAnswers[key];
   }
 
-  const errorCategory   = ERROR_TYPE_LABEL[resolvedType]    || 'Unknown mistake pattern';
+  const errorCategory   = ERROR_TYPE_LABEL[resolvedType]    || ERROR_TYPE_LABEL['unknown'];
   const confidence      = CONFIDENCE_LEVEL[resolvedType]    || 'low';
   const detectedPattern = DETECTED_PATTERN[resolvedType]    || DETECTED_PATTERN['wrong_answer'];
 
-  // ── 4. Generate 3 adaptive hint levels ────────────────────────────────────
+  // Generate 3 adaptive Socratic hint levels
   const hint1 = buildPersonalizedHint(question, errorInfo, studentAnswer, 1);
   const hint2 = buildPersonalizedHint(question, errorInfo, studentAnswer, 2);
   const hint3 = buildPersonalizedHint(question, errorInfo, studentAnswer, 3);
