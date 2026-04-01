@@ -3,7 +3,21 @@ import { Lightbulb } from 'lucide-react';
 
 const dotColors = ['bg-[#FF6500]', 'bg-teal-500', 'bg-purple-500'];
 
-export default function HintPanel({ hints, hintSources, currentLevel, maxLevel = 3 }) {
+function builtInWhy(code) {
+  const map = {
+    no_openai_key:
+      'AI hints are off: your API server has no usable OPENAI_API_KEY. In Render: open service “ats” → Environment → add the key (or link your env group) → Save → redeploy.',
+    empty_student_answer: 'Built-in hints are shown because no answer was on file for the AI step.',
+    openai_empty_level:
+      'OpenAI returned empty hint text after retries. Check Render logs, model name, and billing; built-in text is used for this level.',
+    openai_auth: 'OpenAI rejected the API key (401). Replace the key on Render and redeploy.',
+    openai_error: 'The AI hint request failed. See server logs on Render for details.',
+    openai_no_cache: 'Hint cache was missing; built-in text was used.',
+  };
+  return map[code] || 'Built-in hints are being used instead of the AI path.';
+}
+
+export default function HintPanel({ hints, hintSources, lastHint, currentLevel, maxLevel = 3 }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -17,6 +31,12 @@ export default function HintPanel({ hints, hintSources, currentLevel, maxLevel =
           ))}
         </div>
       </div>
+
+      {lastHint?.source === 'rules' && lastHint?.llmSkippedReason && (
+        <p className="text-[10px] text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 leading-snug">
+          <span className="font-bold">Why not AI?</span> {builtInWhy(lastHint.llmSkippedReason)}
+        </p>
+      )}
 
       <AnimatePresence>
         {hints.map((hint, i) => (

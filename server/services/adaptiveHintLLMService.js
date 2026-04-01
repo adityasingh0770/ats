@@ -135,11 +135,13 @@ async function generateAdaptiveHints(
 
   let lastBundle = null;
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     const retryNote =
-      attempt > 0
+      attempt === 1
         ? '\n\nCRITICAL RETRY: hint_level_1, hint_level_2, and hint_level_3 were missing or too short. Each must be 2+ sentences and mention the student_answer explicitly. All three keys required.'
-        : '';
+        : attempt === 2
+          ? '\n\nFINAL RETRY: Output valid JSON only. Fill hint_level_1, hint_level_2, hint_level_3 with different strings (each 40+ characters). Reference the student_answer text. Never leave a hint empty.'
+          : '';
 
     const res = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
@@ -149,7 +151,7 @@ async function generateAdaptiveHints(
       },
       body: JSON.stringify({
         model,
-        temperature: attempt > 0 ? 0.45 : 0.3,
+        temperature: attempt === 0 ? 0.3 : attempt === 1 ? 0.45 : 0.55,
         max_tokens: 1400,
         response_format: { type: 'json_object' },
         messages: [

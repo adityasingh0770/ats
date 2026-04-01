@@ -25,12 +25,18 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
       errorInfo: errorInfo || null,
     });
 
+  const asRules = async (reason) => {
+    const fb = await fallback();
+    console.warn('[hints] using built-in rules:', reason, { level, qid: question.qid });
+    return { ...fb, source: 'rules', llmSkippedReason: reason };
+  };
+
   if (!getOpenAiKey()) {
-    return { ...(await fallback()), source: 'rules' };
+    return asRules('no_openai_key');
   }
 
   if (ansKey === undefined || ansKey === null || String(ansKey).trim() === '') {
-    return { ...(await fallback()), source: 'rules' };
+    return asRules('empty_student_answer');
   }
 
   try {
@@ -48,6 +54,7 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
 
       if (bundle.is_correct) {
         session.adaptiveHintsCache = null;
+        console.warn('[hints] LLM bundle marked correct (unexpected with grader); clearing cache');
       } else {
         session.adaptiveHintsCache = {
           questionId: qid,
@@ -63,6 +70,10 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
             confidence: bundle.confidence || 'medium',
           },
         };
+        const L = session.adaptiveHintsCache.levels;
+        if (!L[0] || !L[1] || !L[2]) {
+          console.warn('[hints] LLM returned incomplete levels after retries:', L.map((x) => (x ? `${x.length}ch` : 'EMPTY')));
+        }
       }
     }
 
@@ -78,14 +89,15 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
           source: 'llm',
         };
       }
+      return asRules('openai_empty_level');
     }
   } catch (e) {
-    console.warn('[hints] LLM path failed, using rule-based:', e.message);
+    console.warn('[hints] LLM path failed:', e.code || e.name, e.message);
     session.adaptiveHintsCache = null;
+    return asRules(e.code === 'LLM_HTTP_ERROR' && e.status === 401 ? 'openai_auth' : 'openai_error');
   }
 
-  const fb = await fallback();
-  return { ...fb, source: 'rules' };
+  return asRules('openai_no_cache');
 }
 
 module.exports = { resolveHint };

@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const { getOpenAiKey } = require('./utils/openaiEnv');
 
 dotenv.config();
 
@@ -33,7 +34,13 @@ app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/quiz', require('./routes/quizRoutes'));
 app.use('/api/session', require('./routes/sessionRoutes'));
 
-app.get('/api/health', (req, res) => res.json({ status: 'OK', message: 'MathMentor API running' }));
+app.get('/api/health', (req, res) =>
+  res.json({
+    status: 'OK',
+    message: 'MathMentor API running',
+    openaiConfigured: Boolean(getOpenAiKey()),
+  })
+);
 
 app.use(errorHandler);
 

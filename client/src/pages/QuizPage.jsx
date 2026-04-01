@@ -248,6 +248,7 @@ export default function QuizPage() {
                   <HintPanel
                     hints={hints}
                     hintSources={hintSources}
+                    lastHint={hint}
                     currentLevel={hintLevel}
                     maxLevel={3}
                   />
