@@ -5,6 +5,35 @@
 const { getGeminiKey } = require('./geminiEnv');
 const { getFetchImpl } = require('./httpFetch');
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Prefer server-provided retry delay (google.rpc.RetryInfo); else exponential backoff.
+ * @param {object|null} data - parsed error JSON body
+ * @param {number} attemptIndex - 0-based retry after first 429
+ */
+function gemini429BackoffMs(data, attemptIndex) {
+  const details = data?.error?.details;
+  if (Array.isArray(details)) {
+    for (const d of details) {
+      if (d?.['@type'] === 'type.googleapis.com/google.rpc.RetryInfo' && d.retryDelay) {
+        const rd = d.retryDelay;
+        let sec = 0;
+        if (typeof rd === 'string') {
+          const m = rd.match(/^(\d+)s$/);
+          sec = m ? parseInt(m[1], 10) : 0;
+        } else if (typeof rd === 'object') {
+          sec = Number(rd.seconds || 0) + Number(rd.nanos || 0) / 1e9;
+        }
+        if (sec > 0) return Math.min(120000, Math.ceil(sec * 1000) + 500);
+      }
+    }
+  }
+  return Math.min(45000, 3000 * 2 ** attemptIndex);
+}
+
 function openaiMessagesToGemini(messages) {
   if (!Array.isArray(messages)) return { systemText: '', userText: '' };
   const systemChunks = [];
@@ -24,11 +53,11 @@ function openaiMessagesToGemini(messages) {
 
 /**
  * @param {object} body - OpenAI-style chat body
- * @param {{ timeoutMs?: number, logTag?: string }} options
+ * @param {{ timeoutMs?: number, logTag?: string, max429Retries?: number }} options
  * @returns {Promise<{ choices: Array<{ message: { content: string } }> }>}
  */
 async function geminiChatCompletionOpenAiShaped(body, options = {}) {
-  const { timeoutMs = 90000, logTag = 'gemini' } = options;
+  const { timeoutMs = 90000, logTag = 'gemini', max429Retries = 2 } = options;
   const key = getGeminiKey();
   if (!key) {
     const e = new Error('GEMINI_API_KEY is not configured');
@@ -59,48 +88,69 @@ async function geminiChatCompletionOpenAiShaped(body, options = {}) {
     },
   };
 
-  const ctrl = new AbortController();
-  const id = setTimeout(() => ctrl.abort(), timeoutMs);
+  const maxAttempts = Math.max(1, max429Retries + 1);
   let res;
   let raw;
-  try {
-    res = await fetchImpl(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiBody),
-      signal: ctrl.signal,
-    });
-    raw = await res.text();
-  } catch (e) {
-    if (e.name === 'AbortError') {
-      const err = new Error(`Gemini timed out after ${timeoutMs}ms`);
-      err.code = 'LLM_TIMEOUT';
+  let data;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const ctrl = new AbortController();
+    const id = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      res = await fetchImpl(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geminiBody),
+        signal: ctrl.signal,
+      });
+      raw = await res.text();
+    } catch (e) {
+      clearTimeout(id);
+      if (e.name === 'AbortError') {
+        const err = new Error(`Gemini timed out after ${timeoutMs}ms`);
+        err.code = 'LLM_TIMEOUT';
+        throw err;
+      }
+      const err = new Error(e.message || 'Network error calling Gemini');
+      err.code = 'LLM_NETWORK';
+      throw err;
+    } finally {
+      clearTimeout(id);
+    }
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      if (res.status === 429 && attempt < max429Retries) {
+        const delay = gemini429BackoffMs(null, attempt);
+        console.warn(`[${logTag}] Gemini 429 non-JSON body, backoff ${delay}ms`);
+        await sleep(delay);
+        continue;
+      }
+      console.error(`[${logTag}] Gemini non-JSON:`, raw.slice(0, 400));
+      const err = new Error('Gemini returned non-JSON');
+      err.code = 'GEMINI_BAD_RESPONSE';
       throw err;
     }
-    const err = new Error(e.message || 'Network error calling Gemini');
-    err.code = 'LLM_NETWORK';
-    throw err;
-  } finally {
-    clearTimeout(id);
-  }
 
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch {
-    console.error(`[${logTag}] Gemini non-JSON:`, raw.slice(0, 400));
-    const err = new Error('Gemini returned non-JSON');
-    err.code = 'GEMINI_BAD_RESPONSE';
-    throw err;
-  }
+    if (!res.ok) {
+      if (res.status === 429 && attempt < max429Retries) {
+        const delay = gemini429BackoffMs(data, attempt);
+        console.warn(
+          `[${logTag}] Gemini rate limit (429), waiting ${delay}ms before retry ${attempt + 2}/${maxAttempts}`
+        );
+        await sleep(delay);
+        continue;
+      }
+      const msg = data?.error?.message || `Gemini HTTP ${res.status}`;
+      console.error(`[${logTag}] Gemini error ${res.status}:`, JSON.stringify(data?.error || data).slice(0, 800));
+      const err = new Error(msg);
+      err.code = 'LLM_HTTP_ERROR';
+      err.status = res.status;
+      throw err;
+    }
 
-  if (!res.ok) {
-    const msg = data?.error?.message || `Gemini HTTP ${res.status}`;
-    console.error(`[${logTag}] Gemini error ${res.status}:`, JSON.stringify(data?.error || data).slice(0, 800));
-    const err = new Error(msg);
-    err.code = 'LLM_HTTP_ERROR';
-    err.status = res.status;
-    throw err;
+    break;
   }
 
   const block = data?.promptFeedback?.blockReason;

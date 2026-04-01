@@ -15,7 +15,8 @@ function builtInWhy(code) {
       'Gemini request failed. In Render → Logs search for [hints] or [gemini]. Check API key, model name, quota, and region.',
     llm_network: 'Could not reach Google Gemini from the server. Check network / firewall on the host.',
     llm_timeout: 'Gemini took too long. Retry; if it persists, try a smaller GEMINI_MODEL or upgrade hosting.',
-    llm_rate_limit: 'Gemini rate limit (429). Wait a few minutes, enable billing in Google AI, or use a higher quota project.',
+    llm_rate_limit:
+      'Google returned 429 — your free key is fine, but the free tier allows only a few requests per minute. Wait 1–2 minutes and try again; avoid refreshing repeatedly. For heavier use, enable pay-as-you-go in Google AI / Cloud (higher limits).',
     llm_no_cache: 'Hint cache was missing; built-in text was used.',
     fetch_missing:
       'This server has no HTTP client. Use Node 18+ on Render (see package.json engines) and redeploy.',

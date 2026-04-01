@@ -128,6 +128,9 @@ async function generateAdaptiveHints(
   let lastBundle = null;
 
   for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) {
+      await new Promise((r) => setTimeout(r, 1500));
+    }
     const retryNote =
       attempt === 1
         ? '\n\nCRITICAL RETRY: hint_level_1, hint_level_2, and hint_level_3 were missing or too short. Each must be 2+ sentences and mention the student_answer explicitly. All three keys required.'
