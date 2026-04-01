@@ -11,7 +11,6 @@ import {
   Image as ImageIcon,
   List,
   Footprints,
-  Bot,
 } from 'lucide-react';
 
 function svgToDataUrl(svgMarkup) {
@@ -70,24 +69,6 @@ export default function RemedialContent({ content, onContinue }) {
           </div>
         </div>
       </div>
-
-      {/* Gemini AI personal insight */}
-      {content.geminiInsight && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-4 sm:p-5"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4 text-white" />
-            </div>
-            <p className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Your AI tutor says</p>
-          </div>
-          <p className="text-sm text-[#333333] leading-relaxed">{content.geminiInsight}</p>
-        </motion.div>
-      )}
 
       {/* Tab bar */}
       <div className="flex flex-wrap gap-1 p-1 rounded-2xl bg-[#F0EDE8] border border-[#E8E5E0]">

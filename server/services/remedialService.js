@@ -1,7 +1,6 @@
 const { getByConceptKey } = require('../store/contentCache');
 const { buildLessonSlides } = require('../data/conceptLessonBuilder');
 const { getRemedialSimple } = require('../data/remedialSimple');
-const { getGeminiRemedial } = require('./geminiService');
 
 let remedialMedia = {};
 try {
@@ -69,22 +68,8 @@ const getRemedialContent = async (topic, shape, ctx = {}) => {
   const simple = getRemedialSimple(conceptKey);
   const digest = buildSessionTryDigest(ctx.wrongAttempts);
   const media = remedialMedia[conceptKey] || {};
-  const figures = Array.isArray(content?.figures) ? content.figures : [];
 
-  // Gemini-generated personalized insight based on this student's wrong attempts
-  let geminiInsight = null;
-  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here') {
-    try {
-      geminiInsight = await getGeminiRemedial(
-        ctx.currentQuestion || null,
-        topic,
-        shape,
-        ctx.wrongAttempts || []
-      );
-    } catch (err) {
-      console.warn('[Remedial] Gemini failed, using static content only:', err.message);
-    }
-  }
+  const figures = Array.isArray(content?.figures) ? content.figures : [];
 
   if (!content) {
     return {
@@ -94,7 +79,6 @@ const getRemedialContent = async (topic, shape, ctx = {}) => {
       basicsBullets: simple.bullets,
       explanation: simple.intro,
       sessionDigest: digest,
-      geminiInsight,
       formula: 'Refer to your textbook.',
       formulaBreakdown: '',
       workedExample: '',
@@ -112,7 +96,6 @@ const getRemedialContent = async (topic, shape, ctx = {}) => {
     basicsBullets: simple.bullets,
     explanation: `${simple.intro}\n\n${content.remedial.explanation}`,
     sessionDigest: digest,
-    geminiInsight,
     formula: content.formula,
     formulaBreakdown: content.remedial.formulaBreakdown,
     workedExample: content.remedial.workedExample,

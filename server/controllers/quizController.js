@@ -204,7 +204,6 @@ const submitAnswer = async (req, res) => {
     if (rule.showRemedial) {
       remedialContent = await getRemedialContent(session.topic, session.shape, {
         wrongAttempts: session.wrongAttempts || [],
-        currentQuestion: question,
       });
     }
 
@@ -279,10 +278,8 @@ const requestRemedial = async (req, res) => {
     const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    const currentQuestion = findById(session.currentQuestionId) || null;
     const remedial = await getRemedialContent(session.topic, session.shape, {
       wrongAttempts: session.wrongAttempts || [],
-      currentQuestion,
     });
     res.json(remedial);
   } catch (err) {

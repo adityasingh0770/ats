@@ -245,7 +245,7 @@ export default function QuizPage() {
                 disabled={isAnswerLocked || submitting} />
               <AnimatePresence>
                 {hintLevel > 0 && (
-                  <HintPanel hints={hints} currentLevel={hintLevel} maxLevel={3} isAI={hint?.source === 'gemini'} />
+                  <HintPanel hints={hints} currentLevel={hintLevel} maxLevel={3} />
                 )}
               </AnimatePresence>
               <AnimatePresence>
