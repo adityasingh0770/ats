@@ -17,14 +17,6 @@ const { calculateMastery, updateConfidenceScore, difficultyFromMastery } = requi
 
 const MAX_QUESTIONS_PER_SESSION = 8;
 
-function adaptiveBundleForAnswer(session, questionId, studentAnswer) {
-  const c = session.adaptiveHintsCache;
-  if (!c || c.questionId !== questionId || String(c.answerKey ?? '') !== String(studentAnswer ?? '')) {
-    return { meta: null, priorHints: null };
-  }
-  return { meta: c.meta || null, priorHints: Array.isArray(c.levels) ? c.levels : null };
-}
-
 const startQuiz = async (req, res) => {
   try {
     const { topic, shape } = req.body;
@@ -107,7 +99,6 @@ const submitAnswer = async (req, res) => {
     if (isCorrect) {
       session.lastStudentAnswer = null;
       session.lastErrorInfo = null;
-      session.adaptiveHintsCache = null;
       session.metrics.correct += 1;
       session.consecutiveCorrect += 1;
       session.consecutiveWrong = 0;
@@ -143,7 +134,6 @@ const submitAnswer = async (req, res) => {
           session.currentQuestionId = nextQuestion._id;
           session.currentAttempts = 0;
           session.currentHintsUsed = 0;
-          session.adaptiveHintsCache = null;
         }
       }
     } else {
@@ -212,24 +202,8 @@ const submitAnswer = async (req, res) => {
 
     let remedialContent = null;
     if (rule.showRemedial) {
-      const { meta: adaptiveMeta, priorHints } = adaptiveBundleForAnswer(
-        session,
-        question._id,
-        session.lastStudentAnswer
-      );
       remedialContent = await getRemedialContent(session.topic, session.shape, {
         wrongAttempts: session.wrongAttempts || [],
-        llmRemedialInput: {
-          questionText: question.question,
-          studentAnswer: session.lastStudentAnswer,
-          correctAnswer: question.answer,
-          topic: session.topic,
-          shape: session.shape,
-          formula: question.formula,
-          errorTypeRuleBased: errorInfo?.type || null,
-          adaptiveMeta,
-          priorHints,
-        },
       });
     }
 
@@ -304,27 +278,8 @@ const requestRemedial = async (req, res) => {
     const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    const question = findById(session.currentQuestionId);
-    const { meta: adaptiveMeta, priorHints } = adaptiveBundleForAnswer(
-      session,
-      question?._id,
-      session.lastStudentAnswer
-    );
     const remedial = await getRemedialContent(session.topic, session.shape, {
       wrongAttempts: session.wrongAttempts || [],
-      llmRemedialInput: question
-        ? {
-            questionText: question.question,
-            studentAnswer: session.lastStudentAnswer,
-            correctAnswer: question.answer,
-            topic: session.topic,
-            shape: session.shape,
-            formula: question.formula,
-            errorTypeRuleBased: session.lastErrorInfo?.type || null,
-            adaptiveMeta,
-            priorHints,
-          }
-        : null,
     });
     res.json(remedial);
   } catch (err) {

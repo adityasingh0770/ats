@@ -30,7 +30,7 @@ export default function QuizPage() {
 
   const {
     sessionId, currentQuestion, conceptMaterial, phase, feedback,
-    hint, hints, hintSources, hintLevel,
+    hint, hints, hintLevel,
     remedialContent, progress, currentDifficulty,
     setSession, startQuiz: storeStartQuiz, setFeedback, setHint,
     setRemedial, setNextQuestion, incrementAttempt, reset, resumeQuiz,
@@ -245,13 +245,7 @@ export default function QuizPage() {
                 disabled={isAnswerLocked || submitting} />
               <AnimatePresence>
                 {hintLevel > 0 && (
-                  <HintPanel
-                    hints={hints}
-                    hintSources={hintSources}
-                    lastHint={hint}
-                    currentLevel={hintLevel}
-                    maxLevel={3}
-                  />
+                  <HintPanel hints={hints} currentLevel={hintLevel} maxLevel={3} />
                 )}
               </AnimatePresence>
               <AnimatePresence>

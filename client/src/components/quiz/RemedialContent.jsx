@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain,
@@ -11,7 +11,6 @@ import {
   Image as ImageIcon,
   List,
   Footprints,
-  Target,
 } from 'lucide-react';
 
 function svgToDataUrl(svgMarkup) {
@@ -37,13 +36,7 @@ export default function RemedialContent({ content, onContinue }) {
   const [tab, setTab] = useState('basics');
   const [gifFailed, setGifFailed] = useState(false);
 
-  useEffect(() => {
-    if (content?.llmRemedial) setTab('personalized');
-  }, [Boolean(content?.llmRemedial)]);
-
   if (!content) return null;
-
-  const llm = content.llmRemedial;
 
   const simpleQ = content.simpleQuestion || null;
   const digest = content.sessionDigest;
@@ -79,19 +72,6 @@ export default function RemedialContent({ content, onContinue }) {
 
       {/* Tab bar */}
       <div className="flex flex-wrap gap-1 p-1 rounded-2xl bg-[#F0EDE8] border border-[#E8E5E0]">
-        {llm && (
-          <button
-            key="personalized"
-            type="button"
-            onClick={() => setTab('personalized')}
-            className={`flex-1 min-w-[4.5rem] flex items-center justify-center gap-1 py-2 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all ${
-              tab === 'personalized' ? 'bg-white text-[#FF6500] shadow-sm' : 'text-[#888888] hover:text-[#444444]'
-            }`}
-          >
-            <Target className="w-3 h-3 shrink-0 opacity-80" />
-            Your focus
-          </button>
-        )}
         {TABS.map(({ id, label, Icon }) => {
           if (id === 'visual' && !hasVisual) return null;
           if (id === 'tries' && !hasTries) return null;
@@ -121,72 +101,6 @@ export default function RemedialContent({ content, onContinue }) {
           transition={{ duration: 0.2 }}
           className="rounded-2xl border border-[#E8E5E0] bg-white shadow-sm p-4 sm:p-5 min-h-[180px]"
         >
-          {tab === 'personalized' && llm && (
-            <div className="space-y-4">
-              <p className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider flex items-center gap-2 flex-wrap">
-                <Target className="w-3 h-3 text-[#FF6500]" />
-                Based on your last answer &amp; hints
-                <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700 border border-violet-200">
-                  Gemini
-                </span>
-              </p>
-              {llm.opening && (
-                <p className="text-sm text-[#333333] leading-relaxed font-medium">{llm.opening}</p>
-              )}
-              {llm.misconception_focus && (
-                <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-3">
-                  <p className="text-[10px] font-bold text-amber-800 uppercase mb-1.5">Likely mix-up</p>
-                  <p className="text-sm text-[#555555] leading-relaxed">{llm.misconception_focus}</p>
-                </div>
-              )}
-              {Array.isArray(llm.key_ideas) && llm.key_ideas.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider mb-2">Key ideas</p>
-                  <ul className="space-y-2">
-                    {llm.key_ideas.map((b, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-[#555555] leading-relaxed">
-                        <span className="w-5 h-5 rounded-lg bg-[#FF6500]/15 text-[#FF6500] text-xs font-black flex items-center justify-center shrink-0">
-                          {i + 1}
-                        </span>
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {llm.formula_reminder && (
-                <div className="rounded-xl border border-teal-100 bg-teal-50/70 p-3">
-                  <p className="text-[10px] font-bold text-teal-800 uppercase mb-1">Formula reminder</p>
-                  <p className="text-sm text-teal-900 leading-relaxed whitespace-pre-line">{llm.formula_reminder}</p>
-                </div>
-              )}
-              {llm.guided_rethink && (
-                <div className="pt-2 border-t border-[#F0EDE8]">
-                  <p className="text-[10px] font-bold text-[#AAAAAA] uppercase mb-2">How to think it through</p>
-                  <div className="space-y-3 text-sm text-[#555555] leading-relaxed">
-                    {String(llm.guided_rethink)
-                      .split(/\n\n+/)
-                      .map((para, i) => (
-                        <p key={i}>{para.trim()}</p>
-                      ))}
-                  </div>
-                </div>
-              )}
-              {Array.isArray(llm.self_check_questions) && llm.self_check_questions.length > 0 && (
-                <div className="rounded-xl border border-[#E8E5E0] bg-[#FAFAF9] p-3">
-                  <p className="text-[10px] font-bold text-[#888888] uppercase mb-2">Self-check (no answers shown)</p>
-                  <ul className="list-decimal list-inside space-y-2 text-sm text-[#666666]">
-                    {llm.self_check_questions.map((q, i) => (
-                      <li key={i} className="leading-relaxed pl-1">
-                        {q}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
           {tab === 'basics' && (
             <div className="space-y-4">
               {content.intro && (
@@ -275,16 +189,8 @@ export default function RemedialContent({ content, onContinue }) {
           {tab === 'tries' && digest?.hasTries && (
             <div>
               <p className="text-sm text-[#555555] mb-3">
-                Here is everything you typed on <strong>wrong tries</strong> this session (same order as you tried).
-                {llm ? (
-                  <>
-                    {' '}
-                    Use the <strong>Your focus</strong> tab for feedback tied to your answer; other tabs add general
-                    backup.
-                  </>
-                ) : (
-                  <> The review above is general—not tailored to one answer.</>
-                )}
+                Here is everything you typed on <strong>wrong tries</strong> this session (same order as you tried). The
+                review tabs above are general—not tailored to one answer.
               </p>
               <ul className="space-y-2 max-h-52 overflow-y-auto pr-1">
                 {digest.tries.map((t) => (

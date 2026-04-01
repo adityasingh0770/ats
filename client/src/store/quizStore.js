@@ -9,8 +9,7 @@ export const useQuizStore = create((set, get) => ({
   phase: 'concept', // concept | quiz | remedial | complete
   feedback: null,
   hint: null,
-  hints: [],       // accumulated array of hint strings for current question
-  hintSources: [], // parallel: 'llm' | 'rules' per hint line
+  hints: [], // accumulated hint strings for current question
   hintLevel: 0,
   remedialContent: null,
   progress: { answered: 0, total: 8, correct: 0 },
@@ -34,7 +33,6 @@ export const useQuizStore = create((set, get) => ({
       feedback: null,
       hint: null,
       hints: [],
-      hintSources: [],
       hintLevel: 0,
       remedialContent: null,
       progress: { answered: 0, total: 8, correct: 0 },
@@ -49,7 +47,6 @@ export const useQuizStore = create((set, get) => ({
     hint,
     hintLevel: hint?.level || 0,
     hints: hint?.content ? [...s.hints, hint.content] : s.hints,
-    hintSources: hint?.content ? [...(s.hintSources || []), hint.source || 'rules'] : (s.hintSources || []),
   })),
 
   setRemedial: (remedialContent) => set({ remedialContent, phase: 'remedial' }),
@@ -60,7 +57,6 @@ export const useQuizStore = create((set, get) => ({
       feedback: null,
       hint: null,
       hints: [],
-      hintSources: [],
       hintLevel: 0,
       remedialContent: null,
       phase: 'quiz',
@@ -84,7 +80,7 @@ export const useQuizStore = create((set, get) => ({
     set({
       sessionId: null, topic: null, shape: null, currentQuestion: null,
       conceptMaterial: null, phase: 'concept', feedback: null,
-      hint: null, hints: [], hintSources: [], hintLevel: 0, remedialContent: null,
+      hint: null, hints: [], hintLevel: 0, remedialContent: null,
       progress: { answered: 0, total: 8, correct: 0 },
       currentDifficulty: 'beginner', masteryBefore: 0, masteryAfter: 0,
       questionStartTime: null, showHintSuggestion: false, attemptCount: 0,

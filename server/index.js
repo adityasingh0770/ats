@@ -3,8 +3,6 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
-const { getGeminiKey, isGeminiLlmDisabled, isGeminiLlmEnabled } = require('./utils/geminiEnv');
-const { getFetchImpl } = require('./utils/httpFetch');
 
 dotenv.config();
 
@@ -39,10 +37,6 @@ app.get('/api/health', (req, res) =>
   res.json({
     status: 'OK',
     message: 'MathMentor API running',
-    geminiConfigured: Boolean(getGeminiKey()),
-    geminiLlmEnabled: isGeminiLlmEnabled(),
-    geminiLlmDisabledByEnv: isGeminiLlmDisabled(),
-    llm: 'gemini-only',
   })
 );
 
@@ -50,13 +44,8 @@ app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 8787;
 const server = app.listen(PORT, () => {
-  const httpClient = getFetchImpl();
-  const clientLabel = !httpClient ? 'none' : typeof fetch === 'function' ? 'fetch' : 'node-fetch';
   console.log(`MathMentor server running on port ${PORT}`);
-  const llmOff = isGeminiLlmDisabled() ? '; GEMINI_LLM_DISABLED (no Gemini calls)' : '';
-  console.log(
-    `Node ${process.version}; HTTP client: ${clientLabel}; GEMINI_API_KEY set: ${Boolean(getGeminiKey())}${llmOff}`
-  );
+  console.log(`Node ${process.version}`);
 });
 
 server.on('error', (err) => {
