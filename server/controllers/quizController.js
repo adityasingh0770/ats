@@ -10,7 +10,7 @@ const {
 const { getNextQuestion, findById } = require('../store/questionBank');
 const { getConceptMaterial, getRemedialContent } = require('../services/remedialService');
 const { handleError } = require('../utils/dbError');
-const { getHint } = require('../services/hintService');
+const { resolveHint } = require('../services/hintResolutionService');
 const { detectError, checkAnswer } = require('../services/errorDetectionService');
 const { applyPedagogicalRule, adjustDifficulty } = require('../services/pedagogyEngine');
 const { calculateMastery, updateConfidenceScore, difficultyFromMastery } = require('../services/masteryService');
@@ -88,10 +88,7 @@ const submitAnswer = async (req, res) => {
 
     let hint = null;
     if (rule.hintLevel) {
-      hint = await getHint(question._id, rule.hintLevel, {
-        studentAnswer: isCorrect ? null : answer,
-        errorInfo: isCorrect ? null : errorInfo,
-      });
+      hint = await resolveHint(question, session, answer, errorInfo, rule.hintLevel);
       session.currentHintsUsed += 1;
       session.metrics.hintsUsed += 1;
     }
@@ -102,6 +99,7 @@ const submitAnswer = async (req, res) => {
     if (isCorrect) {
       session.lastStudentAnswer = null;
       session.lastErrorInfo = null;
+      session.adaptiveHintsCache = null;
       session.metrics.correct += 1;
       session.consecutiveCorrect += 1;
       session.consecutiveWrong = 0;
@@ -137,6 +135,7 @@ const submitAnswer = async (req, res) => {
           session.currentQuestionId = nextQuestion._id;
           session.currentAttempts = 0;
           session.currentHintsUsed = 0;
+          session.adaptiveHintsCache = null;
         }
       }
     } else {
@@ -248,11 +247,17 @@ const requestHint = async (req, res) => {
       return res.status(400).json({ message: 'You already have all hints for this question. Use the review or try again.' });
     }
 
+    const question = findById(session.currentQuestionId);
+    if (!question) return res.status(404).json({ message: 'Current question not found.' });
+
     const nextLevel = Math.min((session.currentHintsUsed || 0) + 1, 3);
-    const hint = await getHint(session.currentQuestionId, nextLevel, {
-      studentAnswer: session.lastStudentAnswer,
-      errorInfo: session.lastErrorInfo,
-    });
+    const hint = await resolveHint(
+      question,
+      session,
+      session.lastStudentAnswer,
+      session.lastErrorInfo,
+      nextLevel
+    );
     session.currentHintsUsed += 1;
     session.metrics.hintsUsed += 1;
     saveSession(session);
