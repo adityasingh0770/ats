@@ -11,7 +11,14 @@ function builtInWhy(code) {
     openai_empty_level:
       'OpenAI returned empty hint text after retries. Check Render logs, model name, and billing; built-in text is used for this level.',
     openai_auth: 'OpenAI rejected the API key (401). Replace the key on Render and redeploy.',
-    openai_error: 'The AI hint request failed. See server logs on Render for details.',
+    openai_error:
+      'The AI hint request failed. On Render → Logs, search for [hints] OpenAI error. Common fixes: valid API key, billing/credits, model name (try OPENAI_MODEL=gpt-4o-mini), and region access to OpenAI.',
+    openai_network:
+      'Could not reach OpenAI from the server (network/DNS). Check Render outbound access and OPENAI_BASE_URL if you use a proxy.',
+    openai_timeout: 'OpenAI took too long to respond. Retry; if it persists, upgrade Render plan or reduce load.',
+    openai_rate_limit: 'OpenAI rate limit (429). Wait a minute or add billing tier.',
+    fetch_missing:
+      'This server build has no fetch. Set Node 18+ on Render (package.json engines) or redeploy after pulling latest dependencies.',
     openai_no_cache: 'Hint cache was missing; built-in text was used.',
   };
   return map[code] || 'Built-in hints are being used instead of the AI path.';

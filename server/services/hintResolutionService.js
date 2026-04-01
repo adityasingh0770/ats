@@ -94,7 +94,12 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
   } catch (e) {
     console.warn('[hints] LLM path failed:', e.code || e.name, e.message);
     session.adaptiveHintsCache = null;
-    return asRules(e.code === 'LLM_HTTP_ERROR' && e.status === 401 ? 'openai_auth' : 'openai_error');
+    if (e.code === 'FETCH_MISSING') return asRules('fetch_missing');
+    if (e.code === 'LLM_TIMEOUT') return asRules('openai_timeout');
+    if (e.code === 'LLM_NETWORK') return asRules('openai_network');
+    if (e.code === 'LLM_HTTP_ERROR' && e.status === 401) return asRules('openai_auth');
+    if (e.code === 'LLM_HTTP_ERROR' && e.status === 429) return asRules('openai_rate_limit');
+    return asRules('openai_error');
   }
 
   return asRules('openai_no_cache');

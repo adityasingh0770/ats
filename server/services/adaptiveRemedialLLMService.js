@@ -3,6 +3,7 @@
  */
 
 const { getOpenAiKey } = require('../utils/openaiEnv');
+const { openaiChatCompletion } = require('../utils/openaiChat');
 
 const SYSTEM_PROMPT = `You are an expert Grade 8 mathematics tutor for mensuration (perimeter, area, surface area, volume, circles, solids).
 
@@ -67,7 +68,6 @@ async function generateAdaptiveRemedial(input) {
     throw err;
   }
 
-  const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
   const payload = {
@@ -82,13 +82,8 @@ async function generateAdaptiveRemedial(input) {
     prior_hints_shown: Array.isArray(input.priorHints) ? input.priorHints.filter(Boolean) : [],
   };
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
+  const data = await openaiChatCompletion(
+    {
       model,
       temperature: 0.35,
       max_tokens: 2200,
@@ -100,25 +95,9 @@ async function generateAdaptiveRemedial(input) {
           content: `Generate the remedial JSON for this case:\n${JSON.stringify(payload, null, 0)}`,
         },
       ],
-    }),
-  });
-
-  const raw = await res.text();
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch {
-    const err = new Error(`Remedial LLM non-JSON: ${raw.slice(0, 160)}`);
-    err.code = 'REMEDIAL_LLM_BAD';
-    throw err;
-  }
-
-  if (!res.ok) {
-    const err = new Error(data?.error?.message || `Remedial LLM HTTP ${res.status}`);
-    err.code = 'REMEDIAL_LLM_HTTP';
-    err.status = res.status;
-    throw err;
-  }
+    },
+    { timeoutMs: 90000, logTag: 'remedial' }
+  );
 
   const text = data?.choices?.[0]?.message?.content;
   if (!text) {

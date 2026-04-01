@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { getOpenAiKey } = require('./utils/openaiEnv');
+const { getFetchImpl } = require('./utils/openaiChat');
 
 dotenv.config();
 
@@ -45,7 +46,12 @@ app.get('/api/health', (req, res) =>
 app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 8787;
-const server = app.listen(PORT, () => console.log(`MathMentor server running on port ${PORT}`));
+const server = app.listen(PORT, () => {
+  const httpClient = getFetchImpl();
+  const clientLabel = !httpClient ? 'none' : typeof fetch === 'function' ? 'fetch' : 'node-fetch';
+  console.log(`MathMentor server running on port ${PORT}`);
+  console.log(`Node ${process.version}; OpenAI HTTP client: ${clientLabel}; OPENAI key set: ${Boolean(getOpenAiKey())}`);
+});
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {

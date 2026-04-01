@@ -4,6 +4,7 @@
  */
 
 const { getOpenAiKey } = require('../utils/openaiEnv');
+const { openaiChatCompletion } = require('../utils/openaiChat');
 
 const SYSTEM_PROMPT = `You are an intelligent tutoring system for Grade 8 mensuration.
 
@@ -118,7 +119,6 @@ async function generateAdaptiveHints(
     throw err;
   }
 
-  const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
   const payloadObj = {
@@ -143,13 +143,8 @@ async function generateAdaptiveHints(
           ? '\n\nFINAL RETRY: Output valid JSON only. Fill hint_level_1, hint_level_2, hint_level_3 with different strings (each 40+ characters). Reference the student_answer text. Never leave a hint empty.'
           : '';
 
-    const res = await fetch(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
+    const data = await openaiChatCompletion(
+      {
         model,
         temperature: attempt === 0 ? 0.3 : attempt === 1 ? 0.45 : 0.55,
         max_tokens: 1400,
@@ -161,25 +156,9 @@ async function generateAdaptiveHints(
             content: `INPUT (JSON):\n${JSON.stringify(payloadObj)}${retryNote}\n\nOutput only the JSON object.`,
           },
         ],
-      }),
-    });
-
-    const raw = await res.text();
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      const err = new Error(`LLM provider returned non-JSON: ${raw.slice(0, 200)}`);
-      err.code = 'LLM_BAD_RESPONSE';
-      throw err;
-    }
-
-    if (!res.ok) {
-      const err = new Error(data?.error?.message || `LLM request failed (${res.status})`);
-      err.code = 'LLM_HTTP_ERROR';
-      err.status = res.status;
-      throw err;
-    }
+      },
+      { timeoutMs: 65000, logTag: 'hints' }
+    );
 
     const text = data?.choices?.[0]?.message?.content;
     if (!text) {
