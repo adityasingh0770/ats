@@ -12,6 +12,12 @@ export const requestHint = async (sessionId, level) => {
   const { data } = await api.get('/quiz/hint', { params: { sessionId, level } });
   return data;
 };
+
+/** ITS-style JSON: is_correct, error_type, detected_pattern, confidence, message, hint_level_1..3 */
+export const requestAdaptiveHints = async (payload) => {
+  const { data } = await api.post('/quiz/adaptive-hints', payload);
+  return data;
+};
 export const requestRemedial = async (sessionId) => {
   const { data } = await api.get('/quiz/remedial', { params: { sessionId } });
   return data;
