@@ -127,21 +127,19 @@ async function generateAdaptiveHints(
 
   let lastBundle = null;
 
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     if (attempt > 0) {
-      await new Promise((r) => setTimeout(r, 1500));
+      await new Promise((r) => setTimeout(r, 400));
     }
     const retryNote =
       attempt === 1
         ? '\n\nCRITICAL RETRY: hint_level_1, hint_level_2, and hint_level_3 were missing or too short. Each must be 2+ sentences and mention the student_answer explicitly. All three keys required.'
-        : attempt === 2
-          ? '\n\nFINAL RETRY: Output valid JSON only. Fill hint_level_1, hint_level_2, hint_level_3 with different strings (each 40+ characters). Reference the student_answer text. Never leave a hint empty.'
-          : '';
+        : '';
 
     const data = await llmChatCompletion(
       {
         model,
-        temperature: attempt === 0 ? 0.3 : attempt === 1 ? 0.45 : 0.55,
+        temperature: attempt === 0 ? 0.3 : 0.45,
         max_tokens: 1400,
         response_format: { type: 'json_object' },
         messages: [
@@ -152,7 +150,7 @@ async function generateAdaptiveHints(
           },
         ],
       },
-      { timeoutMs: 65000, logTag: 'hints' }
+      { timeoutMs: 28000, logTag: 'hints', max429Retries: 0 }
     );
 
     const text = data?.choices?.[0]?.message?.content;

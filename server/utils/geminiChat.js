@@ -9,6 +9,15 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Default 0: on 429, fail fast so callers can fall back (retries add many seconds for little gain on free tier). */
+function defaultMax429Retries() {
+  const raw = process.env.GEMINI_MAX_429_RETRIES;
+  if (raw === undefined || raw === '') return 0;
+  const n = parseInt(String(raw), 10);
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(5, Math.max(0, n));
+}
+
 /**
  * Prefer server-provided retry delay (google.rpc.RetryInfo); else exponential backoff.
  * @param {object|null} data - parsed error JSON body
@@ -57,7 +66,8 @@ function openaiMessagesToGemini(messages) {
  * @returns {Promise<{ choices: Array<{ message: { content: string } }> }>}
  */
 async function geminiChatCompletionOpenAiShaped(body, options = {}) {
-  const { timeoutMs = 90000, logTag = 'gemini', max429Retries = 2 } = options;
+  const { timeoutMs = 90000, logTag = 'gemini', max429Retries: max429Opt } = options;
+  const max429Retries = typeof max429Opt === 'number' ? max429Opt : defaultMax429Retries();
   const key = getGeminiKey();
   if (!key) {
     const e = new Error('GEMINI_API_KEY is not configured');

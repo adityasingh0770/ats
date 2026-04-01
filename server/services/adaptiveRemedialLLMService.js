@@ -88,7 +88,7 @@ async function generateAdaptiveRemedial(input) {
         },
       ],
     },
-    { timeoutMs: 90000, logTag: 'remedial' }
+    { timeoutMs: 55000, logTag: 'remedial', max429Retries: 0 }
   );
 
   const text = data?.choices?.[0]?.message?.content;
