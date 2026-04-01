@@ -1,5 +1,6 @@
 const { generateAdaptiveHints } = require('../services/adaptiveHintLLMService');
 const { handleError } = require('../utils/dbError');
+const { getOpenAiKey } = require('../utils/openaiEnv');
 
 const postAdaptiveHints = async (req, res) => {
   try {
@@ -15,7 +16,7 @@ const postAdaptiveHints = async (req, res) => {
       return res.status(400).json({ message: 'student_answer is required.' });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!getOpenAiKey()) {
       return res.status(503).json({
         message: 'Adaptive LLM hints are not configured. Set OPENAI_API_KEY on the server.',
       });

@@ -2,6 +2,8 @@
  * Detailed remedial micro-lesson from OpenAI (JSON). Never echoes the item’s final answer.
  */
 
+const { getOpenAiKey } = require('../utils/openaiEnv');
+
 const SYSTEM_PROMPT = `You are an expert Grade 8 mathematics tutor for mensuration (perimeter, area, surface area, volume, circles, solids).
 
 INPUT gives you: the question text, the student’s wrong answer, the correct answer (for your reasoning only), topic/shape, optional formula, optional detector labels, and optional prior hint lines shown to the student.
@@ -12,6 +14,7 @@ CRITICAL RULES:
 - You may teach the method and formulas in general terms.
 - Build on any "adaptive_meta" or "prior_hints" so your remedial feels continuous with what they already saw.
 - Be detailed: students are in remedial because they are stuck.
+- Opening and misconception_focus MUST tie to their specific wrong answer (student_answer)—name or paraphrase it.
 
 OUTPUT: Return ONLY a JSON object with exactly these keys:
 "opening": string (warm, 2–4 sentences),
@@ -57,7 +60,7 @@ function normalize(parsed) {
  * @param {string[]|null} [input.priorHints] - three hint lines if any
  */
 async function generateAdaptiveRemedial(input) {
-  const key = process.env.OPENAI_API_KEY;
+  const key = getOpenAiKey();
   if (!key) {
     const err = new Error('OPENAI_API_KEY is not configured');
     err.code = 'REMEDIAL_LLM_DISABLED';

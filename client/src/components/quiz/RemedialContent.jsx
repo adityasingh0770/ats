@@ -123,9 +123,12 @@ export default function RemedialContent({ content, onContinue }) {
         >
           {tab === 'personalized' && llm && (
             <div className="space-y-4">
-              <p className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider flex items-center gap-1">
+              <p className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider flex items-center gap-2 flex-wrap">
                 <Target className="w-3 h-3 text-[#FF6500]" />
-                Based on your last answer &amp; hints (AI tutor)
+                Based on your last answer &amp; hints
+                <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700 border border-violet-200">
+                  AI personalized
+                </span>
               </p>
               {llm.opening && (
                 <p className="text-sm text-[#333333] leading-relaxed font-medium">{llm.opening}</p>

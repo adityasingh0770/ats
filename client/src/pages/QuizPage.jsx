@@ -30,7 +30,7 @@ export default function QuizPage() {
 
   const {
     sessionId, currentQuestion, conceptMaterial, phase, feedback,
-    hint, hints, hintLevel,
+    hint, hints, hintSources, hintLevel,
     remedialContent, progress, currentDifficulty,
     setSession, startQuiz: storeStartQuiz, setFeedback, setHint,
     setRemedial, setNextQuestion, incrementAttempt, reset, resumeQuiz,
@@ -247,6 +247,7 @@ export default function QuizPage() {
                 {hintLevel > 0 && (
                   <HintPanel
                     hints={hints}
+                    hintSources={hintSources}
                     currentLevel={hintLevel}
                     maxLevel={3}
                   />

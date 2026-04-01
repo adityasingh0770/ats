@@ -1,60 +1,28 @@
 /**
  * OpenAI-compatible Chat Completions → strict JSON ITS hint payload.
- * Env: OPENAI_API_KEY (required), OPENAI_MODEL (default gpt-4o-mini), OPENAI_BASE_URL (optional).
+ * Env: OPENAI_API_KEY, OPENAI_MODEL (default gpt-4o-mini), OPENAI_BASE_URL (optional).
  */
 
-const SYSTEM_PROMPT = `You are an intelligent tutoring system that analyzes a student's final answer and generates adaptive hints to guide learning.
+const { getOpenAiKey } = require('../utils/openaiEnv');
 
-OBJECTIVE:
-Evaluate the student's answer, infer the most likely mistake pattern, and generate helpful hints WITHOUT revealing the correct answer.
+const SYSTEM_PROMPT = `You are an intelligent tutoring system for Grade 8 mensuration.
 
-INSTRUCTIONS:
+The student's submitted answer is WRONG for the given question (the human grader already marked it incorrect).
 
-1. CHECK CORRECTNESS:
-- Compare the student answer with the correct answer (allow equivalent forms: same numeric value, equivalent fractions, correct units if applicable).
-- If correct:
-  - Set "is_correct" to true
-  - Return a short encouraging message in "message"
-  - Set "error_type", "detected_pattern", "hint_level_1", "hint_level_2", "hint_level_3" to empty strings
-  - Set "confidence" to "high"
+TASK:
+1. Infer the most likely mistake from their specific answer value.
+2. Produce THREE different hint strings: hint_level_1 (gentle), hint_level_2 (clearer), hint_level_3 (strong nudge). Each must be DISTINCT in content.
+3. Each hint MUST explicitly refer to what they wrote (e.g. their number or choice)—paraphrase or quote it—then guide them to rethink. At least 2 sentences per hint.
+4. NEVER state the correct final answer. NO step-by-step that ends in the answer. NO "the answer is …".
 
-2. IF INCORRECT:
-- Set "is_correct" to false
-- Set "message" to empty string
+Also set:
+- "is_correct": false
+- "error_type": short machine-friendly label (e.g. wrong_formula, arithmetic_slip, unit_confusion)
+- "detected_pattern": one sentence on likely thinking
+- "confidence": "low"|"medium"|"high"
+- "message": ""
 
-3. IDENTIFY LIKELY MISTAKE:
-- Reverse-engineer how the student might have arrived at their answer.
-- Categories (non-exhaustive): wrong operation; arithmetic error; order of operations (BODMAS/PEMDAS); sign error; wrong formula or concept; partial/incomplete solving; unit/place value error.
-
-4. COMMON WRONG ANSWERS:
-- If the input includes "common_wrong_answers" as a map and the student answer matches a key (or normalized form), prioritize that interpretation for error_type and detected_pattern.
-
-5. CONFIDENCE:
-- high → clear mapping (e.g. obvious wrong operation)
-- medium → plausible but not certain
-- low → multiple possible interpretations
-
-6. GENERATE ADAPTIVE HINTS (when incorrect):
-- DO NOT reveal the correct answer or any digit/token that completes it
-- DO NOT give a step-by-step solution
-- DO NOT explicitly name the exact arithmetic slip (e.g. avoid "you added instead of multiplied"); guide them to rethink
-- hint_level_1 → very subtle guidance
-- hint_level_2 → more specific direction
-- hint_level_3 → strong guidance but still not the answer
-- If confidence is low, keep hints more general
-
-7. STYLE:
-- Short, clear, student-friendly, encouraging tone
-
-OUTPUT: Return a single JSON object ONLY with exactly these keys:
-"is_correct" (boolean),
-"error_type" (string, empty if correct),
-"detected_pattern" (string, empty if correct),
-"confidence" ("low"|"medium"|"high"),
-"message" (string, only if correct; else empty),
-"hint_level_1" (string),
-"hint_level_2" (string),
-"hint_level_3" (string)`;
+OUTPUT: JSON only with keys: is_correct, error_type, detected_pattern, confidence, message, hint_level_1, hint_level_2, hint_level_3`;
 
 function stripJsonFence(text) {
   const t = String(text || '').trim();
@@ -62,32 +30,68 @@ function stripJsonFence(text) {
   return m ? m[1].trim() : t;
 }
 
-function normalizePayload(parsed, isCorrectFromCompare) {
-  const isCorrect = Boolean(parsed.is_correct);
+function coalesceHintFields(parsed) {
+  const pick = (...vals) => {
+    for (const v of vals) {
+      if (v != null && String(v).trim()) return String(v).trim();
+    }
+    return '';
+  };
+  const h = parsed.hints;
+  return {
+    ...parsed,
+    hint_level_1: pick(
+      parsed.hint_level_1,
+      parsed.hintLevel1,
+      parsed.level_1,
+      parsed.hint1,
+      Array.isArray(h) ? h[0] : null
+    ),
+    hint_level_2: pick(
+      parsed.hint_level_2,
+      parsed.hintLevel2,
+      parsed.level_2,
+      parsed.hint2,
+      Array.isArray(h) ? h[1] : null
+    ),
+    hint_level_3: pick(
+      parsed.hint_level_3,
+      parsed.hintLevel3,
+      parsed.level_3,
+      parsed.hint3,
+      Array.isArray(h) ? h[2] : null
+    ),
+  };
+}
+
+function normalizePayload(parsed, correct_answer, student_answer, graderMarkedWrong) {
+  const merged = coalesceHintFields(parsed);
+  let isCorrect = Boolean(merged.is_correct);
+
+  if (!graderMarkedWrong && correct_answer != null && student_answer != null) {
+    const agreed = answersMatch(correct_answer, student_answer);
+    if (agreed && !isCorrect) {
+      isCorrect = true;
+    }
+  }
+
+  if (graderMarkedWrong) {
+    isCorrect = false;
+  }
+
   const base = {
     is_correct: isCorrect,
-    error_type: isCorrect ? '' : String(parsed.error_type || 'unknown'),
-    detected_pattern: isCorrect ? '' : String(parsed.detected_pattern || ''),
-    confidence: ['low', 'medium', 'high'].includes(parsed.confidence) ? parsed.confidence : 'medium',
-    message: isCorrect ? String(parsed.message || 'Well done!') : '',
-    hint_level_1: isCorrect ? '' : String(parsed.hint_level_1 || ''),
-    hint_level_2: isCorrect ? '' : String(parsed.hint_level_2 || ''),
-    hint_level_3: isCorrect ? '' : String(parsed.hint_level_3 || ''),
+    error_type: isCorrect ? '' : String(merged.error_type || 'unknown'),
+    detected_pattern: isCorrect ? '' : String(merged.detected_pattern || ''),
+    confidence: ['low', 'medium', 'high'].includes(merged.confidence) ? merged.confidence : 'medium',
+    message: isCorrect ? String(merged.message || 'Well done!') : '',
+    hint_level_1: isCorrect ? '' : String(merged.hint_level_1 || '').trim(),
+    hint_level_2: isCorrect ? '' : String(merged.hint_level_2 || '').trim(),
+    hint_level_3: isCorrect ? '' : String(merged.hint_level_3 || '').trim(),
   };
-  if (isCorrectFromCompare && !isCorrect) {
-    base.is_correct = true;
-    base.error_type = '';
-    base.detected_pattern = '';
-    base.confidence = 'high';
-    base.message = String(parsed.message || 'Well done!');
-    base.hint_level_1 = '';
-    base.hint_level_2 = '';
-    base.hint_level_3 = '';
-  }
   return base;
 }
 
-/** Loose numeric / string equality for sanity check */
 function answersMatch(correct, student) {
   const c = String(correct).trim().toLowerCase();
   const s = String(student).trim().toLowerCase();
@@ -98,14 +102,16 @@ function answersMatch(correct, student) {
   return false;
 }
 
-async function generateAdaptiveHints({
-  question,
-  correct_answer,
-  student_answer,
-  concept_tags,
-  common_wrong_answers,
-}) {
-  const key = process.env.OPENAI_API_KEY;
+function levelsComplete(b) {
+  return [b.hint_level_1, b.hint_level_2, b.hint_level_3].every((s) => String(s || '').trim().length > 0);
+}
+
+async function generateAdaptiveHints(
+  { question, correct_answer, student_answer, concept_tags, common_wrong_answers },
+  options = {}
+) {
+  const graderMarkedWrong = options.graderMarkedWrong === true;
+  const key = getOpenAiKey();
   if (!key) {
     const err = new Error('OPENAI_API_KEY is not configured');
     err.code = 'ADAPTIVE_HINTS_DISABLED';
@@ -115,77 +121,87 @@ async function generateAdaptiveHints({
   const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
-  const userContent = JSON.stringify(
-    {
-      question,
-      correct_answer: String(correct_answer),
-      student_answer: String(student_answer),
-      concept_tags: Array.isArray(concept_tags) ? concept_tags : [],
-      common_wrong_answers:
-        common_wrong_answers && typeof common_wrong_answers === 'object' && !Array.isArray(common_wrong_answers)
-          ? common_wrong_answers
-          : {},
-    },
-    null,
-    0
-  );
+  const payloadObj = {
+    question,
+    correct_answer: String(correct_answer),
+    student_answer: String(student_answer),
+    concept_tags: Array.isArray(concept_tags) ? concept_tags : [],
+    common_wrong_answers:
+      common_wrong_answers && typeof common_wrong_answers === 'object' && !Array.isArray(common_wrong_answers)
+        ? common_wrong_answers
+        : {},
+    grader_already_marked_incorrect: graderMarkedWrong,
+  };
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.25,
-      max_tokens: 900,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        {
-          role: 'user',
-          content: `INPUT (JSON):\n${userContent}\n\nOutput only the required JSON object, no other text.`,
-        },
-      ],
-    }),
-  });
+  let lastBundle = null;
 
-  const raw = await res.text();
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch {
-    const err = new Error(`LLM provider returned non-JSON: ${raw.slice(0, 200)}`);
-    err.code = 'LLM_BAD_RESPONSE';
-    throw err;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const retryNote =
+      attempt > 0
+        ? '\n\nCRITICAL RETRY: hint_level_1, hint_level_2, and hint_level_3 were missing or too short. Each must be 2+ sentences and mention the student_answer explicitly. All three keys required.'
+        : '';
+
+    const res = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model,
+        temperature: attempt > 0 ? 0.45 : 0.3,
+        max_tokens: 1400,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          {
+            role: 'user',
+            content: `INPUT (JSON):\n${JSON.stringify(payloadObj)}${retryNote}\n\nOutput only the JSON object.`,
+          },
+        ],
+      }),
+    });
+
+    const raw = await res.text();
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      const err = new Error(`LLM provider returned non-JSON: ${raw.slice(0, 200)}`);
+      err.code = 'LLM_BAD_RESPONSE';
+      throw err;
+    }
+
+    if (!res.ok) {
+      const err = new Error(data?.error?.message || `LLM request failed (${res.status})`);
+      err.code = 'LLM_HTTP_ERROR';
+      err.status = res.status;
+      throw err;
+    }
+
+    const text = data?.choices?.[0]?.message?.content;
+    if (!text) {
+      const err = new Error('Empty completion from LLM');
+      err.code = 'LLM_EMPTY';
+      throw err;
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(stripJsonFence(text));
+    } catch (e) {
+      const err = new Error(`Could not parse LLM JSON: ${e.message}`);
+      err.code = 'LLM_PARSE';
+      throw err;
+    }
+
+    lastBundle = normalizePayload(parsed, correct_answer, student_answer, graderMarkedWrong);
+    if (levelsComplete(lastBundle)) {
+      return lastBundle;
+    }
   }
 
-  if (!res.ok) {
-    const err = new Error(data?.error?.message || `LLM request failed (${res.status})`);
-    err.code = 'LLM_HTTP_ERROR';
-    err.status = res.status;
-    throw err;
-  }
-
-  const text = data?.choices?.[0]?.message?.content;
-  if (!text) {
-    const err = new Error('Empty completion from LLM');
-    err.code = 'LLM_EMPTY';
-    throw err;
-  }
-
-  let parsed;
-  try {
-    parsed = JSON.parse(stripJsonFence(text));
-  } catch (e) {
-    const err = new Error(`Could not parse LLM JSON: ${e.message}`);
-    err.code = 'LLM_PARSE';
-    throw err;
-  }
-
-  const agreedCorrect = answersMatch(correct_answer, student_answer);
-  return normalizePayload(parsed, agreedCorrect);
+  return lastBundle;
 }
 
-module.exports = { generateAdaptiveHints };
+module.exports = { generateAdaptiveHints, answersMatch };

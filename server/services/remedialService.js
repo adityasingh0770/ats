@@ -2,6 +2,7 @@ const { getByConceptKey } = require('../store/contentCache');
 const { buildLessonSlides } = require('../data/conceptLessonBuilder');
 const { getRemedialSimple } = require('../data/remedialSimple');
 const { generateAdaptiveRemedial } = require('./adaptiveRemedialLLMService');
+const { getOpenAiKey } = require('../utils/openaiEnv');
 
 let remedialMedia = {};
 try {
@@ -64,7 +65,7 @@ function buildSessionTryDigest(wrongAttempts) {
 }
 
 async function maybeAttachLlmRemedial(base, ctx) {
-  if (!process.env.OPENAI_API_KEY || !ctx.llmRemedialInput) return base;
+  if (!getOpenAiKey() || !ctx.llmRemedialInput) return base;
   const in_ = ctx.llmRemedialInput;
   if (!in_.questionText || in_.studentAnswer === undefined || in_.studentAnswer === null) return base;
   try {

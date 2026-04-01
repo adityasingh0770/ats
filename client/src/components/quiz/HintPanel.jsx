@@ -3,7 +3,7 @@ import { Lightbulb } from 'lucide-react';
 
 const dotColors = ['bg-[#FF6500]', 'bg-teal-500', 'bg-purple-500'];
 
-export default function HintPanel({ hints, currentLevel, maxLevel = 3 }) {
+export default function HintPanel({ hints, hintSources, currentLevel, maxLevel = 3 }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -28,11 +28,21 @@ export default function HintPanel({ hints, currentLevel, maxLevel = 3 }) {
             transition={{ duration: 0.25 }}
             className="overflow-hidden rounded-2xl border border-[#E8E5E0] bg-[#FFFBF7] p-3"
           >
-            <div className="flex items-center gap-1.5 mb-1.5">
+            <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
               <Lightbulb className="w-3 h-3 text-[#FF6500]" aria-hidden />
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#555555]">
                 Hint {i + 1} of {maxLevel}
               </span>
+              {hintSources?.[i] === 'llm' && (
+                <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700 border border-violet-200">
+                  AI
+                </span>
+              )}
+              {hintSources?.[i] === 'rules' && (
+                <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-600 border border-stone-200">
+                  Built-in
+                </span>
+              )}
             </div>
             <p className="text-xs text-[#555555] leading-relaxed whitespace-pre-line">{hint}</p>
           </motion.div>

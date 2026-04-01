@@ -1,5 +1,6 @@
 const { getHint } = require('./hintService');
 const { generateAdaptiveHints } = require('./adaptiveHintLLMService');
+const { getOpenAiKey } = require('../utils/openaiEnv');
 
 function cacheValid(cache, questionId, answerKey) {
   return (
@@ -24,23 +25,26 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
       errorInfo: errorInfo || null,
     });
 
-  if (!process.env.OPENAI_API_KEY) {
-    return fallback();
+  if (!getOpenAiKey()) {
+    return { ...(await fallback()), source: 'rules' };
   }
 
   if (ansKey === undefined || ansKey === null || String(ansKey).trim() === '') {
-    return fallback();
+    return { ...(await fallback()), source: 'rules' };
   }
 
   try {
     if (!cacheValid(session.adaptiveHintsCache, qid, ansKey)) {
-      const bundle = await generateAdaptiveHints({
-        question: question.question,
-        correct_answer: question.answer,
-        student_answer: ansKey,
-        concept_tags: [question.topic, question.shape].filter(Boolean),
-        common_wrong_answers: {},
-      });
+      const bundle = await generateAdaptiveHints(
+        {
+          question: question.question,
+          correct_answer: question.answer,
+          student_answer: ansKey,
+          concept_tags: [question.topic, question.shape].filter(Boolean),
+          common_wrong_answers: {},
+        },
+        { graderMarkedWrong: true }
+      );
 
       if (bundle.is_correct) {
         session.adaptiveHintsCache = null;
@@ -71,6 +75,7 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
           content: txt,
           formula: question.formula,
           adaptive: c.meta || null,
+          source: 'llm',
         };
       }
     }
@@ -80,7 +85,7 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
   }
 
   const fb = await fallback();
-  return fb;
+  return { ...fb, source: 'rules' };
 }
 
 module.exports = { resolveHint };
