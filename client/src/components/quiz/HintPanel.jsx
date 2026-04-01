@@ -5,28 +5,33 @@ const dotColors = ['bg-[#FF6500]', 'bg-teal-500', 'bg-purple-500'];
 
 function builtInWhy(code) {
   const map = {
-    no_openai_key:
-      'AI hints are off: add OPENAI_API_KEY or GEMINI_API_KEY on Render → your service → Environment → Save → redeploy.',
     no_llm_key:
-      'AI hints are off: set OPENAI_API_KEY and/or GEMINI_API_KEY on the API server (Render → Environment), then redeploy.',
+      'AI hints need GEMINI_API_KEY on the API server (Render → your service → Environment). Save, redeploy, then try again. You can remove OPENAI_API_KEY from env — it is no longer used.',
     empty_student_answer: 'Built-in hints are shown because no answer was on file for the AI step.',
-    openai_empty_level:
-      'OpenAI returned empty hint text after retries. Check Render logs, model name, and billing; built-in text is used for this level.',
-    openai_auth: 'OpenAI rejected the API key (401). Replace the key on Render and redeploy.',
-    openai_error:
-      'The AI hint request failed. On Render → Logs, search for [hints] OpenAI error. Common fixes: valid API key, billing/credits, model name (try OPENAI_MODEL=gpt-4o-mini), and region access to OpenAI.',
-    openai_network:
-      'Could not reach OpenAI from the server (network/DNS). Check Render outbound access and OPENAI_BASE_URL if you use a proxy.',
-    openai_timeout: 'OpenAI took too long to respond. Retry; if it persists, upgrade Render plan or reduce load.',
-    openai_rate_limit:
-      'Rate limit (429). Add GEMINI_API_KEY on Render to auto-fallback when OpenAI is busy, or set LLM_PROVIDER=gemini to use only Gemini, or wait / upgrade billing.',
-    llm_rate_limit:
-      'Rate limit (429). Add GEMINI_API_KEY on Render (same service as the API) and redeploy — with both keys, Gemini runs first by default. Or wait a few minutes / upgrade quota.',
+    llm_empty_level:
+      'Gemini returned empty hint text after retries. Check Render logs and GEMINI_MODEL (try gemini-1.5-flash if 2.0 fails).',
+    llm_auth: 'Gemini rejected the key (401/403). Create a new key in Google AI Studio and set GEMINI_API_KEY on Render.',
+    llm_error:
+      'Gemini request failed. In Render → Logs search for [hints] or [gemini]. Check API key, model name, quota, and region.',
+    llm_network: 'Could not reach Google Gemini from the server. Check network / firewall on the host.',
+    llm_timeout: 'Gemini took too long. Retry; if it persists, try a smaller GEMINI_MODEL or upgrade hosting.',
+    llm_rate_limit: 'Gemini rate limit (429). Wait a few minutes, enable billing in Google AI, or use a higher quota project.',
+    llm_no_cache: 'Hint cache was missing; built-in text was used.',
     fetch_missing:
-      'This server build has no fetch. Set Node 18+ on Render (package.json engines) or redeploy after pulling latest dependencies.',
-    openai_no_cache: 'Hint cache was missing; built-in text was used.',
+      'This server has no HTTP client. Use Node 18+ on Render (see package.json engines) and redeploy.',
+    // legacy codes from older sessions
+    no_openai_key:
+      'Set GEMINI_API_KEY on Render (OpenAI is no longer used). Save and redeploy.',
+    openai_empty_level:
+      'AI returned empty hints. Set GEMINI_API_KEY and check GEMINI_MODEL in Render logs.',
+    openai_auth: 'Invalid API key for the AI provider. Use GEMINI_API_KEY from Google AI Studio.',
+    openai_error: 'AI request failed. Use GEMINI_API_KEY only; see Render logs.',
+    openai_network: 'Network error calling the AI. Check Render connectivity.',
+    openai_timeout: 'AI timed out. Retry or adjust GEMINI_MODEL.',
+    openai_rate_limit: 'Rate limited. Wait or increase Gemini quota in Google Cloud / AI Studio.',
+    openai_no_cache: 'Hint cache missing; using built-in text.',
   };
-  return map[code] || 'Built-in hints are being used instead of the AI path.';
+  return map[code] || 'Built-in hints are used when Gemini is unavailable.';
 }
 
 export default function HintPanel({ hints, hintSources, lastHint, currentLevel, maxLevel = 3 }) {

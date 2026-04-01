@@ -1,6 +1,5 @@
 const { getHint } = require('./hintService');
 const { generateAdaptiveHints } = require('./adaptiveHintLLMService');
-const { getOpenAiKey } = require('../utils/openaiEnv');
 const { getGeminiKey } = require('../utils/geminiEnv');
 
 function cacheValid(cache, questionId, answerKey) {
@@ -12,8 +11,7 @@ function cacheValid(cache, questionId, answerKey) {
 }
 
 /**
- * Prefer OpenAI adaptive hints (one bundle per wrong answer, three levels cached).
- * Falls back to rule-based getHint if no key, LLM error, empty level, or LLM claims correct while grader says wrong.
+ * Gemini-backed adaptive hints (cached per wrong answer); rule-based fallback if no key or LLM error.
  */
 async function resolveHint(question, session, studentAnswer, errorInfo, hintLevel) {
   const level = Math.min(Math.max(parseInt(hintLevel, 10) || 1, 1), 3);
@@ -32,7 +30,7 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
     return { ...fb, source: 'rules', llmSkippedReason: reason };
   };
 
-  if (!getOpenAiKey() && !getGeminiKey()) {
+  if (!getGeminiKey()) {
     return asRules('no_llm_key');
   }
 
@@ -90,20 +88,20 @@ async function resolveHint(question, session, studentAnswer, errorInfo, hintLeve
           source: 'llm',
         };
       }
-      return asRules('openai_empty_level');
+      return asRules('llm_empty_level');
     }
   } catch (e) {
     console.warn('[hints] LLM path failed:', e.code || e.name, e.message);
     session.adaptiveHintsCache = null;
     if (e.code === 'FETCH_MISSING') return asRules('fetch_missing');
-    if (e.code === 'LLM_TIMEOUT') return asRules('openai_timeout');
-    if (e.code === 'LLM_NETWORK') return asRules('openai_network');
-    if (e.code === 'LLM_HTTP_ERROR' && e.status === 401) return asRules('openai_auth');
+    if (e.code === 'LLM_TIMEOUT') return asRules('llm_timeout');
+    if (e.code === 'LLM_NETWORK') return asRules('llm_network');
+    if (e.code === 'LLM_HTTP_ERROR' && (e.status === 401 || e.status === 403)) return asRules('llm_auth');
     if (e.code === 'LLM_HTTP_ERROR' && e.status === 429) return asRules('llm_rate_limit');
-    return asRules('openai_error');
+    return asRules('llm_error');
   }
 
-  return asRules('openai_no_cache');
+  return asRules('llm_no_cache');
 }
 
 module.exports = { resolveHint };

@@ -1,5 +1,5 @@
 /**
- * Detailed remedial micro-lesson from OpenAI (JSON). Never echoes the item’s final answer.
+ * Detailed remedial micro-lesson from Gemini (JSON). Never echoes the item’s final answer.
  */
 
 const { llmChatCompletion } = require('../utils/llmRouter');
@@ -60,7 +60,7 @@ function normalize(parsed) {
  * @param {string[]|null} [input.priorHints] - three hint lines if any
  */
 async function generateAdaptiveRemedial(input) {
-  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
   const payload = {
     question: input.questionText,

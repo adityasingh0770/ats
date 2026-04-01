@@ -127,7 +127,7 @@ export default function RemedialContent({ content, onContinue }) {
                 <Target className="w-3 h-3 text-[#FF6500]" />
                 Based on your last answer &amp; hints
                 <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700 border border-violet-200">
-                  AI personalized
+                  Gemini
                 </span>
               </p>
               {llm.opening && (

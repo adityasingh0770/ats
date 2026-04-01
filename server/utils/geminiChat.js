@@ -3,7 +3,7 @@
  */
 
 const { getGeminiKey } = require('./geminiEnv');
-const { getFetchImpl } = require('./openaiChat');
+const { getFetchImpl } = require('./httpFetch');
 
 function openaiMessagesToGemini(messages) {
   if (!Array.isArray(messages)) return { systemText: '', userText: '' };

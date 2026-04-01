@@ -1,6 +1,6 @@
 /**
- * OpenAI-compatible Chat Completions → strict JSON ITS hint payload.
- * Env: OPENAI_API_KEY and/or GEMINI_API_KEY, LLM_PROVIDER (auto|openai|gemini), models — see llmRouter.
+ * Gemini-backed JSON ITS hint payload (internal request shape mirrors chat completions for the router).
+ * Env: GEMINI_API_KEY, GEMINI_MODEL (via Gemini API only — see llmRouter).
  */
 
 const { llmChatCompletion } = require('../utils/llmRouter');
@@ -111,7 +111,7 @@ async function generateAdaptiveHints(
   options = {}
 ) {
   const graderMarkedWrong = options.graderMarkedWrong === true;
-  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
   const payloadObj = {
     question,
