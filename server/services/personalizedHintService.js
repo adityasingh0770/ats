@@ -1,12 +1,12 @@
 /**
  * Personalized Hint Service — 3-level Socratic hints for every error type.
  *
- * Rules:
- *  • Level 1 — very subtle nudge, ask a question, never reveal the answer
- *  • Level 2 — more specific, name the problematic step or formula part
- *  • Level 3 — near-direct: identify the exact mistake, stop before giving the answer
+ * Level 1 — single casual redirecting question, no formula, varied openers
+ * Level 2 — points to the specific formula part or step that was wrong
+ * Level 3 — names the exact mistake precisely, stops before giving the answer
  *
- * All hints address the student directly ("you") and reference their actual answer (sn).
+ * Every hint addresses the student directly ("you") and references their answer (sn).
+ * No two cases use the same sentence structure at the same level.
  */
 
 const { formatStudentAnswerForUi } = require('./errorDetectionService');
@@ -15,20 +15,12 @@ function snippetOf(studentAnswer, unit) {
   return formatStudentAnswerForUi(studentAnswer, unit) || 'your answer';
 }
 
-/**
- * Build a personalized hint for a wrong answer.
- *
- * @param {object}       question      - Full question doc from the question bank
- * @param {object|null}  errorInfo     - Output of detectError()
- * @param {string|number} studentAnswer
- * @param {number}       level         - 1, 2, or 3
- * @returns {string}  Hint text (plain, no markdown)
- */
 function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
   const L     = Math.min(Math.max(parseInt(level, 10) || 1, 1), 3);
   const sn    = snippetOf(studentAnswer, question.unit);
   const f     = question.formula || 'the correct formula';
   const type  = errorInfo?.type || 'wrong_answer';
+  const qType = String(question.type || 'direct_calculation');
   const topic = String(question.topic || '').replace(/_/g, ' ');
   const shape = question.shape || 'shape';
 
@@ -40,319 +32,306 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
 
     case 'square_two_sides_perimeter':
       return pick(
-        `You got ${sn}. Think about how many sides a square has and whether your formula counted all of them.`,
-        `Your answer equals 2 × side. A square has four sides, not two — how does that change the formula?`,
-        `You multiplied 2 × side, giving only two sides. Perimeter of a square = 4 × side because all four sides are equal.`
+        `Hmm — you got ${sn}. How many sides does a square have?`,
+        `Your answer is 2 × side, so you counted two sides. A square has four equal sides — how should that change your total?`,
+        `You multiplied by 2 instead of 4. Perimeter of a square = 4 × side because all four sides are identical and must be counted.`
       );
 
     case 'square_area_instead_of_perimeter':
       return pick(
-        `You got ${sn}. The question asks for the boundary around the square — is the formula you used measuring the boundary or the space inside?`,
-        `You squared the side — that gives area (inside space). For perimeter, think about adding all four equal sides, not squaring them.`,
-        `side² gives area (inside). For perimeter, use P = 4 × side — four sides, each equal to the side length.`
+        `Take a moment — is the question asking for the space inside the square, or the fence around it?`,
+        `You squared the side, which gives area (inside space). Perimeter is about the boundary — think about adding all four sides, not multiplying them together.`,
+        `side² gives area. You need perimeter, which is the total boundary: P = 4 × side. Four equal sides added together, not one side multiplied by itself.`
       );
 
     // ── PERIMETER — Rectangle ───────────────────────────────────────────────
 
     case 'rect_multiply_instead_of_perimeter':
       return pick(
-        `You got ${sn}. You multiplied length and breadth — but does multiplying give the boundary or the inside space?`,
-        `Multiplying length × breadth gives the area (space inside). Perimeter is the total boundary — think about walking around all four sides.`,
-        `l × b gives area. For perimeter, add all four sides: P = 2 × (l + b), since a rectangle has two lengths and two breadths.`
+        `Notice that you multiplied the two measurements — does that give the boundary or the inside of the rectangle?`,
+        `Multiplying length × breadth fills in the inside (that's area). Perimeter is the outer boundary — picture walking all the way around the rectangle.`,
+        `l × b = area. For perimeter you need all four sides: P = 2(l + b). Two lengths and two breadths, not a product.`
       );
 
     case 'rect_sum_only_perimeter':
       return pick(
-        `You got ${sn}. You added the two given measurements once — does a rectangle have just two sides?`,
-        `l + b gives you two sides (one length + one breadth). A rectangle also has the opposite two sides. What's the next step?`,
-        `l + b is half the perimeter. You need to account for the other pair of sides: P = 2 × (l + b), not just (l + b).`
+        `You got ${sn}. Does a rectangle have just two sides?`,
+        `l + b counts one length and one breadth — that's half the rectangle's boundary. The other two sides are still to add.`,
+        `l + b gives only two sides. The full perimeter includes all four: P = 2 × (l + b). You forgot to double it.`
       );
 
     case 'rect_perimeter_instead_of_area':
       return pick(
-        `You got ${sn}. The question asks for the space inside the rectangle — did you use the boundary formula or the inside formula?`,
-        `You used 2 × (l + b) — that gives the perimeter (boundary). Area is the space inside the rectangle. What simpler operation on l and b gives that?`,
-        `2 × (l + b) is perimeter. For area, just multiply: A = l × b. One simple product, no doubling.`
+        `The question asks for the space inside the rectangle — did you use the right formula for that?`,
+        `You applied 2(l + b), which is the boundary (perimeter). Area is simpler — it's just the two dimensions multiplied directly.`,
+        `2(l + b) is perimeter. Area = l × b — a single product of length and breadth, no doubling.`
       );
 
     case 'perimeter_instead_of_area_rect':
       return pick(
-        `You got ${sn}. Re-read the question — does it ask for the space inside or the distance around?`,
-        `Your answer matches the perimeter formula. But area = space inside = l × b. Which one does the question ask for?`,
-        `2(l + b) is perimeter; l × b is area. You applied the perimeter idea. Use l × b for the space inside.`
+        `Re-read the last line — "area" or "perimeter"? Your answer hints at the wrong one.`,
+        `Your answer matches the perimeter approach. Area means the space inside — what single operation on length and breadth gives that?`,
+        `You used perimeter thinking: 2(l+b). But area = l × b. One multiplication, no factor of 2.`
       );
 
     // ── PERIMETER — Circle ──────────────────────────────────────────────────
 
     case 'circle_forgot_multiply_by_2':
       return pick(
-        `You got ${sn}. Look at the circumference formula — does it have a coefficient at the very front that you may have missed?`,
-        `The circumference formula is C = 2πr. Check each part: 2, π, and r. Which one is missing from your calculation?`,
-        `You computed πr, but C = 2πr. The "2" means you go around the complete circle — both "halves" of the boundary.`
+        `Look carefully at the circumference formula — is there a number right at the front you might have skipped?`,
+        `C = 2πr has three parts: 2, π, and r. You seem to have used πr. Which of the three parts is missing?`,
+        `You computed πr, but circumference = 2πr. The "2" accounts for the full round trip — the entire boundary, not half of it.`
       );
 
     case 'circle_area_for_circumference':
       return pick(
-        `You got ${sn}. This question asks for the distance around the circle — which formula gives the boundary, not the inside space?`,
-        `The formula you used involves r² — that's typically the area formula. Re-read the question: does it ask for "around" (circumference) or "inside" (area)?`,
-        `πr² gives the space inside (area). For the distance around (circumference), use C = 2πr — no squaring of r.`
+        `This question asks for the distance all the way around — are you sure you used the "around" formula?`,
+        `Your result matches πr², which is the area (inside space). Circumference is the outer boundary — its formula is different and doesn't involve squaring r.`,
+        `πr² = area (inside). Circumference = 2πr (boundary). You used the area formula — switch to 2πr and recalculate.`
       );
 
     case 'forgot_pi_circumference':
       return pick(
-        `You got ${sn}. The circumference formula involves a special constant related to circles — did you include it?`,
-        `You computed 2 × r, but circumference = 2πr. What constant that involves circles did you forget to multiply by?`,
-        `C = 2πr. You got 2r — π (= 22/7) was left out. Always multiply by π when working with circles.`
+        `Circles always involve a special constant — did yours make it into the calculation?`,
+        `You computed 2 × r = ${sn}. The circumference formula is 2πr — what constant multiplies the whole thing?`,
+        `C = 2πr. You got 2r — π (= 22/7) was left out entirely. Every circle formula needs π.`
       );
 
     // ── AREA — Square ───────────────────────────────────────────────────────
 
     case 'square_perimeter_instead_of_area':
       return pick(
-        `You got ${sn}. The question asks for the space inside the square, not the boundary — which formula gives that?`,
-        `4 × side gives the boundary (perimeter). For area (inside space), think about what you do with the side to get a 2D measure.`,
-        `4 × side is perimeter. Area = side × side = side² — multiply the side by itself to get the space inside.`
+        `What does "area" actually measure — the boundary line or the flat surface covered?`,
+        `4 × side gives the boundary length (perimeter). For area, think about how you measure the flat space a square takes up.`,
+        `4 × side is perimeter. Area = side × side = side². You need the square of the side, not four times it.`
       );
 
     // ── AREA — Rectangle ───────────────────────────────────────────────────
 
     case 'area_instead_of_perimeter_rect':
       return pick(
-        `You got ${sn}. Re-read the question — does it ask for the space inside (area) or the distance around (perimeter)?`,
-        `l × b gives the space inside (area). This question asks for the boundary around the rectangle — which formula uses both l and b in a different way?`,
-        `l × b is area; 2(l+b) is perimeter. You used the area formula — apply the perimeter formula instead.`
+        `You got ${sn} — does the question ask for the boundary or the inside space?`,
+        `l × b fills in the inside (area). This question is about the total distance around — how do you find that for a rectangle?`,
+        `l × b is area; 2(l+b) is perimeter. You calculated the area — apply the perimeter formula instead.`
       );
 
     // ── AREA — Circle ───────────────────────────────────────────────────────
 
     case 'circle_circumference_for_area':
       return pick(
-        `You got ${sn}. This question asks for the space inside the circle (area) — which formula gives that?`,
-        `Your answer matches 2πr (circumference). For area, the formula is πr² — notice how it differs from circumference.`,
-        `2πr is circumference (boundary). Area = πr² — the radius is squared. Use πr², not 2πr.`
+        `The question wants the space inside the circle — did you use the "inside" formula or the "boundary" formula?`,
+        `Your answer matches 2πr (circumference — boundary). For area, the formula looks different; r appears squared. Can you write it down?`,
+        `2πr = circumference. Area = πr² — the r is squared. You used the wrong formula; switch to πr².`
       );
 
     case 'circle_forgot_square_radius':
       return pick(
-        `You got ${sn}. In the area formula, what operation should you do with the radius before multiplying by π?`,
-        `You computed π × r, but the formula is π × r². What does the "squared" (²) tell you to do with r first?`,
-        `Area = πr². You used πr without squaring. Multiply r by itself first (r × r), then multiply by π.`
+        `In the area formula for a circle, what happens to r before you multiply by π?`,
+        `You computed π × r, but the formula is πr². What extra step should you do with r before multiplying by π?`,
+        `Area = πr². You wrote πr without squaring. First multiply r by itself (r × r), then multiply by π.`
       );
 
     case 'forgot_pi_area':
       return pick(
-        `You got ${sn}. You squared the radius correctly — but the area formula has an extra constant for circles. Did you include it?`,
-        `You computed r² but the formula for circle area is πr². What constant is supposed to be multiplied with r²?`,
-        `Area = πr². You computed r² but forgot to multiply by π (= 22/7). Always include π in all circle calculations.`
+        `You squared the radius correctly — but something's still missing from a circle area calculation. What is it?`,
+        `r² is partway there, but the area of a circle is πr². Which constant did you forget to include?`,
+        `Area = πr². You computed r² but skipped multiplying by π (22/7). That constant is essential in every circle formula.`
       );
 
     // ── SURFACE AREA — Cube ─────────────────────────────────────────────────
 
     case 'cube_one_face_sa':
       return pick(
-        `You got ${sn}. You found the area of one face — but how many faces does a cube have in total?`,
-        `a² gives one face area. A cube has 6 identical square faces. How should that change your calculation?`,
-        `You computed a² (one face). Total SA = 6a² — multiply by 6 since all six faces are identical.`
+        `You found the area of a face — but surface area covers every face. How many does a cube have?`,
+        `a² is one square face. A cube is a closed solid with 6 identical faces. How does knowing that change your calculation?`,
+        `You computed a² (one face only). Total SA = 6a² — multiply by 6 to cover all six identical square faces.`
       );
 
     case 'cube_two_faces_sa':
       return pick(
-        `You got ${sn}. You may have counted only two faces — top and bottom. How many faces does a cube have?`,
-        `2a² counts top and bottom only. A cube has four more side faces. How does including all faces change the total?`,
-        `2a² counts 2 faces. Total SA = 6a² — include all 6 equal square faces (top, bottom, and all four sides).`
+        `Interesting — you seem to have counted two faces. Is a cube open on the sides?`,
+        `2a² includes only the top and bottom. A cube has four more faces around the sides. How many faces are there in total?`,
+        `2a² = top + bottom only (2 faces). TSA = 6a² because a cube has 6 identical square faces — include all of them.`
       );
 
     case 'cube_four_faces_sa':
       return pick(
-        `You got ${sn}. You included four faces — but does the question ask for total SA or just the lateral SA?`,
-        `4a² is the lateral surface area (4 side faces only). If the question asks for total SA, you also need to include the top and bottom faces.`,
-        `LSA = 4a² (4 sides). TSA = 6a² (all 6 faces). Re-read the question — does it ask for lateral or total surface area?`
+        `Got ${sn}. Quick check — does the question ask for total surface area or lateral surface area?`,
+        `4a² is the lateral SA (4 side faces, no top/bottom). If total SA is asked, the top and bottom faces must also be included.`,
+        `LSA = 4a² (sides only). TSA = 6a² (all 6 faces). Re-read what the question asks for and choose the right one.`
       );
 
     case 'cube_volume_for_sa':
       return pick(
-        `You got ${sn}. The question asks about the outer covering of the cube — is that the same as the space inside?`,
-        `Your answer matches a³ (volume — space inside). Surface area is about the outer covering. Which formula uses a²?`,
-        `a³ is volume. Surface area = 6a² — multiply the face area (a²) by the number of faces (6).`
+        `Think about this: does "surface area" describe what's on the outside of a cube, or the space it holds inside?`,
+        `Your answer matches a³ — that's the volume (space inside). Surface area is the outer covering. Which formula uses a²?`,
+        `a³ is volume. Surface area = 6a² — six faces, each with area a². Volume and SA are completely different measurements.`
       );
 
     case 'cube_linear_sa':
       return pick(
-        `You got ${sn}. You multiplied 6 by the edge length — but surface area is measured in square units. What should you do with the edge first?`,
-        `6 × edge gives a linear measure. Surface area uses the area of each face — how do you find the area of a square face?`,
-        `TSA = 6 × a × a = 6a². You computed 6a without squaring. Each face area = a², not just a.`
+        `Surface area is measured in square units — does your calculation produce a square unit?`,
+        `6 × edge gives a length (linear). For surface area you need to know each face's area first — how do you find the area of one square face?`,
+        `TSA = 6 × a × a = 6a². You computed 6 × a (linear). Each face is a square, so its area is a², not just a.`
       );
 
     // ── SURFACE AREA — Cuboid ───────────────────────────────────────────────
 
     case 'cuboid_no_factor_2_sa':
       return pick(
-        `You got ${sn}. You added the areas of three face types — but does the full formula have a factor you may have forgotten?`,
-        `lb + bh + lh accounts for one face from each pair. A cuboid has 3 pairs of faces (top+bottom, front+back, left+right). How does that affect the formula?`,
-        `lb + bh + lh counts one face per pair. Since each pair has 2 identical faces, multiply by 2: TSA = 2(lb + bh + lh).`
+        `You found ${sn}. Think about how many times each face of a cuboid appears.`,
+        `lb + bh + lh counts one face from each pair. But a cuboid has pairs of opposite faces — each pair has two identical faces. What does that mean for the total?`,
+        `lb + bh + lh = half the TSA. Every face has an identical opposite face, so multiply by 2: TSA = 2(lb + bh + lh).`
       );
 
     case 'cuboid_volume_for_sa':
       return pick(
-        `You got ${sn}. The question asks for the outer covering of the cuboid — is multiplying l, b, and h directly the formula for that?`,
-        `l × b × h gives volume (space inside). Surface area measures the outer covering — that uses a different formula. Can you recall it?`,
-        `l × b × h is volume. Surface area = 2(lb + bh + lh) — add the areas of all three face pairs and multiply by 2.`
+        `Surface area and volume are easy to mix up — which one does this question actually ask for?`,
+        `l × b × h = volume (how much space it holds). Surface area is about covering every outer face — the formula looks quite different.`,
+        `l × b × h is volume. Surface area = 2(lb + bh + lh) — sum the three pairs of face areas and double them.`
       );
 
     case 'cuboid_partial_sa':
       return pick(
-        `You got ${sn}. You found the area of the top and bottom faces — how many other pairs of faces does a cuboid have?`,
-        `2 × l × b covers the top and bottom. A cuboid has three pairs of faces. Which two other pairs are you missing?`,
-        `A cuboid has 3 face pairs: top+bottom (2lb), front+back (2lh), left+right (2bh). Add all three pairs: TSA = 2(lb + bh + lh).`
+        `You covered the top and bottom — how many more pairs of faces does a cuboid have?`,
+        `2 × l × b gives the top + bottom pair. A cuboid also has a front/back pair and a left/right pair. What are their areas?`,
+        `TSA = 2lb + 2lh + 2bh. You included only 2lb (one pair). Add the other two pairs: 2lh (front+back) and 2bh (left+right).`
       );
 
     // ── SURFACE AREA — Cylinder ─────────────────────────────────────────────
 
     case 'cylinder_lateral_only_sa':
       return pick(
-        `You got ${sn}. You found the curved surface area — but does the total SA of a closed cylinder have any other parts?`,
-        `2πrh gives the curved (lateral) surface only. A closed cylinder also has a circular face on the top and one on the bottom. What area do they add?`,
-        `CSA = 2πrh (curved wall). TSA = 2πrh + 2πr² = 2πr(r + h). You missed the two circular bases (2πr²).`
+        `Got ${sn}. Does a closed cylinder have any flat parts, or just the curved wall?`,
+        `2πrh is the curved surface (the "wrap"). A closed cylinder also has a circular face on top and one on the bottom — what area do those two circles add?`,
+        `CSA = 2πrh (curved wall only). TSA = 2πrh + 2πr² = 2πr(r + h). You missed the two circular bases (2πr²).`
       );
 
     case 'cylinder_only_circles_sa':
       return pick(
-        `You got ${sn}. You found the area of the two circular ends — but what about the curved surface that wraps around the cylinder?`,
-        `2πr² covers the two circular faces (top + bottom). A cylinder also has a curved surface. Which formula gives that part?`,
-        `2πr² = two circles only. TSA = 2πrh + 2πr² = 2πr(r + h). The curved surface area 2πrh was missing.`
+        `You found the area of the two circular ends — what about the surface wrapping around the side?`,
+        `2πr² gives top + bottom circles. The cylinder's curved wall (the "label" around it) is a separate area. Which formula gives that part?`,
+        `2πr² = two circular bases only. TSA = 2πrh + 2πr² = 2πr(r+h). The curved surface area 2πrh was completely missing.`
       );
 
     case 'cylinder_volume_for_sa':
       return pick(
-        `You got ${sn}. The question asks for the outer covering (surface area) — is that the same as the space inside?`,
-        `πr²h gives volume (space inside the cylinder). Surface area measures the outer covering — a completely different formula. Which one is correct?`,
-        `πr²h is volume. For surface area: CSA = 2πrh, or TSA = 2πr(r + h). Re-read what the question asks for.`
+        `Is the question asking for the outer skin of the cylinder, or how much it can hold?`,
+        `πr²h fills the inside (volume). Surface area describes the outer covering — it needs a different formula. Can you recall which one?`,
+        `πr²h = volume. For surface area: CSA = 2πrh, TSA = 2πr(r+h). These are completely different; choose based on what the question asks.`
       );
 
     case 'cylinder_forgot_factor_2_csa':
       return pick(
-        `You got ${sn}. The curved surface area formula has a coefficient at the front — did you include it?`,
-        `You computed π × r × h, but CSA = 2πrh. What factor at the front of the formula is missing?`,
-        `CSA = 2πrh. You got πrh without the 2. The "2" comes from the full circumference (2πr) being "unrolled" times the height.`
+        `The CSA formula starts with a number before π — did that number make it into your answer?`,
+        `You used πrh. The curved surface area formula is 2πrh — what factor sits at the very front?`,
+        `CSA = 2πrh. You computed πrh, dropping the 2. That factor comes from the full circumference: 2πr times height.`
       );
 
     // ── VOLUME — Cube ───────────────────────────────────────────────────────
 
     case 'cube_sa_for_volume':
       return pick(
-        `You got ${sn}. The question asks for the space inside the cube — is the formula you used for the outer covering or the inside space?`,
-        `Your answer matches the surface area formula (6a²). Volume is 3-dimensional — it uses all three dimensions differently. Which formula gives the space inside?`,
-        `6a² is surface area. Volume = a³ — multiply edge × edge × edge. Volume is about space inside, not the outer covering.`
+        `Volume measures how much space a cube holds — is covering its outside faces the same as measuring that space?`,
+        `Your answer matches the surface area formula. Volume is 3-dimensional and uses a different power of the edge. Which one?`,
+        `6a² is surface area. Volume = a³ — multiply the edge by itself three times, not six times squared.`
       );
 
     case 'cube_squared_for_volume':
       return pick(
-        `You got ${sn}. You squared the edge — but volume is 3-dimensional, not 2-dimensional. What else is needed?`,
-        `a² gives a flat area (2D). Volume fills 3D space. If you have a², what one more multiplication would make it 3-dimensional?`,
-        `a² is 2D (face area). Volume = a³ = a × a × a — you need to multiply by a one more time to get the 3D measure.`
+        `You squared the edge — but is a square face the same as the volume of a cube?`,
+        `a² is a flat area (2D, one face). Volume fills three-dimensional space. If you have a², what one more multiplication gets you there?`,
+        `a² = face area (2D). Volume = a³ = a × a × a. You need one more multiplication by a to reach the full 3D measure.`
       );
 
     case 'cube_linear_for_volume':
       return pick(
-        `You got ${sn}. That answer looks like a linear measure, not a volume. What does volume measure, and which formula captures that?`,
-        `6a is a linear expression. Volume measures 3D space — how do you combine the edge length with itself to get a 3D measure?`,
-        `Volume = a³ = a × a × a. You computed 6a (linear). Volume needs the edge multiplied by itself three times.`
+        `Your answer looks like it might be a length, not a volume. What kind of units does volume have?`,
+        `6a is linear (like a total edge length). Volume is 3D — the edge must be used in a way that creates a cubic measure.`,
+        `Volume = a × a × a = a³. You computed something linear. Cube the edge — multiply it by itself three times.`
       );
 
     // ── VOLUME — Cuboid ─────────────────────────────────────────────────────
 
     case 'cuboid_forgot_height_volume':
       return pick(
-        `You got ${sn}. You multiplied two of the three dimensions — but volume is 3-dimensional. Which dimension is missing?`,
-        `You used two dimensions from l, b, h. Volume = l × b × h requires all three. Which one did you leave out?`,
-        `Volume = l × b × h. You multiplied only two dimensions — include all three. Volume fills 3D space, so all three measurements matter.`
+        `You used two of the three dimensions — but volume fills all three directions. Which one is missing?`,
+        `Volume = l × b × h requires all three measurements. You used two of them. Look at your working — which dimension did you leave out?`,
+        `V = l × b × h. You multiplied only two dimensions (leaving one out). All three — length, breadth, and height — must appear in the product.`
       );
 
     case 'cuboid_sa_for_volume':
       return pick(
-        `You got ${sn}. The question asks for the space inside the cuboid — did you use the surface area formula instead?`,
-        `Your answer matches 2(lb + bh + lh) — that's the total surface area. Volume is the space inside. Which formula gives that?`,
-        `2(lb + bh + lh) is TSA (surface). Volume = l × b × h — just multiply all three dimensions once. Much simpler.`
+        `The question asks for the space inside the cuboid — did you accidentally calculate the outer covering?`,
+        `Your answer matches 2(lb + bh + lh), which is the total surface area formula. Volume is simpler — just one product of the three dimensions.`,
+        `2(lb + bh + lh) is TSA. Volume = l × b × h — multiply all three dimensions once. Much simpler than surface area.`
       );
 
     case 'cuboid_added_dims_volume':
       return pick(
-        `You got ${sn}. You added the three dimensions — but does adding give a 3-dimensional volume measure?`,
-        `l + b + h is a sum. Volume needs all three dimensions combined in a different way to give a 3D quantity. What operation is that?`,
-        `Volume = l × b × h (multiplication). You computed l + b + h (addition). Multiply all three to get the space inside.`
+        `Interesting approach — but does adding the three measurements give a 3D volume?`,
+        `l + b + h is a sum of lengths. Volume needs the three dimensions combined differently to give a 3D quantity. What operation is that?`,
+        `Volume = l × b × h (multiply). You computed l + b + h (add). Multiplication, not addition, produces the volume.`
       );
 
     // ── VOLUME — Cylinder ───────────────────────────────────────────────────
 
     case 'cylinder_forgot_height_volume':
       return pick(
-        `You got ${sn}. You found the base circle area — but a cylinder has height too. What does the height contribute to volume?`,
-        `πr² gives the circular base area (2D). Volume fills the whole cylinder from base to top — what factor adds the third dimension?`,
-        `V = πr²h. You computed πr² (base area only) and forgot to multiply by height h. Volume = base area × height.`
+        `You found the base area — but a cylinder has height. Where does height go in the volume formula?`,
+        `πr² is the area of the circular base (flat, 2D). Volume stretches that base through the full height. What factor adds the third dimension?`,
+        `V = πr²h. You stopped at πr² (base area) without multiplying by height h. Volume = base area × height.`
       );
 
     case 'cylinder_csa_for_volume':
       return pick(
-        `You got ${sn}. You may have used the surface area formula — but the question asks for the space inside the cylinder.`,
-        `2πrh is the curved surface area formula. Volume is about filling the inside — which formula uses πr² and height?`,
-        `2πrh = CSA (surface). Volume = πr²h — base area (πr²) multiplied by height h.`
+        `Got ${sn}. The question is about filling the cylinder — not coating its outside. Which formula is right?`,
+        `2πrh is the curved surface area (outer wall). Volume is about how much the cylinder can hold — a different formula applies.`,
+        `2πrh = CSA (surface). Volume = πr²h — base area (πr²) multiplied by height h. Different formulas for different things.`
       );
 
     case 'cylinder_tsa_for_volume':
       return pick(
-        `You got ${sn}. You found the total surface area — but the question asks for the space inside (volume).`,
-        `2πr(r + h) is the total surface area formula. Volume is completely different — it measures how much the cylinder can hold, not its outer covering.`,
-        `TSA = 2πr(r + h). Volume = πr²h. They measure different things. Volume = base area × height — use πr²h.`
+        `Surface area and volume measure very different things — which one does this question need?`,
+        `2πr(r + h) is the total surface area (outer covering). Volume is the space inside — the formula is much simpler and uses only base area and height.`,
+        `TSA = 2πr(r+h); Volume = πr²h. You used TSA. Switch to Volume = πr²h — it's base area times height.`
       );
 
     case 'cylinder_forgot_square_r':
       return pick(
-        `You got ${sn}. In the volume formula for a cylinder, what operation should you apply to the radius before multiplying by height?`,
-        `You used π × r × h, but V = πr²h. The radius appears squared — what does that mean you should do with r first?`,
-        `V = πr²h. You computed πrh without squaring r. Multiply r × r first, then multiply by π and h.`
+        `Look at the volume formula — what operation is applied to r specifically?`,
+        `You wrote π × r × h, but V = πr²h. The radius appears squared — what should you do with r before multiplying by π and h?`,
+        `V = πr²h. You computed πrh — r wasn't squared. Multiply r × r first, then multiply by π and h.`
       );
 
     // ── OPERATION CONFUSION ─────────────────────────────────────────────────
 
     case 'multiply_instead_of_add':
       return pick(
-        `You got ${sn}. Think about what operation the formula actually calls for at that step — should you be adding or multiplying?`,
-        `Mistake pattern: you multiplied two numbers that should be added first. Re-read the formula — does it say to add two lengths (or terms) before anything else?`,
-        `Write the addition step first (a + b), then continue with the rest of the formula (e.g., doubling, or multiplying by π).`
+        `Check the formula at that step — should those two values be multiplied, or combined in another way?`,
+        `You multiplied two numbers that the formula needs you to add first. Re-read ${f} — does it call for a sum or a product at that step?`,
+        `Write the addition step explicitly: (a + b), then apply whatever comes next in the formula. Multiplication comes after, not instead of, the sum.`
       );
 
     case 'add_instead_of_multiply':
       return pick(
-        `You got ${sn}. Check the formula — should those two numbers be added or multiplied at that step?`,
-        `You used addition where the formula needs multiplication. Compare your steps to ${f} — which operation connects those two values?`,
-        `Identify which two quantities must be multiplied (not summed) — then multiply them exactly as the formula shows.`
-      );
-
-    case 'area_instead_of_perimeter_rect':
-      return pick(
-        `You got ${sn}. You multiplied length and breadth — does that give the boundary or the space inside?`,
-        `l × b gives the space inside (area). This question is about the boundary around the rectangle. How do you find the total distance around?`,
-        `Perimeter = 2(l + b): walk around all four sides. Area = l × b: the inside space. You did the area operation — switch to the perimeter formula.`
-      );
-
-    case 'perimeter_instead_of_area_rect':
-      return pick(
-        `You got ${sn}. Re-read the last line of the question — does it ask for "around" (perimeter) or "inside" (area)?`,
-        `You used the perimeter approach. But area is the space inside — what simpler operation on length and breadth gives that?`,
-        `2(l + b) is perimeter; l × b is area. You used the perimeter path — use the single product of length and breadth for area.`
+        `At that step in the formula, are those two numbers supposed to be added — or multiplied?`,
+        `You added values that the formula requires to be multiplied. Compare your steps to ${f} — which operation connects those two quantities?`,
+        `Identify the two quantities that must be multiplied (not added), then multiply them exactly as the formula shows.`
       );
 
     // ── RADIUS / DIAMETER ───────────────────────────────────────────────────
 
     case 'radius_diameter_confusion': {
-      const fb = String(errorInfo?.feedback || '');
-      const looksDouble = /twice|double|2\s*×/i.test(fb) || /too large/i.test(fb) || ans > parseFloat(question.answer) * 1.5;
+      const ans = parseFloat(studentAnswer);
+      const correct = parseFloat(question.answer);
+      const looksDouble = !isNaN(ans) && !isNaN(correct) && ans > correct * 1.5;
       return pick(
         looksDouble
-          ? `You got ${sn}, which is larger than expected. Did you use the radius and diameter interchangeably? Check which one the question gives you.`
-          : `You got ${sn}, which is smaller than expected. Check: the question mentions "radius" or "diameter" — are you using the right one in ${f}?`,
-        `Radius (r) = half the diameter. Diameter (d) = 2 × radius. If the question gives diameter, convert: r = d ÷ 2 before using ${f}.`,
-        `Use either r or d consistently — convert once if needed, then plug into ${f} without mixing both in the same step.`
+          ? `Your answer is much larger than expected. Did you use the diameter where the formula needs the radius?`
+          : `Your answer is smaller than expected. Check whether the question gives radius or diameter — they're easy to swap.`,
+        `Radius (r) = half the diameter. If the question gives the diameter, you must halve it before substituting into ${f}.`,
+        `r = d ÷ 2. Substitute the correct one into ${f} — if the question gives diameter, convert first: r = diameter ÷ 2.`
       );
     }
 
@@ -360,45 +339,45 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
 
     case 'formula_swap':
       return pick(
-        `You got ${sn}. Re-read the question's last line — does it ask for "around/boundary", "inside/space", "surface", or "volume"?`,
-        `You applied the wrong formula family for this question type. Compare ${f} with the other common formula for this shape and choose the one that matches the question.`,
-        `Name what you need: perimeter = boundary; area = inside; surface area = all faces; volume = space filled. Then use only the matching formula.`
+        `Re-read the last line of the question — what exactly is it asking you to find?`,
+        `You applied a formula for a different measurement than what was asked. Pick out the key word: "perimeter", "area", "surface area", or "volume", then match it to the right formula.`,
+        `Label what you need: boundary → perimeter; inside space → area; all faces → surface area; space filled → volume. Then use only the matching formula.`
       );
 
     // ── SA / VOLUME CONFUSION ───────────────────────────────────────────────
 
     case 'sa_volume_confusion':
       return pick(
-        `You got ${sn}. Re-read the question — does it ask for the outer covering (surface area) or the space inside (volume)?`,
-        `Surface area and volume use completely different formulas for the same solid. Identify what the question asks, then choose the matching formula.`,
-        `Surface area = total area of all faces. Volume = how much space the solid holds. They are different — confirm which one is asked and use only that formula.`
+        `Did you mix up the outer covering of the solid with the space inside it?`,
+        `Surface area and volume use completely different formulas for the same shape. Which one does the question ask for?`,
+        `Surface area = total area of all outer faces. Volume = how much space the solid encloses. Confirm which is asked, then apply only that formula.`
       );
 
     // ── UNIT ERROR ──────────────────────────────────────────────────────────
 
     case 'unit_error':
       return pick(
-        `You got ${sn}. The size of the error suggests a unit conversion issue — are all your measurements in the same unit?`,
-        `Check: 1 m = 100 cm and 1 m² = 10,000 cm². Make sure all lengths are in the same unit before you substitute into ${f}.`,
-        `Convert every measurement to one unit first. Then substitute into ${f} and calculate. Don't mix cm and m in the same problem.`
+        `The scale of your answer seems off — are all your lengths in the same unit before you calculate?`,
+        `A factor-of-100 difference usually means cm and m got mixed. Remember: 1 m = 100 cm, so 1 m² = 10,000 cm².`,
+        `Convert every dimension to one unit first. Then substitute into ${f} and calculate. Never mix cm and m in the same problem.`
       );
 
     // ── ARITHMETIC ──────────────────────────────────────────────────────────
 
     case 'arithmetic_mistake':
       return pick(
-        `You got ${sn}. Your approach seems right, but the final value is off — try recalculating each step slowly on paper.`,
-        `Trace each operation in order. Common slips: order of operations, fraction arithmetic (especially with 22/7), or squaring.`,
-        `Write ${f}, substitute every value, then evaluate one operation at a time — check each intermediate result before moving on.`
+        `Your approach looks right, but the final value is a little off — try each calculation step again slowly.`,
+        `Trace every operation in order. Common slips: handling 22/7 as a fraction, order of operations inside brackets, or squaring a decimal.`,
+        `Write ${f}, substitute each value, and evaluate one operation at a time — check each intermediate result before moving to the next step.`
       );
 
     // ── PARTIAL FORMULA ─────────────────────────────────────────────────────
 
     case 'partial_formula':
       return pick(
-        `You got ${sn}, which is smaller than expected. Did you apply every part of the formula, or did you stop too early?`,
-        `Compare your work to ${f}. Is every symbol in the formula accounted for in your calculation?`,
-        `Write out ${f} fully, then replace each symbol with the number from the question — make sure no term is left out.`
+        `Your answer is smaller than expected — did you complete every step of the formula?`,
+        `Compare your work to ${f}. Is there a factor, a bracket, or a squaring step that you might have left out?`,
+        `Write ${f} in full, replace every letter with a number from the question, then evaluate — leave nothing out.`
       );
 
     // ── MCQ / TRUE-FALSE ────────────────────────────────────────────────────
@@ -406,18 +385,18 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
     case 'wrong_option': {
       const letter = String(studentAnswer).toUpperCase().trim();
       return pick(
-        `You chose ${letter}. Try working out the correct answer from the formula before looking at the options.`,
-        `Plug the question's measurements into ${f} step by step, then see which option the result matches.`,
-        `Calculate the answer using ${f} with the given values — the correct option is exactly what the formula produces.`
+        `You chose ${letter}. Before picking an option, try working out the answer from the formula and then match it to the choices.`,
+        `Plug the given values into ${f} step by step. Which option does your result match?`,
+        `Calculate using ${f} with the numbers in the question. The correct option is exactly what the formula produces — compare your computed value to each choice.`
       );
     }
 
     case 'wrong_verdict': {
       const said = String(studentAnswer).trim();
       return pick(
-        `You said "${said}". Apply the formula to the numbers in the statement and check whether the claim holds.`,
-        `Do the calculation the statement describes using ${f}. If the result matches the claimed value, it's True; otherwise, False.`,
-        `Evaluate both sides of the statement separately using ${f}. Compare — if they match, True; if not, False.`
+        `You said "${said}". Run the calculation the statement describes and see whether the result agrees with what it claims.`,
+        `Apply ${f} to the numbers in the statement. If your result matches the claimed value, it's True; if not, False.`,
+        `Evaluate both sides of the statement using ${f}. Compare them — equal means True, not equal means False.`
       );
     }
 
@@ -425,19 +404,80 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
 
     case 'invalid_input':
       return pick(
-        `Please enter only a number in the answer box — no units, no words.`,
-        `Type the numeric value only (e.g., 44 or 3.5). If the answer is a fraction, enter its decimal form.`,
-        `Remove any text or unit labels from your answer. Enter just the number so the system can check it.`
+        `Please type only a number in the answer box — no units or extra words.`,
+        `Enter the numeric value only (e.g., 44 or 3.5). If the answer is a fraction, convert it to a decimal first.`,
+        `Remove any letters, unit labels, or symbols from your answer. The system needs a plain number to check it.`
+      );
+
+    // ── REVERSE-FIND ─────────────────────────────────────────────────────────
+
+    case 'reverse_gave_perimeter':
+      return pick(
+        `You wrote the perimeter itself — but the question is asking you to find the side length from it.`,
+        `The perimeter is given information. To get the side, you need to reverse the formula: if P = 4 × side, then side = P ÷ ?`,
+        `Side = Perimeter ÷ 4. You wrote the perimeter down instead of dividing it. One step left: divide by 4.`
+      );
+
+    case 'reverse_square_half':
+      return pick(
+        `You got ${sn}. A square has four equal sides — did you divide by the right number?`,
+        `You divided the perimeter by 2, but P = 4 × side means side = P ÷ 4, not P ÷ 2.`,
+        `A square has 4 sides, so side = Perimeter ÷ 4. You divided by 2 — that gives two sides' worth, not one.`
+      );
+
+    case 'reverse_multiplied':
+      return pick(
+        `You multiplied — but the perimeter is already given. What operation undoes multiplication?`,
+        `You applied P = 4 × side in the forward direction. The question gives you P and asks for side — you need to go backwards.`,
+        `If P = 4 × side, then side = P ÷ 4. You multiplied by 4 instead of dividing. Reverse the formula to isolate the unknown.`
+      );
+
+    case 'reverse_gave_area':
+      return pick(
+        `That number is the area that the question gave you — what do you need to do to it to get the side?`,
+        `The area is given information. Area = side² means you need to undo squaring. What is the inverse operation of squaring?`,
+        `side = √(area). You wrote the area value instead of taking its square root. One more step: √${sn}.`
+      );
+
+    case 'reverse_square_divided':
+      return pick(
+        `Dividing by 4 doesn't undo squaring — what operation does?`,
+        `Area = side², so to find the side you need to reverse the squaring. What is the opposite of squaring a number?`,
+        `To reverse s² = area, take the square root: side = √area. Dividing by 4 is not the inverse of squaring.`
+      );
+
+    case 'reverse_rect_forgot_subtract':
+      return pick(
+        `Good start — you found half the perimeter. What do you do next to isolate the missing side?`,
+        `P ÷ 2 gives you (length + breadth). You already know one of them. How do you get the other one from their sum?`,
+        `Half the perimeter = l + b. You know one side, so subtract it: missing side = (P ÷ 2) − known side. You stopped one step early.`
+      );
+
+    case 'reverse_gave_input':
+      return pick(
+        `That value is already in the question — you need to compute the unknown, not copy a given number.`,
+        `The question provides some values and asks you to find one missing value. Which value is the unknown? Set up the formula to solve for it.`,
+        `Don't copy a given value as your answer. Set up the formula, substitute the known numbers, and solve for the missing quantity.`
       );
 
     // ── DEFAULT ──────────────────────────────────────────────────────────────
 
-    default:
+    default: {
+      // For reverse-find / fill-in-blank questions, the hint should be about
+      // working backwards — not about "which formula to use"
+      const isReverse = qType === 'reverse_find' || qType === 'fill_in_blank';
       return pick(
-        `You got ${sn}. First check: does the question want ${topic} of this ${shape} — and are you using the matching formula?`,
-        `Use ${f} with the values from the question. Write the formula, substitute each value, then calculate — watch × vs + and any squared or cubed terms.`,
-        `Copy ${f}, replace each letter with the number from the question, then evaluate carefully — respecting brackets, powers, and the order of operations.`
+        isReverse
+          ? `You got ${sn}. The question gives you a result and asks you to find one of the inputs — try working the formula backwards.`
+          : `You got ${sn}. Re-read the question carefully — which measurement is it actually asking for?`,
+        isReverse
+          ? `Write out ${f}, identify which value is missing (the unknown), substitute everything else, and solve for the unknown.`
+          : `Try writing ${f} out in full, substituting each value from the question, and checking each step — is the formula and the operation (+, ×, ²) correct?`,
+        isReverse
+          ? `Rearrange ${f} to isolate the unknown on one side, then substitute the given values and calculate.`
+          : `Write ${f}, replace each letter with its number, and evaluate carefully — pay attention to brackets, powers, and whether you need to add or multiply.`
       );
+    }
   }
 }
 

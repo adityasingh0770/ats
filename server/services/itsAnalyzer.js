@@ -105,6 +105,15 @@ const ERROR_TYPE_LABEL = {
   invalid_input:                       'Non-numeric or unreadable input entered',
   wrong_answer:                        'Answer mismatch — specific pattern could not be identified',
   unknown:                             'Answer mismatch — specific pattern could not be identified',
+
+  // Reverse-find
+  reverse_gave_perimeter:       'Copied the given perimeter instead of dividing to find the side',
+  reverse_square_half:          'Divided the perimeter by 2 instead of 4 — a square has 4 sides, not 2',
+  reverse_multiplied:           'Multiplied by 4 instead of dividing — formula applied forwards, not backwards',
+  reverse_gave_area:            'Copied the given area instead of taking the square root for the side',
+  reverse_square_divided:       'Divided area by 4 instead of taking the square root',
+  reverse_rect_forgot_subtract: 'Halved the perimeter correctly but forgot to subtract the known side',
+  reverse_gave_input:           'Entered a value given in the question instead of computing the unknown',
 };
 
 // ── Confidence levels per error type ─────────────────────────────────────────
@@ -163,6 +172,15 @@ const CONFIDENCE_LEVEL = {
   // Low confidence: no specific pattern found
   wrong_answer:                        'low',
   unknown:                             'low',
+
+  // Reverse-find: high confidence (value-matched)
+  reverse_gave_perimeter:       'high',
+  reverse_square_half:          'high',
+  reverse_multiplied:           'high',
+  reverse_gave_area:            'high',
+  reverse_square_divided:       'high',
+  reverse_rect_forgot_subtract: 'high',
+  reverse_gave_input:           'high',
 };
 
 // ── Detected-pattern descriptions ────────────────────────────────────────────
@@ -265,6 +283,22 @@ const DETECTED_PATTERN = {
     'Student answer does not match the correct result — specific mistake pattern could not be identified.',
   unknown:
     'Student answer does not match the correct result — specific mistake pattern could not be identified.',
+
+  // Reverse-find
+  reverse_gave_perimeter:
+    'Student wrote down the perimeter that was given in the question instead of working backwards to find the side (side = P ÷ 4).',
+  reverse_square_half:
+    'Student halved the perimeter (P ÷ 2) instead of quartering it — confused "2 sides" with "4 sides" of a square.',
+  reverse_multiplied:
+    'Student multiplied by 4 instead of dividing — applied the formula forwards (P = 4s) rather than solving for s.',
+  reverse_gave_area:
+    'Student wrote down the area that was given instead of computing its square root to find the side.',
+  reverse_square_divided:
+    'Student divided the area by 4 instead of taking the square root — did not know how to reverse s².',
+  reverse_rect_forgot_subtract:
+    'Student halved the perimeter to get (l + b) but then forgot to subtract the known side to isolate the unknown.',
+  reverse_gave_input:
+    'Student entered a number that appears in the question statement rather than computing the unknown quantity.',
 };
 
 // ── Main analyzer ─────────────────────────────────────────────────────────────

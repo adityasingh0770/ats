@@ -695,6 +695,123 @@ const detectError = (studentAnswer, correctAnswer, question) => {
     }
   }
 
+  // ── REVERSE-FIND — Square (given perimeter, find side) ───────────────────
+  if ((qType === 'reverse_find' || qType === 'fill_in_blank') &&
+      shape === 'square' && topic === 'perimeter') {
+    const nums = findNumbersInQuestion(qtext);
+    // Try to find the given perimeter — it will be the number that equals correct*4
+    let givenPerim = null;
+    for (const n of nums) {
+      if (near(n, correct * 4, Math.abs(correct) * 0.1 + 0.5)) { givenPerim = n; break; }
+    }
+    if (givenPerim != null) {
+      if (near(ans, givenPerim, 0.5)) {
+        return pack({
+          type: 'reverse_gave_perimeter',
+          feedback: `⚠️ You wrote ${ans} — that's the perimeter the question already gave you. You need to find the side length.`,
+          hintLead: `${ans} is the perimeter, which the question already told you. The question asks for the side — how do you get from perimeter back to one side?`,
+          remedialLead: `The perimeter is given (${givenPerim}). To find the side: side = perimeter ÷ 4, because a square has 4 equal sides.`,
+        });
+      }
+      if (near(ans, givenPerim / 2, 0.5)) {
+        return pack({
+          type: 'reverse_square_half',
+          feedback: `⚠️ You divided the perimeter by 2 — but a square has 4 sides, not 2. Try dividing by 4.`,
+          hintLead: `You got ${ans}, which is ${givenPerim} ÷ 2. A square has four equal sides. What should you divide by to find one side?`,
+          remedialLead: `Perimeter of a square = 4 × side. So side = perimeter ÷ 4, not ÷ 2. A square has 4 sides.`,
+        });
+      }
+      if (near(ans, givenPerim * 4, Math.abs(givenPerim) * 0.1 + 0.5)) {
+        return pack({
+          type: 'reverse_multiplied',
+          feedback: `⚠️ You multiplied instead of dividing — you applied the formula forwards. To find the side, divide the perimeter by 4.`,
+          hintLead: `You got ${ans} by multiplying. But the question gives you the perimeter — you need to work backwards. How do you undo "× 4"?`,
+          remedialLead: `P = 4 × side means side = P ÷ 4. You applied the formula in the wrong direction — divide, don't multiply.`,
+        });
+      }
+    }
+  }
+
+  // ── REVERSE-FIND — Square (given area, find side) ─────────────────────────
+  if ((qType === 'reverse_find' || qType === 'fill_in_blank') &&
+      shape === 'square' && topic === 'area') {
+    const nums = findNumbersInQuestion(qtext);
+    let givenArea = null;
+    for (const n of nums) {
+      if (near(n, correct * correct, Math.abs(correct) * 0.15 + 0.5)) { givenArea = n; break; }
+    }
+    if (givenArea != null) {
+      if (near(ans, givenArea, 0.5)) {
+        return pack({
+          type: 'reverse_gave_area',
+          feedback: `⚠️ You wrote ${ans} — that's the area the question already gave you. You need to find the side length.`,
+          hintLead: `${ans} is the area that was given. The question asks for the side — what operation reverses squaring?`,
+          remedialLead: `Area = side². So side = √area. You need the square root of ${givenArea}, not the area itself.`,
+        });
+      }
+      if (near(ans, givenArea / 4, Math.abs(givenArea) * 0.1 + 0.5)) {
+        return pack({
+          type: 'reverse_square_divided',
+          feedback: `⚠️ You divided the area by 4, but that's not how you reverse squaring. To find the side, take the square root.`,
+          hintLead: `You divided by 4 — but area = side². To undo squaring, you need a different operation. What is the inverse of squaring?`,
+          remedialLead: `Area = s². To find s: take the square root of the area (√area). Dividing by 4 would give the wrong answer.`,
+        });
+      }
+    }
+  }
+
+  // ── REVERSE-FIND — Rectangle (given perimeter, find missing side) ─────────
+  if ((qType === 'reverse_find' || qType === 'fill_in_blank') &&
+      shape === 'rectangle' && topic === 'perimeter') {
+    const nums = findNumbersInQuestion(qtext);
+    // Find which number, when paired with correct, gives a matching perimeter
+    for (const knownSide of nums) {
+      if (near(knownSide, correct, 0.5)) continue; // skip the answer itself
+      const expectedPerim = 2 * (knownSide + correct);
+      let givenPerim = null;
+      for (const n of nums) {
+        if (near(n, expectedPerim, Math.abs(expectedPerim) * 0.1 + 0.5) && !near(n, knownSide, 0.5)) {
+          givenPerim = n; break;
+        }
+      }
+      if (givenPerim != null) {
+        const halfPerim = givenPerim / 2;
+        if (near(ans, halfPerim, 0.5)) {
+          return pack({
+            type: 'reverse_rect_forgot_subtract',
+            feedback: `⚠️ You halved the perimeter to get ${halfPerim}, but forgot to subtract the known side (${knownSide}) to isolate the missing side.`,
+            hintLead: `Good start — you found P ÷ 2 = ${halfPerim}. That equals (length + breadth). The question gives one side as ${knownSide}. What's the next step?`,
+            remedialLead: `P ÷ 2 = l + b = ${halfPerim}. You know one side is ${knownSide}. So missing side = ${halfPerim} − ${knownSide} = ${halfPerim - knownSide}.`,
+          });
+        }
+        if (near(ans, givenPerim, 0.5)) {
+          return pack({
+            type: 'reverse_gave_input',
+            feedback: `⚠️ You wrote ${ans} — that's the perimeter the question gave you. Work backwards to find the missing side.`,
+            hintLead: `${ans} is already in the question as the perimeter. You need to find the missing side — how do you use P = 2(l + b) in reverse?`,
+            remedialLead: `Rearrange P = 2(l + b): first find l + b = P ÷ 2, then subtract the known side.`,
+          });
+        }
+        break;
+      }
+    }
+  }
+
+  // ── REVERSE-FIND — general: student echoed a given value ──────────────────
+  if (qType === 'reverse_find' || qType === 'fill_in_blank') {
+    const nums = findNumbersInQuestion(qtext);
+    for (const n of nums) {
+      if (near(ans, n, 0.5) && !near(ans, correct, 0.5)) {
+        return pack({
+          type: 'reverse_gave_input',
+          feedback: `⚠️ You wrote ${ans}, which matches a value already given in the question. You need to calculate the unknown.`,
+          hintLead: `${ans} is a number that appears in the question itself. The question asks you to find something — use the given values to work it out.`,
+          remedialLead: `Don't copy a given value — set up the formula, substitute the known values, then solve for the unknown.`,
+        });
+      }
+    }
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   //  GENERAL FALLBACK DETECTORS (apply when specific ones didn't fire)
   // ══════════════════════════════════════════════════════════════════════════
