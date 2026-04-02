@@ -4,10 +4,9 @@
  * R2: Then give question
  * R3: Correct → increase difficulty
  * R4: 1st wrong → encouragement
- * R5: 2nd wrong → Personalized hint 1
+ * R5: 2nd wrong → Personalized hint 1 (from current answer)
  * R6: 3rd wrong → Personalized hint 2
- * R7: 4th wrong → Personalized hint 3
- * R8: ≥5 wrong → Remedial content
+ * R7: ≥4 wrong → Remedial content
  * Advanced: time-based adaptivity, frustration detection
  */
 
@@ -41,18 +40,16 @@ const applyPedagogicalRule = (attemptCount, isCorrect, timeSpent, expectedTime) 
     };
   }
 
-  // Frustration: same hint ladder as normal (no skipping to hint 3)
-  if (frustrationDetected && attemptCount >= 2 && attemptCount < 5) {
-    const hintLevel = Math.min(attemptCount - 1, 3);
+  // Frustration: same 2-hint ladder, then remedial
+  if (frustrationDetected && attemptCount >= 2 && attemptCount < 4) {
+    const hintLevel = Math.min(attemptCount - 1, 2);
     return {
       rule: 'R_FRUSTRATION',
       action: 'hint',
       message:
         hintLevel === 1
           ? "Taking a while is normal — here’s a hint aimed at what you tried. 💡"
-          : hintLevel === 2
-            ? 'Another focused hint — one more after this if you need it.'
-            : 'Last hint before a short review opens if you’re still stuck.',
+          : 'One more focused hint — then a short review if you’re still stuck.',
       hintLevel,
       showRemedial: false,
       adjustDifficulty: null,
@@ -88,7 +85,7 @@ const applyPedagogicalRule = (attemptCount, isCorrect, timeSpent, expectedTime) 
     return {
       rule: 'R6',
       action: 'hint',
-      message: "Here's another hint based on what you tried — you have one more after this. 💡",
+      message: 'Here’s another hint tailored to the answer you just tried. 💡',
       hintLevel: 2,
       showRemedial: false,
       adjustDifficulty: null,
@@ -96,23 +93,11 @@ const applyPedagogicalRule = (attemptCount, isCorrect, timeSpent, expectedTime) 
     };
   }
 
-  if (attemptCount === 4) {
+  if (attemptCount >= 4) {
     return {
       rule: 'R7',
-      action: 'hint',
-      message: 'Last personalized hint — then we open a short review if you still need it.',
-      hintLevel: 3,
-      showRemedial: false,
-      adjustDifficulty: null,
-      frustrationDetected: false,
-    };
-  }
-
-  if (attemptCount >= 5) {
-    return {
-      rule: 'R8',
       action: 'remedial',
-      message: "Let's review the idea with pictures and simple steps — then you can continue. 🧠",
+      message: "Let’s open a short review with pictures and steps — then you can continue. 🧠",
       hintLevel: null,
       showRemedial: true,
       adjustDifficulty: 'down',

@@ -1,12 +1,10 @@
 /**
- * Personalized Hint Service — 3-level Socratic hints for every error type.
+ * Personalized Hint Service — up to two Socratic hints per wrong attempt, then remedial.
  *
- * Level 1 — single casual redirecting question, no formula, varied openers
- * Level 2 — points to the specific formula part or step that was wrong
- * Level 3 — names the exact mistake precisely, stops before giving the answer
+ * Level 1 — light redirect tied to the student’s submitted value (sn)
+ * Level 2 — clearer nudge on the mistaken operation or step (still no direct answer)
  *
  * Every hint addresses the student directly ("you") and references their answer (sn).
- * No two cases use the same sentence structure at the same level.
  */
 
 const { formatStudentAnswerForUi } = require('./errorDetectionService');
@@ -16,7 +14,7 @@ function snippetOf(studentAnswer, unit) {
 }
 
 function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
-  const L     = Math.min(Math.max(parseInt(level, 10) || 1, 1), 3);
+  const L     = Math.min(Math.max(parseInt(level, 10) || 1, 1), 2);
   const sn    = snippetOf(studentAnswer, question.unit);
   const f     = question.formula || 'the correct formula';
   const type  = errorInfo?.type || 'wrong_answer';
@@ -35,6 +33,13 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
         `Hmm — you got ${sn}. How many sides does a square have?`,
         `Your answer is 2 × side, so you counted two sides. A square has four equal sides — how should that change your total?`,
         `You multiplied by 2 instead of 4. Perimeter of a square = 4 × side because all four sides are identical and must be counted.`
+      );
+
+    case 'square_perimeter_subtract_instead_multiply':
+      return pick(
+        `You wrote ${sn}. Did you subtract one number from the other, or multiply?`,
+        `Your result matches “side minus 4.” In P = 4 × side, the 4 tells you how many equal sides to count — the operation between 4 and the side is multiplication, not subtraction.`,
+        `You subtracted (${sn} comes from subtraction). Perimeter = 4 × side: multiply the side length by 4. Never subtract the 4 from the side.`
       );
 
     case 'square_area_instead_of_perimeter':
@@ -583,6 +588,44 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
         `Re-read what the question is charging for — is it charging per unit of area, or per unit of length?`,
         `The cost rate tells you which formula to use. "Per m²" means area; "per m" means perimeter/length. Which one does this question use?`,
         `Identify the cost basis: if the rate is "per m²", calculate area × rate. If "per m", calculate perimeter × rate. You used the wrong measurement type.`
+      );
+
+    // ── Generic algebraic (+/−/×/÷ confusion from question numbers) ─────────
+
+    case 'algebraic_subtract_instead_multiply':
+      return pick(
+        `You wrote ${sn}. Does that value come from subtracting two numbers that should grow the total together instead?`,
+        `Your answer fits “one amount minus another.” Here those pieces should be multiplied, not subtracted — swap − for × using the same numbers.`
+      );
+
+    case 'algebraic_divide_instead_multiply':
+      return pick(
+        `You have ${sn}. Did you divide two quantities where the problem expects you to combine them into one larger amount?`,
+        `Your result lines up with a ÷ b pattern. The next step needs a product (×), not a quotient — multiply those two values instead.`
+      );
+
+    case 'algebraic_multiply_instead_divide':
+      return pick(
+        `${sn} is pretty large — could you have multiplied when the numbers actually need to be split or scaled down?`,
+        `Your value matches a × b style step. Here you should share or ratio the amounts: use division (÷) where you used multiplication.`
+      );
+
+    case 'algebraic_add_instead_divide':
+      return pick(
+        `You entered ${sn}. Does that come from adding, when the story is really about splitting something evenly or finding “how many fit”?`,
+        `Your answer looks like a sum. This situation calls for division — use ÷ on the relevant pair instead of +.`
+      );
+
+    case 'algebraic_divide_instead_add':
+      return pick(
+        `You got ${sn}. Could that be from dividing two parts that were supposed to be totaled?`,
+        `Your number matches a ÷ step. Those two amounts should be added first (+), not divided — combine them, then finish any later steps.`
+      );
+
+    case 'algebraic_subtract_instead_add':
+      return pick(
+        `${sn} — is that what you get after taking away, when the question really wants a combined total?`,
+        `Your result matches subtraction. Here you need the sum of those parts (+), not the difference — add them and continue.`
       );
 
     // ── DEFAULT ──────────────────────────────────────────────────────────────

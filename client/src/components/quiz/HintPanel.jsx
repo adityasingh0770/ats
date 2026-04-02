@@ -3,16 +3,17 @@ import { Lightbulb } from 'lucide-react';
 
 const dotColors = ['bg-[#FF6500]', 'bg-teal-500', 'bg-purple-500'];
 
-export default function HintPanel({ hints, currentLevel, maxLevel = 3 }) {
+export default function HintPanel({ hints, currentLevel, maxLevel = 2 }) {
+  const dotCount = Math.max(1, Math.min(maxLevel, 3));
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-[#888888]">Hints for your answer</span>
         <div className="flex gap-1" aria-hidden>
-          {[0, 1, 2].map((l) => (
+          {Array.from({ length: dotCount }, (_, idx) => (
             <div
-              key={l}
-              className={`w-5 h-1.5 rounded-full transition-colors ${l < currentLevel ? dotColors[l] : 'bg-black/8'}`}
+              key={idx}
+              className={`w-5 h-1.5 rounded-full transition-colors ${idx < currentLevel ? dotColors[idx] : 'bg-black/8'}`}
             />
           ))}
         </div>

@@ -5,15 +5,12 @@ const { analyzeAnswer } = require('./itsAnalyzer');
  * Returns the hint for the requested level along with ITS diagnostic info.
  */
 async function resolveHint(question, _session, studentAnswer, errorInfo, hintLevel) {
-  const level = Math.min(Math.max(parseInt(hintLevel, 10) || 1, 1), 3);
+  const level = Math.min(Math.max(parseInt(hintLevel, 10) || 1, 1), 2);
 
-  // Run the ITS analysis (pure rule-based, no API calls)
+  // Run the ITS analysis (pure rule-based, no API calls) — two Socratic hints per wrong answer
   const analysis = analyzeAnswer(question, studentAnswer, errorInfo);
 
-  const content =
-    level === 1 ? analysis.hint_level_1 :
-    level === 2 ? analysis.hint_level_2 :
-    analysis.hint_level_3;
+  const content = level === 1 ? analysis.hint_level_1 : analysis.hint_level_2;
 
   return {
     level,

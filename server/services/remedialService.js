@@ -29,6 +29,14 @@ const ERROR_INSIGHT = {
     fix: 'Use P = 4 × s — add all four sides, do not square.',
     remember: 'P = 4 × s  (not s²)',
   },
+  square_perimeter_subtract_instead_multiply: {
+    label: 'Subtracted instead of multiplying by 4',
+    category: 'Wrong operation',
+    whatYouDid: 'You combined the side and 4 with subtraction (e.g. side − 4).',
+    whyWrong: 'The “4” in P = 4 × side means four equal sides — you multiply the side by 4, not subtract.',
+    fix: 'Compute 4 × side (multiplication), not side − 4.',
+    remember: 'P = 4 × s  (multiply, don’t subtract the 4)',
+  },
 
   // Perimeter — Rectangle
   rect_multiply_instead_of_perimeter: {
@@ -584,6 +592,56 @@ const ERROR_INSIGHT = {
     whyWrong: 'The rate in the question tells you which formula to use: "per m²" → area; "per m" → perimeter.',
     fix: 'Identify the rate unit, choose the matching formula, then multiply.',
     remember: 'per m² → area × rate  |  per m → perimeter × rate',
+  },
+
+  // Generic algebraic (operation confusion)
+  algebraic_subtract_instead_multiply: {
+    label: 'Subtracted instead of multiplying',
+    category: 'Wrong operation',
+    whatYouDid: 'You subtracted two values that should be multiplied.',
+    whyWrong: 'Taking a difference shrinks the total; the problem needed a product (scaling or repeated parts).',
+    fix: 'Use × between those two numbers, not −.',
+    remember: '“How many” or “all parts together” → often ×, not −',
+  },
+  algebraic_divide_instead_multiply: {
+    label: 'Divided instead of multiplying',
+    category: 'Wrong operation',
+    whatYouDid: 'You divided where a product was needed.',
+    whyWrong: 'Division splits; the question asked you to combine into one larger value.',
+    fix: 'Multiply the two quantities instead of dividing.',
+    remember: 'If the answer should grow with both inputs → ×',
+  },
+  algebraic_multiply_instead_divide: {
+    label: 'Multiplied instead of dividing',
+    category: 'Wrong operation',
+    whatYouDid: 'You multiplied where sharing or splitting was needed.',
+    whyWrong: 'Multiplication inflates the value; the situation called for fair shares or “how many fit”.',
+    fix: 'Divide the appropriate total by the given part.',
+    remember: 'Splitting / per-unit → often ÷',
+  },
+  algebraic_add_instead_divide: {
+    label: 'Added instead of dividing',
+    category: 'Wrong operation',
+    whatYouDid: 'You added when you needed to split or scale down.',
+    whyWrong: 'A sum is too large; the problem needed a ratio or equal parts.',
+    fix: 'Use division on the values from the problem instead of adding them.',
+    remember: 'Equal parts or “how many in one” → ÷',
+  },
+  algebraic_divide_instead_add: {
+    label: 'Divided instead of adding',
+    category: 'Wrong operation',
+    whatYouDid: 'You divided parts that should be totaled.',
+    whyWrong: 'The question asked for a combined amount, not a share.',
+    fix: 'Add the relevant amounts first, then apply any other step.',
+    remember: 'Total / together → + before other ops',
+  },
+  algebraic_subtract_instead_add: {
+    label: 'Subtracted instead of adding',
+    category: 'Wrong operation',
+    whatYouDid: 'You subtracted where a total was needed.',
+    whyWrong: 'Difference misses one of the parts the problem tells you to include.',
+    fix: 'Add the pieces (+), don’t take the difference.',
+    remember: '“Total” / “all together” → sum with +',
   },
 
   // MCQ / T-F

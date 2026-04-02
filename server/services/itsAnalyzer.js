@@ -2,7 +2,7 @@
  * ITS Analyzer — Intelligent Tutoring System Core Engine
  *
  * Analyzes a student's answer, infers the most likely mistake pattern,
- * and generates 3 adaptive hint levels WITHOUT revealing the correct answer.
+ * and generates 2 adaptive hints (from the current wrong answer) without revealing the correct answer.
  * 100% rule-based — no external API or LLM.
  *
  * Output format:
@@ -14,7 +14,7 @@
  *   message           : string,   // encouragement if correct, else ''
  *   hint_level_1      : string,
  *   hint_level_2      : string,
- *   hint_level_3      : string,
+ *   hint_level_3      : '' (reserved),
  * }
  */
 
@@ -118,6 +118,8 @@ const ERROR_TYPE_LABEL = {
   // Extended perimeter — Square
   square_three_sides_perimeter: 'Counted 3 sides instead of 4 (answer = 3 × side)',
   square_one_side_only:         'Wrote the side length itself as the perimeter (counted 1 side)',
+  square_perimeter_subtract_instead_multiply:
+    'Subtracted the 4 from the side (e.g. side − 4) instead of multiplying 4 × side for perimeter',
 
   // Extended perimeter — Rectangle
   rect_two_lengths_only:        'Added only two lengths (2 × l) — forgot the two breadths',
@@ -149,6 +151,14 @@ const ERROR_TYPE_LABEL = {
   // Cost problems
   cost_forgot_rate:             'Calculated the area/perimeter correctly but forgot to multiply by the cost rate',
   cost_wrong_measure:           'Used the wrong measurement type (e.g., area instead of perimeter) for cost calculation',
+
+  // Generic algebraic (pairwise +/−/×/÷)
+  algebraic_subtract_instead_multiply: 'Subtracted two quantities where the formula needs their product',
+  algebraic_divide_instead_multiply:   'Divided where the formula needs a product',
+  algebraic_multiply_instead_divide:     'Multiplied where the formula needs division',
+  algebraic_add_instead_divide:         'Added where the formula needs division',
+  algebraic_divide_instead_add:         'Divided where the formula needs a sum',
+  algebraic_subtract_instead_add:       'Subtracted where the formula needs a sum',
 };
 
 // ── Confidence levels per error type ─────────────────────────────────────────
@@ -220,6 +230,7 @@ const CONFIDENCE_LEVEL = {
   // Extended patterns — all value-matched → high
   square_three_sides_perimeter:    'high',
   square_one_side_only:            'high',
+  square_perimeter_subtract_instead_multiply: 'high',
   rect_two_lengths_only:           'high',
   rect_two_breadths_only:          'high',
   rect_triangle_area:              'high',
@@ -233,6 +244,13 @@ const CONFIDENCE_LEVEL = {
   cylinder_diameter_as_radius_vol: 'high',
   cost_forgot_rate:                'high',
   cost_wrong_measure:              'medium',
+
+  algebraic_subtract_instead_multiply: 'high',
+  algebraic_divide_instead_multiply:   'medium',
+  algebraic_multiply_instead_divide:   'medium',
+  algebraic_add_instead_divide:         'medium',
+  algebraic_divide_instead_add:         'medium',
+  algebraic_subtract_instead_add:       'medium',
 };
 
 // ── Detected-pattern descriptions ────────────────────────────────────────────
@@ -357,6 +375,8 @@ const DETECTED_PATTERN = {
     'Student computed 3 × side — counted three sides of the square instead of all four.',
   square_one_side_only:
     'Student submitted the side length itself as the answer — effectively counted only one side.',
+  square_perimeter_subtract_instead_multiply:
+    'Student subtracted 4 from the side (or 4 − side) treating “4” like a number to combine with subtraction instead of multiplying 4 × side.',
 
   // Extended perimeter — Rectangle
   rect_two_lengths_only:
@@ -401,6 +421,19 @@ const DETECTED_PATTERN = {
     'Student computed the correct area or perimeter but forgot to multiply by the cost rate.',
   cost_wrong_measure:
     'Student used the wrong measurement type for the cost calculation (e.g., used area rate but perimeter was needed).',
+
+  algebraic_subtract_instead_multiply:
+    'Student subtracted two quantities where the correct path was to multiply them.',
+  algebraic_divide_instead_multiply:
+    'Student divided where the correct path was to multiply.',
+  algebraic_multiply_instead_divide:
+    'Student multiplied where the correct path was to divide.',
+  algebraic_add_instead_divide:
+    'Student added where the correct path was to divide.',
+  algebraic_divide_instead_add:
+    'Student divided where the correct path was to add.',
+  algebraic_subtract_instead_add:
+    'Student subtracted where the correct path was to add.',
 };
 
 // ── Main analyzer ─────────────────────────────────────────────────────────────
@@ -429,7 +462,7 @@ function analyzeAnswer(question, studentAnswer, precomputedError = null) {
     };
   }
 
-  // Use precomputed error if available (saves re-running detection)
+  // Use precomputed error from this submit (must match current student answer)
   const errorInfo = precomputedError || detectError(studentAnswer, question.answer, question);
   const errorType = errorInfo?.type || 'wrong_answer';
 
@@ -444,10 +477,8 @@ function analyzeAnswer(question, studentAnswer, precomputedError = null) {
   const confidence      = CONFIDENCE_LEVEL[resolvedType]    || 'low';
   const detectedPattern = DETECTED_PATTERN[resolvedType]    || DETECTED_PATTERN['wrong_answer'];
 
-  // Generate 3 adaptive Socratic hint levels
   const hint1 = buildPersonalizedHint(question, errorInfo, studentAnswer, 1);
   const hint2 = buildPersonalizedHint(question, errorInfo, studentAnswer, 2);
-  const hint3 = buildPersonalizedHint(question, errorInfo, studentAnswer, 3);
 
   return {
     is_correct:       false,
@@ -457,7 +488,7 @@ function analyzeAnswer(question, studentAnswer, precomputedError = null) {
     message:          '',
     hint_level_1:     hint1,
     hint_level_2:     hint2,
-    hint_level_3:     hint3,
+    hint_level_3:     '',
   };
 }
 

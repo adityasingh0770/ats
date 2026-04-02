@@ -241,14 +241,14 @@ const requestHint = async (req, res) => {
     const session = findSessionOne({ sessionId, userId: req.user._id });
     if (!session) return res.status(404).json({ message: 'Session not found.' });
 
-    if ((session.currentHintsUsed || 0) >= 3) {
-      return res.status(400).json({ message: 'You already have all hints for this question. Use the review or try again.' });
+    if ((session.currentHintsUsed || 0) >= 2) {
+      return res.status(400).json({ message: 'You already have both hints for this question. Use the review or try again.' });
     }
 
     const question = findById(session.currentQuestionId);
     if (!question) return res.status(404).json({ message: 'Current question not found.' });
 
-    const nextLevel = Math.min((session.currentHintsUsed || 0) + 1, 3);
+    const nextLevel = Math.min((session.currentHintsUsed || 0) + 1, 2);
     const hint = await resolveHint(
       question,
       session,

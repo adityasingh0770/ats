@@ -130,10 +130,17 @@ function extractCylinderDims(text) {
   return r && h ? { r, h } : null;
 }
 
-// ── General operation-confusion check (rectangle / 2-number cases) ────────────
+// ── General operation-confusion (needs two quantities: question text + formula) ─
 
-function inferOperationConfusion(ans, correct, questionText) {
-  const nums = findNumbersInQuestion(questionText);
+function collectNumbersForOperationConfusion(question) {
+  const fromQ = findNumbersInQuestion(question?.question || '');
+  const fromF = findNumbersInQuestion(question?.formula || '');
+  const merged = [...new Set([...fromQ, ...fromF])].filter((n) => n > 0 && n < 1e6);
+  return merged.length >= 2 ? merged : fromQ.length >= 2 ? fromQ : merged;
+}
+
+function inferOperationConfusion(ans, correct, question) {
+  const nums = collectNumbersForOperationConfusion(question);
   if (nums.length < 2) return null;
   for (let i = 0; i < nums.length; i++) {
     for (let j = i + 1; j < nums.length; j++) {
@@ -172,6 +179,134 @@ function inferOperationConfusion(ans, correct, questionText) {
           feedback: `⚠️ Your answer (${ans}) matches the perimeter formula. This question asks for area — the space inside.`,
           hintLead: `You used 2×(${a}+${b}). But the question asks for the space inside. Which simpler operation on length and breadth gives area?`,
           remedialLead: `2×(length+breadth) is perimeter. Area is about the space inside — multiply length × breadth directly.`,
+        });
+      }
+    }
+  }
+  return null;
+}
+
+/** How was `val` likely built from two givens a and b? */
+function classifyBinaryCombination(val, a, b, tol) {
+  if (val == null || Number.isNaN(val)) return null;
+  const t = Math.max(tol ?? 0.5, Math.abs(val) * 0.02 + 0.01);
+  if (near(val, a + b, t)) return 'add';
+  if (near(val, a - b, t)) return 'sub';
+  if (near(val, b - a, t)) return 'sub';
+  if (near(val, a * b, t)) return 'mul';
+  if (b !== 0 && near(val, a / b, t)) return 'div';
+  if (a !== 0 && near(val, b / a, t)) return 'div';
+  return null;
+}
+
+/**
+ * Numeric items: wrong + / − / × / ÷ on number pairs from question + formula (and 3-term sum vs product).
+ * Runs after shape-specific rules; complements inferOperationConfusion with subtraction/division cases.
+ */
+function inferAlgebraicPairsError(ans, correct, question) {
+  const qType = question?.type || 'direct_calculation';
+  if (qType === 'mcq' || qType === 'true_false') return null;
+  if (Number.isNaN(ans) || Number.isNaN(correct)) return null;
+
+  const raw = collectNumbersForOperationConfusion(question);
+  const nums = [...new Set(raw)].filter((n) => n > 0 && n < 1e6).sort((x, y) => x - y);
+  if (nums.length < 2) return null;
+
+  const tol = Math.max(0.5, Math.abs(correct) * 0.02);
+  if (near(ans, correct, tol)) return null;
+
+  if (nums.length === 3) {
+    const [a, b, c] = nums;
+    const sum3 = a + b + c;
+    const prod3 = a * b * c;
+    if (near(ans, sum3, tol) && near(correct, prod3, tol) && !near(sum3, prod3, tol)) {
+      return pack({
+        type: 'add_instead_of_multiply',
+        feedback: `⚠️ Your answer (${ans}) equals ${a} + ${b} + ${c}. Here the correct result uses multiplication of all three dimensions.`,
+        hintLead: `You summed the three numbers. Volume-type questions need all three multiplied together, not added.`,
+        remedialLead: `Use × between the three dimensions, not +.`,
+      });
+    }
+    if (near(ans, prod3, tol) && near(correct, sum3, tol) && !near(sum3, prod3, tol)) {
+      return pack({
+        type: 'multiply_instead_of_add',
+        feedback: `⚠️ Your answer (${ans}) equals ${a} × ${b} × ${c}, but the correct path adds parts first (or uses a smaller set of operations).`,
+        hintLead: `You multiplied everything. Check whether the formula asks you to add some terms before multiplying by an outer factor.`,
+        remedialLead: `Not every mensuration formula is “multiply all numbers in the question.”`,
+      });
+    }
+  }
+
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      const a = nums[i];
+      const b = nums[j];
+      const sKind = classifyBinaryCombination(ans, a, b, tol);
+      const cKind = classifyBinaryCombination(correct, a, b, tol);
+      if (!sKind || !cKind || sKind === cKind) continue;
+
+      if (sKind === 'add' && cKind === 'mul') {
+        return pack({
+          type: 'add_instead_of_multiply',
+          feedback: `⚠️ Your answer matches ${a} + ${b} = ${a + b}, but this step needs ${a} × ${b}.`,
+          hintLead: `You added. The correct combination for this step is multiplication.`,
+          remedialLead: `Use ×, not +, between these two values.`,
+        });
+      }
+      if (sKind === 'mul' && cKind === 'add') {
+        return pack({
+          type: 'multiply_instead_of_add',
+          feedback: `⚠️ Your answer matches ${a} × ${b} = ${a * b}, but this step needs ${a} + ${b}.`,
+          hintLead: `You multiplied. Here the formula expects you to add these two values first.`,
+          remedialLead: `Use +, not ×, for this pair.`,
+        });
+      }
+      if (sKind === 'sub' && cKind === 'mul') {
+        return pack({
+          type: 'algebraic_subtract_instead_multiply',
+          feedback: `⚠️ Your answer looks like a subtraction of the two values, not their product.`,
+          hintLead: `Subtraction doesn’t match this step — multiply the two quantities instead.`,
+          remedialLead: `Replace “−” with “×” for combining these numbers here.`,
+        });
+      }
+      if (sKind === 'div' && cKind === 'mul') {
+        return pack({
+          type: 'algebraic_divide_instead_multiply',
+          feedback: `⚠️ Your answer matches a division of the two values, but this step needs their product.`,
+          hintLead: `You divided where the formula needs multiplication.`,
+          remedialLead: `Multiply these two values for this step, don’t divide.`,
+        });
+      }
+      if (sKind === 'mul' && cKind === 'div') {
+        return pack({
+          type: 'algebraic_multiply_instead_divide',
+          feedback: `⚠️ Your answer matches a product, but this step requires division.`,
+          hintLead: `You multiplied when you likely need to divide — e.g. undoing × or splitting.`,
+          remedialLead: `Try dividing instead of multiplying for this pair.`,
+        });
+      }
+      if (sKind === 'add' && cKind === 'div') {
+        return pack({
+          type: 'algebraic_add_instead_divide',
+          feedback: `⚠️ Your answer matches a sum, but this step uses division.`,
+          hintLead: `Adding isn’t right here — think how many times one value fits into the other.`,
+          remedialLead: `Use division, not addition, between these quantities.`,
+        });
+      }
+      if (sKind === 'div' && cKind === 'add') {
+        return pack({
+          type: 'algebraic_divide_instead_add',
+          feedback: `⚠️ Your answer matches a division, but this step needs an addition.`,
+          hintLead: `You divided where the parts should be summed.`,
+          remedialLead: `Add the two values for this step.`,
+        });
+      }
+      if (sKind === 'sub' && cKind === 'add') {
+        return pack({
+          type: 'algebraic_subtract_instead_add',
+          feedback: `⚠️ Your answer matches a subtraction, but this step needs a sum.`,
+          hintLead: `You subtracted where lengths or parts should be added together.`,
+          remedialLead: `Use addition instead of subtraction for this pair.`,
         });
       }
     }
@@ -286,22 +421,22 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           remedialLead: `P = 4×side. You gave just one side value. Multiply by 4 to get the full boundary.`,
         });
       }
-      // Student added the formula coefficient (4) to the side instead of multiplying
-      if (near(ans, s + 4, 0.5) && !near(ans, perim, 0.5)) {
+      // P = 4×s: student did side − 4 (e.g. 7 − 4 = 3) — subtracted the factor instead of multiplying
+      if (!near(ans, perim, 0.5) && near(ans, s - 4, 0.5) && s > 4) {
         return pack({
-          type: 'add_instead_of_multiply',
-          feedback: `⚠️ ${s} + 4 = ${s + 4} — you added the factor 4 to the side. P = 4 × side means multiplication, not addition.`,
-          hintLead: `You got ${s + 4} = ${s} + 4. But P = 4 × a means multiply 4 by the side, not add them together.`,
-          remedialLead: `P = 4 × ${s} = ${perim}. The "×" in the formula means multiply. 4 × ${s} is very different from 4 + ${s}.`,
+          type: 'square_perimeter_subtract_instead_multiply',
+          feedback: `⚠️ ${ans} = ${s} − 4 — you subtracted 4 from the side. Perimeter needs 4 × side (four equal sides), not subtraction.`,
+          hintLead: `You computed ${s} − 4 = ${ans}. The “4” in P = 4 × side means “multiply the side by 4,” not “take 4 away from the side.”`,
+          remedialLead: `P = 4 × side. Use multiplication: 4 times the full side length. Subtraction (${s} − 4) does not match the perimeter formula.`,
         });
       }
-      // Student subtracted: s - 4 or 4 - s
-      if (near(ans, Math.abs(s - 4), 0.5) && !near(ans, perim, 0.5) && s !== 4) {
+      // Rare: 4 − side (would be negative for s > 4); if positive small mistake
+      if (!near(ans, perim, 0.5) && s < 4 && near(ans, 4 - s, 0.5)) {
         return pack({
-          type: 'add_instead_of_multiply',
-          feedback: `⚠️ You subtracted instead of multiplying. P = 4 × side — the operation is multiplication.`,
-          hintLead: `Your answer looks like ${s} − 4 or 4 − ${s}. The formula P = 4 × a uses multiplication — try 4 × ${s}.`,
-          remedialLead: `P = 4 × side. You seem to have used subtraction. Multiply 4 by the side length to get the perimeter.`,
+          type: 'square_perimeter_subtract_instead_multiply',
+          feedback: `⚠️ Your answer matches 4 − ${s}. The formula asks you to multiply the side by 4, not subtract the side from 4.`,
+          hintLead: `You subtracted the side from 4. Think: perimeter = 4 equal sides, each of length ${s} — should you subtract or multiply?`,
+          remedialLead: `P = 4 × side. Multiply 4 × ${s}, not 4 − ${s}.`,
         });
       }
     }
@@ -350,24 +485,6 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           remedialLead: `P = 2×(l+b). You only included 2b — add the two lengths as well: P = 2×${l} + 2×${b}.`,
         });
       }
-      // Student added l + b + 2 (added the coefficient 2) instead of 2×(l+b)
-      if (near(ans, l + b + 2, 0.5) && !near(ans, perim, 0.5)) {
-        return pack({
-          type: 'add_instead_of_multiply',
-          feedback: `⚠️ You added ${l}+${b}+2 = ${l+b+2}. P = 2×(l+b) means multiply by 2, not add 2.`,
-          hintLead: `Your answer = ${l}+${b}+2. But in P = 2×(l+b), the "2" is a multiplier — multiply (l+b) by 2, don't add 2 to it.`,
-          remedialLead: `P = 2 × (l+b) = 2 × ${l+b} = ${perim}. The 2 multiplies the whole bracket — it does not get added to l+b.`,
-        });
-      }
-      // Student added l + b + l + b wrong (possibly transposed / added differently)
-      if (near(ans, l + b + l, 0.5) && !near(ans, perim, 0.5)) {
-        return pack({
-          type: 'rect_sum_only_perimeter',
-          feedback: `⚠️ Your answer = l+b+l = ${l+b+l} — you included 3 sides but missed one breadth.`,
-          hintLead: `You added three sides. A rectangle has four — two lengths (${l}) and two breadths (${b}). Which side did you miss?`,
-          remedialLead: `P = l+b+l+b = 2×(l+b) = ${perim}. You were one side short.`,
-        });
-      }
     }
   }
 
@@ -404,25 +521,6 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           remedialLead: `C = 2πr. You got 2r — π (22/7) was not applied. Always include π when working with circles.`,
         });
       }
-      // Student added 2 + r or r + 2 (added the coefficient)
-      if (near(ans, 2 + r, 0.5) && !near(ans, circ, 0.5)) {
-        return pack({
-          type: 'add_instead_of_multiply',
-          feedback: `⚠️ 2 + ${r} = ${2+r} — you added 2 and r. C = 2πr means multiply: 2 × π × r.`,
-          hintLead: `You got 2 + ${r} = ${2+r}. In C = 2πr, every symbol is multiplied — 2 × π × r. Try multiplying instead of adding.`,
-          remedialLead: `C = 2 × π × r = 2 × (22/7) × ${r} = ${circ.toFixed(2)}. The operations are all multiplication, not addition.`,
-        });
-      }
-      // Student added π + r (forgot the 2 AND confused × with +)
-      const piPlusR = PI + r;
-      if (near(ans, piPlusR, Math.abs(piPlusR) * 0.05 + 0.5) && !near(ans, circ, 0.5)) {
-        return pack({
-          type: 'add_instead_of_multiply',
-          feedback: `⚠️ π + r ≈ ${piPlusR.toFixed(1)} — you added π and r. Both the 2 and π must multiply r: C = 2×π×r.`,
-          hintLead: `You seem to have added π + r. In C = 2πr, π is multiplied with r, not added — and there is also a 2 to include.`,
-          remedialLead: `C = 2 × π × r. None of the terms are added together — all three (2, π, r) are multiplied. Use 2 × (22/7) × ${r}.`,
-        });
-      }
     }
   }
 
@@ -439,24 +537,6 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           feedback: `⚠️ 4×${s} = ${perim} gives the boundary length (perimeter). This question wants the space the square covers.`,
           hintLead: `4×side gives the boundary length (perimeter). For area, think about how much space the square covers — what operation on the side gives that?`,
           remedialLead: `You used the perimeter formula. Area = side × side = s². Think: space inside, not boundary length.`,
-        });
-      }
-      // Student added s + s = 2s instead of multiplying s × s
-      if (near(ans, 2 * s, 0.5) && !near(ans, area, 0.5) && s > 1) {
-        return pack({
-          type: 'add_instead_of_multiply',
-          feedback: `⚠️ ${s} + ${s} = ${2*s} — you added the side twice. Area = s × s means multiply: ${s} × ${s} = ${area}.`,
-          hintLead: `You got ${2*s} = ${s}+${s}. Area uses multiplication: s × s = ${s} × ${s}. Adding and multiplying give very different results.`,
-          remedialLead: `Area = s × s = ${s} × ${s} = ${area}. You added s+s=${2*s}. "s²" means s multiplied by s, not s added to s.`,
-        });
-      }
-      // Student added s + 1 or some small off-by-one
-      if (near(ans, s + 1, 0.5) && !near(ans, area, 0.5)) {
-        return pack({
-          type: 'arithmetic_mistake',
-          feedback: `⚠️ ${s}+1 = ${s+1} — looks like a calculation slip. Area = s² = ${s}×${s} = ${area}.`,
-          hintLead: `You got ${s+1} which looks like ${s}+1. For area, you need to multiply the side by itself: ${s}×${s}.`,
-          remedialLead: `Area = s × s = ${s} × ${s} = ${area}. Check that you multiplied, not performed a different operation.`,
         });
       }
     }
@@ -1060,40 +1140,13 @@ const detectError = (studentAnswer, correctAnswer, question) => {
   //  GENERAL FALLBACK DETECTORS (apply when specific ones didn't fire)
   // ══════════════════════════════════════════════════════════════════════════
 
-  // ── Formula-constant confusion: student added/subtracted a formula coefficient
-  //    to/from a question value instead of multiplying (e.g., 7+4=11 for P=4×7)
-  {
-    const nums = findNumbersInQuestion(qtext);
-    // Common formula coefficients to check against
-    const coefficients = [2, 4, 6, 3, 5, 12];
-    for (const n of nums) {
-      if (n === ans) continue;
-      for (const c of coefficients) {
-        // n + c = ans (added coefficient to a question number)
-        if (near(ans, n + c, 0.5) && !near(ans, correct, 0.5)) {
-          return pack({
-            type: 'add_instead_of_multiply',
-            feedback: `⚠️ ${n} + ${c} = ${ans} — you added a formula constant to the value. The formula uses multiplication, not addition.`,
-            hintLead: `You got ${n} + ${c} = ${ans}. But the formula calls for multiplication. Try ${c} × ${n} and see if that matches the correct formula.`,
-            remedialLead: `Check the formula: every symbol connected by × must be multiplied, not added. Use ${formula || 'the correct formula'} with the values from the question.`,
-          });
-        }
-        // n - c = ans (subtracted coefficient)
-        if (c < n && near(ans, n - c, 0.5) && !near(ans, correct, 0.5)) {
-          return pack({
-            type: 'add_instead_of_multiply',
-            feedback: `⚠️ ${n} − ${c} = ${ans} — you subtracted a formula constant. The formula uses multiplication (×), not subtraction.`,
-            hintLead: `Your answer = ${n} − ${c}. The formula uses × (multiplication) between its terms. Try multiplying those values instead.`,
-            remedialLead: `Use ${formula || 'the correct formula'} — substitute the values and multiply (×) as the formula requires, not subtract or add.`,
-          });
-        }
-      }
-    }
-  }
-
-  // General operation confusion (rectangle/2-number cases)
-  const opErr = inferOperationConfusion(ans, correct, qtext);
+  // General operation confusion (rectangle / 2-number cases; includes formula constants)
+  const opErr = inferOperationConfusion(ans, correct, question);
   if (opErr) return opErr;
+
+  // Broader + / − / × / ÷ mistakes on any pair from question + formula
+  const algErr = inferAlgebraicPairsError(ans, correct, question);
+  if (algErr) return algErr;
 
   // Radius / Diameter confusion for circle & cylinder
   if (shape === 'circle' || shape === 'cylinder') {
@@ -1176,43 +1229,22 @@ const detectError = (studentAnswer, correctAnswer, question) => {
     });
   }
 
-  // Partial formula (answer too small) — check before final fallback
+  // Partial formula (answer too small)
   if (ans > 0 && correct !== 0 && ans < Math.abs(correct) * 0.75) {
-    // Extra: check if ans could be the result of using one number from the question
-    const nums = findNumbersInQuestion(qtext);
-    const singleNumberMatch = nums.some(n => near(ans, n, 0.5));
-    if (singleNumberMatch) {
-      return pack({
-        type: 'partial_formula',
-        feedback: `⚠️ Your answer matches a value already in the question — looks like you may not have applied the formula yet.`,
-        hintLead: `That number appears in the question itself. You need to use ${formula} with the question's values to compute the answer.`,
-        remedialLead: `Write ${formula}, find each variable in the question, substitute, then calculate. Don't copy a number from the question as your answer.`,
-      });
-    }
     return pack({
       type: 'partial_formula',
-      feedback: `⚠️ Your answer is smaller than expected — did you complete every step of ${formula}?`,
-      hintLead: `Your answer is lower than expected. Check every symbol in ${formula} — is there a factor you left out or a step you stopped early?`,
-      remedialLead: `Write out ${formula} in full and substitute every symbol from the question. Don't skip any multiplication or factor.`,
+      feedback: `⚠️ Partial formula! Your answer is smaller than expected — did you apply the complete formula? Formula: ${formula}`,
+      hintLead: `Your answer is lower than expected. Make sure you completed every part of the formula: ${formula}. Did you miss a step or factor?`,
+      remedialLead: `You may have stopped halfway through the formula or left out a factor. Write out ${formula} fully and substitute every symbol.`,
     });
   }
 
-  // Answer larger than correct — could be wrong formula or coefficient error
-  if (ans > 0 && correct !== 0 && ans > Math.abs(correct) * 1.5) {
-    return pack({
-      type: 'formula_swap',
-      feedback: `⚠️ Your answer is much larger than expected. Check that you're using the right formula — ${formula}.`,
-      hintLead: `Your answer is significantly larger than expected. Re-read the question: which measurement does it ask for? Use only ${formula}.`,
-      remedialLead: `Write ${formula}, substitute each value, and check that you haven't swapped in a formula for a different measurement type.`,
-    });
-  }
-
-  // Final fallback — always give concrete next step with the formula
+  // Final fallback
   return pack({
     type: 'wrong_answer',
-    feedback: `❌ Incorrect. Write ${formula}, substitute the values from the question, and calculate step by step.`,
-    hintLead: `Write out ${formula} and substitute each value from the question — calculate one operation at a time and see where your working differs.`,
-    remedialLead: `Your answer doesn't match. Use ${formula}: write it out, fill in every variable from the question, and multiply/add exactly as the formula shows.`,
+    feedback: `❌ Incorrect. The formula to use is: ${formula}. Review the concept and try again.`,
+    hintLead: `Try working through ${formula} step by step using the values from the question. Write down each step to spot where things go differently.`,
+    remedialLead: `Your answer doesn't match the expected result. Review ${formula} with the numbers given in the question.`,
   });
 };
 

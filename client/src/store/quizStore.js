@@ -43,6 +43,9 @@ export const useQuizStore = create((set, get) => ({
 
   setFeedback: (feedback) => set({ feedback }),
 
+  /** Clear hints when student retries after a wrong attempt so new mistakes get fresh hints. */
+  clearQuestionHints: () => set({ hint: null, hints: [], hintLevel: 0 }),
+
   setHint: (hint) => set((s) => ({
     hint,
     hintLevel: hint?.level || 0,

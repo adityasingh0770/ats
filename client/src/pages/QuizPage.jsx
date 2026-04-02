@@ -32,7 +32,7 @@ export default function QuizPage() {
     sessionId, currentQuestion, conceptMaterial, phase, feedback,
     hint, hints, hintLevel,
     remedialContent, progress, currentDifficulty,
-    setSession, startQuiz: storeStartQuiz, setFeedback, setHint,
+    setSession, startQuiz: storeStartQuiz, setFeedback, setHint, clearQuestionHints,
     setRemedial, setNextQuestion, incrementAttempt, reset, resumeQuiz,
   } = useQuizStore();
 
@@ -102,10 +102,11 @@ export default function QuizPage() {
 
   const handleRetry = useCallback(() => {
     setFeedback(null);
+    clearQuestionHints();
     setLastResponse(null);
     setInputKey(k => k + 1);
     timeRef.current = Date.now();
-  }, [setFeedback, setLastResponse]);
+  }, [setFeedback, clearQuestionHints, setLastResponse]);
 
   const handleTerminate = async () => {
     if (!sessionId || terminating) return;
@@ -245,7 +246,7 @@ export default function QuizPage() {
                 disabled={isAnswerLocked || submitting} />
               <AnimatePresence>
                 {hintLevel > 0 && (
-                  <HintPanel hints={hints} currentLevel={hintLevel} maxLevel={3} />
+                  <HintPanel hints={hints} currentLevel={hintLevel} maxLevel={2} />
                 )}
               </AnimatePresence>
               <AnimatePresence>

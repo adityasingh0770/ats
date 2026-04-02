@@ -95,12 +95,6 @@ export default function QuestionCard({ question, onSubmit, timeRef, disabled, in
       {/* Question text */}
       <div className="space-y-2">
         <p className="text-sm text-[#111111] leading-relaxed font-medium">{question.question}</p>
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-[#AAAAAA]">Formula:</span>
-          <code className="text-xs text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-200 font-mono">
-            {question.formula}
-          </code>
-        </div>
       </div>
 
 
