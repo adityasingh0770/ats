@@ -2,13 +2,17 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Badge from '../ui/Badge';
 import { topicIcon, shapeIcon, formatTopicName, formatShapeName, classifyMastery, topicColor } from '../../utils/masteryCalc';
-import { ChevronRight, Lock } from 'lucide-react';
+import { ChevronRight, Lock, CheckCircle2 } from 'lucide-react';
+import { completedSubtopicCount, subtopicsNeededForNext, SUBTOPIC_DONE_THRESHOLD } from '../../utils/topicProgression';
 
-export default function TopicCard({ topic, shapes, index, locked = false, lockHint }) {
+export default function TopicCard({ topic, shapes, index, locked = false, lockHint, conceptProgress }) {
   const navigate = useNavigate();
   const accent = topicColor(topic);
   const overall = Object.values(shapes).reduce((s, v) => s + v.score, 0) / Object.keys(shapes).length;
   const TopicIcon = topicIcon(topic);
+
+  const doneSoFar = completedSubtopicCount(conceptProgress, topic);
+  const needed = subtopicsNeededForNext(topic);
 
   return (
     <motion.div
@@ -35,7 +39,16 @@ export default function TopicCard({ topic, shapes, index, locked = false, lockHi
             <span className="text-[9px] font-bold uppercase tracking-wide text-[#AAAAAA]">Locked</span>
           )}
         </div>
-        {!locked && <span className="text-sm font-black text-[#111111]">{Math.round(overall * 100)}%</span>}
+        <div className="flex items-center gap-2">
+          {!locked && (
+            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+              doneSoFar >= needed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+            }`}>
+              {doneSoFar}/{Object.keys(shapes).length} done
+            </span>
+          )}
+          {!locked && <span className="text-sm font-black text-[#111111]">{Math.round(overall * 100)}%</span>}
+        </div>
       </div>
 
       {locked && lockHint && <p className="text-[11px] text-[#888888] mb-3 leading-snug">{lockHint}</p>}
@@ -44,6 +57,7 @@ export default function TopicCard({ topic, shapes, index, locked = false, lockHi
         {Object.entries(shapes).map(([shape, data]) => {
           const ShapeIcon = shapeIcon(shape);
           const pct = Math.round(data.score * 100);
+          const shapeDone = data.score >= SUBTOPIC_DONE_THRESHOLD;
           return (
             <motion.button
               key={shape}
@@ -55,17 +69,23 @@ export default function TopicCard({ topic, shapes, index, locked = false, lockHi
               className={`w-full group flex items-center gap-2 px-2 py-1.5 rounded-xl transition-colors ${
                 locked
                   ? 'cursor-not-allowed opacity-50'
-                  : 'hover:bg-[#F5F3F0]'
+                  : shapeDone
+                    ? 'hover:bg-emerald-50'
+                    : 'hover:bg-[#F5F3F0]'
               }`}
             >
-              <ShapeIcon
-                className={`w-3 h-3 shrink-0 transition-colors ${
-                  locked ? 'text-[#CCCCCC]' : 'text-[#CCCCCC] group-hover:text-[#888888]'
-                }`}
-              />
+              {shapeDone && !locked ? (
+                <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-500" />
+              ) : (
+                <ShapeIcon
+                  className={`w-3 h-3 shrink-0 transition-colors ${
+                    locked ? 'text-[#CCCCCC]' : 'text-[#CCCCCC] group-hover:text-[#888888]'
+                  }`}
+                />
+              )}
               <span
                 className={`text-xs w-20 text-left shrink-0 transition-colors ${
-                  locked ? 'text-[#BBBBBB]' : 'text-[#888888] group-hover:text-[#444444]'
+                  locked ? 'text-[#BBBBBB]' : shapeDone ? 'text-emerald-700 font-medium' : 'text-[#888888] group-hover:text-[#444444]'
                 }`}
               >
                 {formatShapeName(shape)}
@@ -76,10 +96,10 @@ export default function TopicCard({ topic, shapes, index, locked = false, lockHi
                   animate={{ width: `${pct}%` }}
                   transition={{ duration: 0.8, ease: 'easeOut', delay: index * 0.06 + 0.1 }}
                   className="h-full rounded-full"
-                  style={{ background: locked ? '#D0D0D0' : accent }}
+                  style={{ background: locked ? '#D0D0D0' : shapeDone ? '#10b981' : accent }}
                 />
               </div>
-              <span className={`text-xs w-7 text-right shrink-0 ${locked ? 'text-[#CCCCCC]' : 'text-[#AAAAAA]'}`}>
+              <span className={`text-xs w-7 text-right shrink-0 ${locked ? 'text-[#CCCCCC]' : shapeDone ? 'text-emerald-600' : 'text-[#AAAAAA]'}`}>
                 {pct}%
               </span>
               {!locked && (

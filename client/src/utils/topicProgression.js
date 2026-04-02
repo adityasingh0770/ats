@@ -1,4 +1,4 @@
-/** Linear curriculum: must complete each topic before the next unlocks. */
+/** Linear curriculum: complete 50% of a topic's shapes to unlock the next topic. */
 export const TOPIC_ORDER = ['perimeter', 'area', 'surface_area', 'volume'];
 
 export const SHAPES_BY_TOPIC = {
@@ -8,23 +8,29 @@ export const SHAPES_BY_TOPIC = {
   volume: ['cube', 'cuboid', 'cylinder'],
 };
 
-const AVG_MASTERY_THRESHOLD = 0.38;
+/** Mastery score that counts a shape as "done" (student has completed ≥1 session) */
+export const SUBTOPIC_DONE_THRESHOLD = 0.10;
 
-/**
- * Topic is "complete" when average mastery across its shapes meets threshold.
- */
-export function isTopicComplete(conceptProgress, topic) {
+/** Minimum shapes that must be done (50% rounded up) to unlock the next topic */
+export function subtopicsNeededForNext(topic) {
   const shapes = SHAPES_BY_TOPIC[topic];
-  const prog = conceptProgress?.[topic];
-  if (!shapes?.length || !prog) return false;
-  let sum = 0;
-  for (const s of shapes) {
-    sum += prog[s]?.score ?? 0;
-  }
-  return sum / shapes.length >= AVG_MASTERY_THRESHOLD;
+  return Math.ceil((shapes?.length ?? 0) * 0.5);
 }
 
-/** Index of last topic that is unlocked (0 = perimeter only). */
+/** How many shapes in a topic the student has completed */
+export function completedSubtopicCount(conceptProgress, topic) {
+  const shapes = SHAPES_BY_TOPIC[topic];
+  const prog = conceptProgress?.[topic];
+  if (!shapes || !prog) return 0;
+  return shapes.filter((s) => (prog[s]?.score ?? 0) >= SUBTOPIC_DONE_THRESHOLD).length;
+}
+
+/** True when ≥50% of the topic's shapes are done */
+export function isTopicComplete(conceptProgress, topic) {
+  return completedSubtopicCount(conceptProgress, topic) >= subtopicsNeededForNext(topic);
+}
+
+/** Index of the last topic that is unlocked (0 = only perimeter). */
 export function getLastUnlockedTopicIndex(conceptProgress) {
   if (!conceptProgress) return 0;
   let last = 0;
@@ -45,8 +51,10 @@ export function isTopicUnlocked(conceptProgress, topic) {
 export function unlockHintForTopic(topic) {
   const idx = TOPIC_ORDER.indexOf(topic);
   if (idx <= 0) return null;
-  const need = TOPIC_ORDER[idx - 1];
-  return `Finish ${formatTopicLabel(need)} (raise average mastery across all shapes) to unlock this topic.`;
+  const prevTopic = TOPIC_ORDER[idx - 1];
+  const needed = subtopicsNeededForNext(prevTopic);
+  const total = SHAPES_BY_TOPIC[prevTopic].length;
+  return `Complete ${needed}/${total} shapes in ${formatTopicLabel(prevTopic)} to unlock this topic.`;
 }
 
 function formatTopicLabel(t) {

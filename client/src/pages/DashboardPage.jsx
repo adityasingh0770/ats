@@ -153,6 +153,7 @@ export default function DashboardPage() {
                   index={i}
                   locked={locked}
                   lockHint={locked ? unlockHintForTopic(topic) : null}
+                  conceptProgress={conceptProgress}
                 />
               );
             })}

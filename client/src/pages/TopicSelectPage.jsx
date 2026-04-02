@@ -3,13 +3,16 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/layout/PageWrapper';
 import { topicIcon, shapeIcon, formatTopicName, formatShapeName, topicColor } from '../utils/masteryCalc';
-import { Lock, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { getDashboard } from '../services/quizService';
 import {
   TOPIC_ORDER,
   SHAPES_BY_TOPIC,
   getLastUnlockedTopicIndex,
   unlockHintForTopic,
+  completedSubtopicCount,
+  subtopicsNeededForNext,
+  SUBTOPIC_DONE_THRESHOLD,
 } from '../utils/topicProgression';
 import { FullPageLoader } from '../components/ui/LoadingSpinner';
 
@@ -58,6 +61,11 @@ export default function TopicSelectPage() {
             const unlocked = topicIdx <= lastUnlockedIdx;
             const hint = unlockHintForTopic(t.topic);
 
+            // Progress toward unlocking the next topic
+            const doneSoFar = completedSubtopicCount(conceptProgress, t.topic);
+            const needed = subtopicsNeededForNext(t.topic);
+            const isCurrentlyGating = unlocked && topicIdx === lastUnlockedIdx && doneSoFar < needed;
+
             return (
               <motion.li
                 key={t.topic}
@@ -90,8 +98,25 @@ export default function TopicSelectPage() {
                       {!unlocked && (
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-[#AAAAAA]">Locked</span>
                       )}
+                      {/* Progress pill: show on unlocked topics */}
+                      {unlocked && (
+                        <span
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                            doneSoFar >= needed
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}
+                        >
+                          {doneSoFar}/{t.shapes.length} done
+                        </span>
+                      )}
                     </div>
                     {!unlocked && hint && <p className="text-[10px] text-[#888888] mt-0.5 leading-snug">{hint}</p>}
+                    {isCurrentlyGating && (
+                      <p className="text-[10px] text-amber-600 mt-0.5 leading-snug">
+                        Complete {needed - doneSoFar} more shape{needed - doneSoFar > 1 ? 's' : ''} here to unlock the next topic.
+                      </p>
+                    )}
                   </div>
                   {unlocked && (
                     <ArrowRight className="w-4 h-4 text-[#CCCCCC] shrink-0 hidden sm:block" aria-hidden />
@@ -103,6 +128,7 @@ export default function TopicSelectPage() {
                     {t.shapes.map((shape, shapeIdx) => {
                       const ShapeIcon = shapeIcon(shape);
                       const canStart = unlocked;
+                      const shapeDone = (conceptProgress?.[t.topic]?.[shape]?.score ?? 0) >= SUBTOPIC_DONE_THRESHOLD;
                       return (
                         <motion.button
                           key={shape}
@@ -113,18 +139,28 @@ export default function TopicSelectPage() {
                           transition={{ delay: topicIdx * 0.06 + shapeIdx * 0.03 }}
                           whileTap={canStart ? { scale: 0.98 } : {}}
                           onClick={() => canStart && navigate(`/quiz/${t.topic}/${shape}`)}
-                          className={`group py-1 px-1 rounded-md flex flex-row items-center justify-center gap-0.5 border transition-colors min-h-0 ${
+                          className={`group py-1 px-1 rounded-md flex flex-row items-center justify-center gap-0.5 border transition-colors min-h-0 relative ${
                             canStart
-                              ? 'border-[#E2DFDA] bg-[#F3F1EE] hover:bg-white hover:border-[#C9C5BF] cursor-pointer'
+                              ? shapeDone
+                                ? 'border-emerald-200 bg-emerald-50 hover:bg-emerald-100 cursor-pointer'
+                                : 'border-[#E2DFDA] bg-[#F3F1EE] hover:bg-white hover:border-[#C9C5BF] cursor-pointer'
                               : 'border-[#EBE9E6] bg-[#F4F3F1] cursor-not-allowed opacity-60'
                           }`}
                         >
-                          <ShapeIcon
-                            className={`w-2.5 h-2.5 shrink-0 ${canStart ? 'text-[#999999] group-hover:text-[#555555]' : 'text-[#D0D0D0]'}`}
-                          />
+                          {shapeDone && canStart ? (
+                            <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
+                          ) : (
+                            <ShapeIcon
+                              className={`w-2.5 h-2.5 shrink-0 ${canStart ? 'text-[#999999] group-hover:text-[#555555]' : 'text-[#D0D0D0]'}`}
+                            />
+                          )}
                           <span
                             className={`text-[9px] font-semibold leading-tight truncate ${
-                              canStart ? 'text-[#555555] group-hover:text-[#111111]' : 'text-[#BBBBBB]'
+                              canStart
+                                ? shapeDone
+                                  ? 'text-emerald-700'
+                                  : 'text-[#555555] group-hover:text-[#111111]'
+                                : 'text-[#BBBBBB]'
                             }`}
                           >
                             {formatShapeName(shape)}

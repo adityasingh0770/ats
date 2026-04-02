@@ -17,12 +17,47 @@ const { calculateMastery, updateConfidenceScore, difficultyFromMastery } = requi
 
 const MAX_QUESTIONS_PER_SESSION = 8;
 
+// Topic progression constants (mirrors client/src/utils/topicProgression.js)
+const TOPIC_ORDER = ['perimeter', 'area', 'surface_area', 'volume'];
+const SHAPES_BY_TOPIC = {
+  perimeter: ['square', 'rectangle', 'circle'],
+  area: ['square', 'rectangle', 'circle'],
+  surface_area: ['cube', 'cuboid', 'cylinder'],
+  volume: ['cube', 'cuboid', 'cylinder'],
+};
+const SUBTOPIC_DONE_THRESHOLD = 0.10;
+
+function topicLabel(t) {
+  return String(t).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 const startQuiz = async (req, res) => {
   try {
     const { topic, shape } = req.body;
     if (!topic || !shape) return res.status(400).json({ message: 'Topic and shape are required.' });
 
     const learner = findLearnerByUserId(req.user._id);
+
+    // ── Progression gate: require 50% of previous topic's shapes done ──────────
+    const topicIdx = TOPIC_ORDER.indexOf(topic);
+    if (topicIdx > 0) {
+      const prevTopic = TOPIC_ORDER[topicIdx - 1];
+      const prevShapes = SHAPES_BY_TOPIC[prevTopic];
+      const needed = Math.ceil(prevShapes.length * 0.5);
+      const done = prevShapes.filter(
+        (s) => getMastery(learner, `${prevTopic}_${s}`) >= SUBTOPIC_DONE_THRESHOLD
+      ).length;
+      if (done < needed) {
+        return res.status(403).json({
+          message: `Complete at least ${needed} of ${prevShapes.length} shapes in ${topicLabel(prevTopic)} before starting ${topicLabel(topic)}.`,
+          code: 'TOPIC_LOCKED',
+          needed,
+          done,
+          prevTopic,
+        });
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────────
     const conceptKey = `${topic}_${shape}`;
     const masteryScore = learner ? getMastery(learner, conceptKey) : 0;
     const startDifficulty = difficultyFromMastery(masteryScore);
