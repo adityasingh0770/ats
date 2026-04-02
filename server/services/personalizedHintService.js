@@ -460,6 +460,131 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
         `Don't copy a given value as your answer. Set up the formula, substitute the known numbers, and solve for the missing quantity.`
       );
 
+    // ── EXTENDED PERIMETER — Square ──────────────────────────────────────────
+
+    case 'square_three_sides_perimeter':
+      return pick(
+        `Close — you multiplied by 3. How many sides does a square actually have?`,
+        `You used 3 × side. A square has four equal sides — one more than you counted. How does that change the multiplier?`,
+        `P = 4 × side. You used 3 — one side was missed. All four sides are equal and must all be counted.`
+      );
+
+    case 'square_one_side_only':
+      return pick(
+        `You wrote the side length — but perimeter goes all the way around. How many sides need to be counted?`,
+        `That's the length of one side. Perimeter is the total of all sides — a square has four of them.`,
+        `P = 4 × side. You gave just the side value (× 1). Multiply by 4 to include all four equal sides.`
+      );
+
+    // ── EXTENDED PERIMETER — Rectangle ───────────────────────────────────────
+
+    case 'rect_two_lengths_only':
+      return pick(
+        `You've counted both long sides — but a rectangle has another pair too. Which sides are missing?`,
+        `2 × l gives both lengths. A rectangle also has two breadths. How do you include those in the perimeter?`,
+        `P = 2l + 2b. You computed 2l — the two breadths (each = b) are still missing. Add 2b to complete the perimeter.`
+      );
+
+    case 'rect_two_breadths_only':
+      return pick(
+        `You've counted both short sides — but the longer pair is missing. What are those sides called?`,
+        `2 × b gives both breadths. A rectangle also has two lengths. How do you include those in the full boundary?`,
+        `P = 2l + 2b. You computed 2b — the two lengths (each = l) are not included. Add 2l to get the full perimeter.`
+      );
+
+    // ── EXTENDED AREA — Rectangle ────────────────────────────────────────────
+
+    case 'rect_triangle_area':
+      return pick(
+        `You halved the result — but is a rectangle the same shape as a triangle?`,
+        `Dividing by 2 gives the area of a triangle. A rectangle is a full closed shape — no halving needed for its area.`,
+        `Rectangle area = l × b (no ÷ 2). Halving is for triangles: Area = ½ × base × height. Remove the division.`
+      );
+
+    case 'rect_side_squared':
+      return pick(
+        `You squared one measurement — but a rectangle has two different side lengths. Are both in your formula?`,
+        `l² (or b²) treats the shape as a square. A rectangle has length AND breadth — both dimensions must appear in the area formula.`,
+        `Area = l × b. You squared one side, ignoring the other. Multiply the two different sides together.`
+      );
+
+    // ── EXTENDED AREA — Circle ───────────────────────────────────────────────
+
+    case 'circle_diameter_as_radius_area':
+      return pick(
+        `Your answer is much larger than expected — did you check whether you used radius or diameter?`,
+        `A = πr². If the question gives the diameter, you must halve it first: r = diameter ÷ 2. Using the full diameter makes r appear 2× too big, so the area comes out 4× too large.`,
+        `A = π × r × r. If diameter d is given: r = d ÷ 2. You appear to have used d as r, giving πd² = 4πr². Halve the diameter first.`
+      );
+
+    // ── EXTENDED SA — Cube ───────────────────────────────────────────────────
+
+    case 'cube_three_faces_sa':
+      return pick(
+        `You multiplied by 3 — can you picture all the faces of a cube and count them?`,
+        `3a² accounts for three faces. Imagine a box: top, bottom, front, back, left, right. How many is that?`,
+        `TSA = 6a². You multiplied by 3 instead of 6. A cube has six identical square faces — count all six.`
+      );
+
+    case 'cube_five_faces_sa':
+      return pick(
+        `So close — you included 5 faces. How many faces does a cube have in total?`,
+        `5a² means one face was missed. A closed cube has 6 equal square faces — top, bottom, and four sides.`,
+        `TSA = 6a². You multiplied by 5 — just one face short. Count all six faces and multiply by a².`
+      );
+
+    // ── EXTENDED SA — Cuboid ─────────────────────────────────────────────────
+
+    case 'cuboid_lateral_sa_only':
+      return pick(
+        `You found the area of the four side walls — does the question ask for total SA or lateral SA only?`,
+        `2h(l+b) is the lateral surface area (4 side walls). If total SA is needed, the top and bottom faces must also be added.`,
+        `LSA = 2h(l+b) (sides only). TSA = 2(lb+bh+lh) = LSA + 2lb. Add the top and bottom pair (2lb) to get TSA.`
+      );
+
+    // ── EXTENDED SA — Cylinder ───────────────────────────────────────────────
+
+    case 'cylinder_one_circle_sa':
+      return pick(
+        `You included the curved surface and one circle — but a cylinder has two circular ends. Which one is missing?`,
+        `2πrh + πr² accounts for the wall and one cap. A closed cylinder has a second identical cap on the other end.`,
+        `TSA = 2πrh + 2πr². You added only one πr² instead of two. Both circular ends are equal — add πr² one more time.`
+      );
+
+    // ── EXTENDED VOLUME — Cube ───────────────────────────────────────────────
+
+    case 'cube_twelve_edges_volume':
+      return pick(
+        `Interesting — that number looks like the total length of all edges of the cube, not its volume. What does volume measure?`,
+        `12 × edge gives the total wire length if you outlined the cube's frame. Volume fills the inside — which formula captures that?`,
+        `Volume = a³ = a × a × a. You computed 12 × a (the 12 edges). Volume needs all three dimensions multiplied, not the edge count times length.`
+      );
+
+    // ── EXTENDED VOLUME — Cylinder ───────────────────────────────────────────
+
+    case 'cylinder_diameter_as_radius_vol':
+      return pick(
+        `Your volume is much larger than expected — check whether you used the radius or the diameter in the formula.`,
+        `V = πr²h requires radius. If diameter is given: r = diameter ÷ 2. Using diameter as r makes the volume 4× too large.`,
+        `V = π × r × r × h. With r = diameter ÷ 2. You seem to have used the full diameter as r — that gives π×d²×h = 4πr²h. Halve the diameter first.`
+      );
+
+    // ── COST PROBLEMS ────────────────────────────────────────────────────────
+
+    case 'cost_forgot_rate':
+      return pick(
+        `You have the measurement — but the question asks for the total cost. What one more step is needed?`,
+        `Your answer looks like the area or perimeter without the cost rate. Total cost = measurement × rate per unit.`,
+        `Total cost = area (or perimeter) × cost rate. You stopped at the measurement. Multiply by the rate given in the question.`
+      );
+
+    case 'cost_wrong_measure':
+      return pick(
+        `Re-read what the question is charging for — is it charging per unit of area, or per unit of length?`,
+        `The cost rate tells you which formula to use. "Per m²" means area; "per m" means perimeter/length. Which one does this question use?`,
+        `Identify the cost basis: if the rate is "per m²", calculate area × rate. If "per m", calculate perimeter × rate. You used the wrong measurement type.`
+      );
+
     // ── DEFAULT ──────────────────────────────────────────────────────────────
 
     default: {

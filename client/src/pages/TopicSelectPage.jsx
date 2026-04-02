@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/layout/PageWrapper';
 import { topicIcon, shapeIcon, formatTopicName, formatShapeName, topicColor } from '../utils/masteryCalc';
-import { Zap, Lock, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight } from 'lucide-react';
 import { getDashboard } from '../services/quizService';
 import {
   TOPIC_ORDER,
@@ -46,16 +46,12 @@ export default function TopicSelectPage() {
 
   return (
     <PageWrapper>
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-5">
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-3">
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl font-black text-[#111111]">Your learning path</h1>
-          <p className="text-[#888888] text-xs leading-relaxed max-w-xl">
-            Topics unlock in order: <span className="text-[#444444] font-semibold">Perimeter → Area → Surface area → Volume</span>.
-            Finish each topic (average mastery across all three shapes) to open the next.
-          </p>
         </motion.div>
 
-        <ol className="space-y-3 list-none">
+        <ol className="space-y-2 list-none">
           {topicData.map((t, topicIdx) => {
             const TopicIcon = topicIcon(t.topic);
             const accent = topicColor(t.topic);
@@ -68,23 +64,23 @@ export default function TopicSelectPage() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: topicIdx * 0.06 }}
-                className={`rounded-2xl border overflow-hidden transition-shadow ${
+                className={`rounded-xl border overflow-hidden transition-shadow ${
                   unlocked ? 'border-[#E8E5E0] bg-white shadow-sm' : 'border-[#ECEAE6] bg-[#FAFAF9] opacity-[0.92]'
                 }`}
               >
                 <div
-                  className={`flex items-center gap-3 px-4 py-3 border-b ${
+                  className={`flex items-center gap-2.5 px-3 py-2 border-b ${
                     unlocked ? 'border-[#F0EDE8] bg-[#FAFAF9]' : 'border-transparent'
                   }`}
                 >
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                     style={{ background: unlocked ? `${accent}18` : '#E8E5E0' }}
                   >
                     {unlocked ? (
-                      <TopicIcon className="w-5 h-5" style={{ color: accent }} />
+                      <TopicIcon className="w-4 h-4" style={{ color: accent }} />
                     ) : (
-                      <Lock className="w-4 h-4 text-[#AAAAAA]" />
+                      <Lock className="w-3.5 h-3.5 text-[#AAAAAA]" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -95,15 +91,15 @@ export default function TopicSelectPage() {
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-[#AAAAAA]">Locked</span>
                       )}
                     </div>
-                    {!unlocked && hint && <p className="text-[11px] text-[#888888] mt-1 leading-snug">{hint}</p>}
+                    {!unlocked && hint && <p className="text-[10px] text-[#888888] mt-0.5 leading-snug">{hint}</p>}
                   </div>
                   {unlocked && (
                     <ArrowRight className="w-4 h-4 text-[#CCCCCC] shrink-0 hidden sm:block" aria-hidden />
                   )}
                 </div>
 
-                <div className="p-3 sm:p-4">
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="px-2 pb-1.5 pt-0">
+                  <div className="grid grid-cols-3 gap-0.5">
                     {t.shapes.map((shape, shapeIdx) => {
                       const ShapeIcon = shapeIcon(shape);
                       const canStart = unlocked;
@@ -112,24 +108,23 @@ export default function TopicSelectPage() {
                           key={shape}
                           type="button"
                           disabled={!canStart}
-                          initial={{ opacity: 0, scale: 0.96 }}
+                          initial={{ opacity: 0, scale: 0.98 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: topicIdx * 0.06 + shapeIdx * 0.03 }}
-                          whileHover={canStart ? { scale: 1.03, y: -1 } : {}}
                           whileTap={canStart ? { scale: 0.98 } : {}}
                           onClick={() => canStart && navigate(`/quiz/${t.topic}/${shape}`)}
-                          className={`group p-3 rounded-xl flex flex-col items-center gap-1.5 border transition-all min-h-[88px] ${
+                          className={`group py-1 px-1 rounded-md flex flex-row items-center justify-center gap-0.5 border transition-colors min-h-0 ${
                             canStart
-                              ? 'border-[#E8E5E0] bg-[#F8F6F3] hover:bg-white hover:border-[#D8D4CE] hover:shadow-sm cursor-pointer'
-                              : 'border-[#ECEAE6] bg-[#F5F4F2] cursor-not-allowed opacity-60'
+                              ? 'border-[#E2DFDA] bg-[#F3F1EE] hover:bg-white hover:border-[#C9C5BF] cursor-pointer'
+                              : 'border-[#EBE9E6] bg-[#F4F3F1] cursor-not-allowed opacity-60'
                           }`}
                         >
                           <ShapeIcon
-                            className={`w-4 h-4 ${canStart ? 'text-[#CCCCCC] group-hover:text-[#888888]' : 'text-[#D0D0D0]'}`}
+                            className={`w-2.5 h-2.5 shrink-0 ${canStart ? 'text-[#999999] group-hover:text-[#555555]' : 'text-[#D0D0D0]'}`}
                           />
                           <span
-                            className={`text-[11px] sm:text-xs font-medium text-center leading-tight ${
-                              canStart ? 'text-[#888888] group-hover:text-[#444444]' : 'text-[#BBBBBB]'
+                            className={`text-[9px] font-semibold leading-tight truncate ${
+                              canStart ? 'text-[#555555] group-hover:text-[#111111]' : 'text-[#BBBBBB]'
                             }`}
                           >
                             {formatShapeName(shape)}
@@ -143,19 +138,6 @@ export default function TopicSelectPage() {
             );
           })}
         </ol>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-          className="flex items-start gap-2.5 px-4 py-3 rounded-2xl border border-orange-200 bg-orange-50"
-        >
-          <Zap className="w-3.5 h-3.5 text-[#FF6500] shrink-0 mt-0.5" />
-          <p className="text-xs text-[#666666] leading-relaxed">
-            <span className="text-[#FF6500] font-semibold">Path tip:</span> complete all three shapes in a topic to build
-            average mastery; then the next topic opens automatically.
-          </p>
-        </motion.div>
       </div>
     </PageWrapper>
   );

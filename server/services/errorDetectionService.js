@@ -269,6 +269,23 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           remedialLead: `Squaring the side gives area. Perimeter is the total boundary — a square has four equal sides, so P = 4×side.`,
         });
       }
+      const threeSide = 3 * s;
+      if (near(ans, threeSide, 0.5) && !near(ans, perim, 0.5)) {
+        return pack({
+          type: 'square_three_sides_perimeter',
+          feedback: `⚠️ ${ans} = 3×${s} — you counted three sides. A square has four equal sides.`,
+          hintLead: `You multiplied 3×${s}=${threeSide}. Almost there — but how many sides does a square have?`,
+          remedialLead: `P = 4×side. You multiplied by 3 instead of 4 — a square has four equal sides, not three.`,
+        });
+      }
+      if (near(ans, s, 0.5) && !near(ans, perim, 0.5) && s > 1) {
+        return pack({
+          type: 'square_one_side_only',
+          feedback: `⚠️ ${ans} = ${s} — that is just one side. Perimeter sums all four sides.`,
+          hintLead: `You wrote the side length itself. Perimeter goes all the way around — count every side.`,
+          remedialLead: `P = 4×side. You gave just one side value. Multiply by 4 to get the full boundary.`,
+        });
+      }
     }
   }
 
@@ -295,6 +312,24 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           feedback: `⚠️ ${l}+${b} = ${halfP} adds the sides once, but a rectangle has four sides.`,
           hintLead: `You got ${l}+${b}=${halfP} — that covers just one length and one breadth. A rectangle has four sides. What's the next step?`,
           remedialLead: `Perimeter is the whole boundary: you need both pairs of opposite sides — multiply (l+b) by 2.`,
+        });
+      }
+      const twoL = 2 * l;
+      const twoB = 2 * b;
+      if (near(ans, twoL, 0.5) && !near(ans, perim, 0.5) && !near(l, b, 0.5)) {
+        return pack({
+          type: 'rect_two_lengths_only',
+          feedback: `⚠️ 2×${l} = ${twoL} counts both lengths but misses the two breadths (${b} each).`,
+          hintLead: `You got 2×${l}=${twoL} — that's both long sides. A rectangle has two more sides of breadth ${b}. How does that change the total?`,
+          remedialLead: `P = 2×(l+b). You only included 2l — add the two breadths as well: P = 2×${l} + 2×${b}.`,
+        });
+      }
+      if (near(ans, twoB, 0.5) && !near(ans, perim, 0.5) && !near(l, b, 0.5)) {
+        return pack({
+          type: 'rect_two_breadths_only',
+          feedback: `⚠️ 2×${b} = ${twoB} counts both breadths but misses the two lengths (${l} each).`,
+          hintLead: `You got 2×${b}=${twoB} — that's both short sides. A rectangle also has two sides of length ${l}. What's the full perimeter?`,
+          remedialLead: `P = 2×(l+b). You only included 2b — add the two lengths as well: P = 2×${l} + 2×${b}.`,
         });
       }
     }
@@ -370,6 +405,35 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           remedialLead: `2×(l+b) is perimeter. Area = l×b — just multiply the two dimensions directly.`,
         });
       }
+      const halfArea = (l * b) / 2;
+      if (near(ans, halfArea, Math.abs(halfArea) * 0.05 + 0.5) && !near(ans, area, 0.5)) {
+        return pack({
+          type: 'rect_triangle_area',
+          feedback: `⚠️ ${l}×${b}÷2 = ${halfArea} — that is the triangle area formula. For a rectangle, do not halve.`,
+          hintLead: `You divided by 2 — that would give the area of a triangle with those base and height values. A rectangle's area does not need halving.`,
+          remedialLead: `Rectangle area = l × b (no division by 2). Halving is for triangles: Area = ½ × base × height.`,
+        });
+      }
+      if (!near(l, b, 0.5)) {
+        const lSq = l * l;
+        const bSq = b * b;
+        if (near(ans, lSq, Math.abs(lSq) * 0.05 + 0.5) && !near(ans, area, 0.5)) {
+          return pack({
+            type: 'rect_side_squared',
+            feedback: `⚠️ ${l}² = ${lSq} treats the rectangle as a square. Area = l × b = ${l} × ${b}.`,
+            hintLead: `You squared the length (${l}²). But this is a rectangle — both dimensions matter. What are the two sides you need to multiply?`,
+            remedialLead: `Area = l × b. You used only one side squared. A rectangle has two different sides — multiply both.`,
+          });
+        }
+        if (near(ans, bSq, Math.abs(bSq) * 0.05 + 0.5) && !near(ans, area, 0.5)) {
+          return pack({
+            type: 'rect_side_squared',
+            feedback: `⚠️ ${b}² = ${bSq} treats the rectangle as a square. Area = l × b = ${l} × ${b}.`,
+            hintLead: `You squared the breadth (${b}²). But a rectangle uses two different dimensions. Multiply length × breadth.`,
+            remedialLead: `Area = l × b. You used only one side squared. Both the length and breadth are needed.`,
+          });
+        }
+      }
     }
   }
 
@@ -405,6 +469,16 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           feedback: `⚠️ You got r² = ${rSq}, but area = π×r². Multiply by π (22/7) — don't leave it out.`,
           hintLead: `You squared the radius to get ${rSq}. The area formula is πr² — what constant were you supposed to multiply by?`,
           remedialLead: `Area = πr². You computed r² but forgot to multiply by π (22/7). Always include π in circle area calculations.`,
+        });
+      }
+      // Diameter used as radius → answer ≈ π×d² = 4×area
+      const fourArea = 4 * area;
+      if (near(ans, fourArea, Math.abs(fourArea) * 0.08 + 0.5) && !near(ans, area, 0.5)) {
+        return pack({
+          type: 'circle_diameter_as_radius_area',
+          feedback: `⚠️ Your answer is 4× too large — you likely used the full diameter where the formula needs the radius.`,
+          hintLead: `Your answer is about 4 times too big. If you had the diameter, did you halve it to get r before using A = πr²?`,
+          remedialLead: `A = πr². If the question gives diameter d, first convert: r = d ÷ 2. Using d directly gives πd² = 4πr² — four times the correct area.`,
         });
       }
     }
@@ -461,6 +535,24 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           remedialLead: `TSA = 6×a×a = 6a². You computed 6a without squaring the edge. Each face area = a², not just a.`,
         });
       }
+      const threeFaces = 3 * a * a;
+      const fiveFaces  = 5 * a * a;
+      if (near(ans, threeFaces, Math.abs(threeFaces) * 0.05 + 0.5) && !near(ans, correct, 0.5)) {
+        return pack({
+          type: 'cube_three_faces_sa',
+          feedback: `⚠️ 3a² = ${threeFaces} — you counted only 3 faces. A cube has 6 identical square faces.`,
+          hintLead: `3×a² covers three faces. A cube is a closed solid — how many faces does it have in total?`,
+          remedialLead: `TSA = 6a². You multiplied by 3 instead of 6. Count all faces: top, bottom, front, back, left, right = 6.`,
+        });
+      }
+      if (near(ans, fiveFaces, Math.abs(fiveFaces) * 0.05 + 0.5) && !near(ans, correct, 0.5)) {
+        return pack({
+          type: 'cube_five_faces_sa',
+          feedback: `⚠️ 5a² = ${fiveFaces} — you counted 5 faces. A cube has 6 equal square faces.`,
+          hintLead: `5a² — you are just one face short. How many faces does a cube have?`,
+          remedialLead: `TSA = 6a². You counted 5 faces and missed one. A cube always has exactly 6 identical square faces.`,
+        });
+      }
     }
   }
 
@@ -497,6 +589,15 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           feedback: `⚠️ 2×l×b = ${onlyLB} covers only the top and bottom faces. A cuboid has three pairs of faces.`,
           hintLead: `2×l×b gives only top and bottom. How many other pairs of faces does a cuboid have? What are their areas?`,
           remedialLead: `A cuboid has 3 pairs: top+bottom (2lb), front+back (2lh), left+right (2bh). You only included one pair.`,
+        });
+      }
+      const latSA = 2 * h * (l + b);
+      if (near(ans, latSA, Math.abs(latSA) * 0.05 + 0.5) && !near(ans, correct, 0.5) && !near(latSA, onlyLB, 1)) {
+        return pack({
+          type: 'cuboid_lateral_sa_only',
+          feedback: `⚠️ 2h(l+b) = ${latSA.toFixed(1)} is lateral SA (4 side walls only) — top and bottom faces (2lb = ${(2*l*b).toFixed(1)}) are not included.`,
+          hintLead: `Your answer matches 2h(l+b) — the four side walls. The top and bottom are also faces of the cuboid. What area do they add?`,
+          remedialLead: `Lateral SA = 2h(l+b) (sides only). TSA = 2(lb+bh+lh) — includes top+bottom (2lb). Add 2lb to the lateral SA.`,
         });
       }
     }
@@ -546,6 +647,15 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           remedialLead: `CSA = 2πrh. You computed πrh without the 2. The "2" comes from the full circle of circumference (2πr) times the height.`,
         });
       }
+      const oneCircle = csa + piRSq;  // 2πrh + πr²  (one cap only)
+      if (near(ans, oneCircle, Math.abs(oneCircle) * 0.05 + 0.5) && !near(ans, correct, 0.5)) {
+        return pack({
+          type: 'cylinder_one_circle_sa',
+          feedback: `⚠️ 2πrh + πr² = ${ans.toFixed(1)} — you added one circular base but forgot the second one.`,
+          hintLead: `Your answer equals 2πrh + πr² — that includes the curved surface and one circle. But a cylinder has two circular ends. What area is missing?`,
+          remedialLead: `TSA = 2πrh + 2πr² = 2πr(r+h). You added only one cap (πr²). Both ends are identical circles — add πr² again.`,
+        });
+      }
     }
   }
 
@@ -589,6 +699,15 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           feedback: `⚠️ 6×${a} = ${linear} is linear, not volume. Volume = a³.`,
           hintLead: `6a=${linear} resembles a perimeter, not a volume. For volume, what operation on the edge gives a 3D measure?`,
           remedialLead: `Volume = a³. You computed 6a which is linear. Volume needs all three equal sides multiplied: a×a×a.`,
+        });
+      }
+      const twelveEdges = 12 * a;
+      if (near(ans, twelveEdges, Math.abs(twelveEdges) * 0.05 + 0.5) && !near(ans, correct, 0.5)) {
+        return pack({
+          type: 'cube_twelve_edges_volume',
+          feedback: `⚠️ 12×${a} = ${twelveEdges} is the total length of all 12 edges — not the volume.`,
+          hintLead: `${twelveEdges} = 12 × edge. That measures the total wire length of the cube's frame, not its volume. How do you measure 3D space inside?`,
+          remedialLead: `Volume = a³ = a×a×a. Multiplying 12×a gives total edge length (a cube has 12 edges) — very different from volume.`,
         });
       }
     }
@@ -690,6 +809,16 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           feedback: `⚠️ You got π×r×h ≈ ${ans.toFixed(1)}, but volume = π×r²×h — the radius must be squared first.`,
           hintLead: `You used π×r×h without squaring r. In V = πr²h, what does the ² tell you to do with r before multiplying by h?`,
           remedialLead: `V = πr²h. You computed πrh — the radius must be squared (r×r) before multiplying by π and h.`,
+        });
+      }
+      // Diameter used as radius → answer ≈ 4 × vol
+      const fourVol = 4 * vol;
+      if (near(ans, fourVol, Math.abs(fourVol) * 0.08 + 0.5) && !near(ans, correct, 0.5) && /diameter/i.test(qtext)) {
+        return pack({
+          type: 'cylinder_diameter_as_radius_vol',
+          feedback: `⚠️ Your volume is 4× too large — you likely used the full diameter where the formula needs radius (r = diameter ÷ 2).`,
+          hintLead: `Your answer is about 4 times the expected value. Did you halve the diameter before using it as r in V = πr²h?`,
+          remedialLead: `V = πr²h requires radius, not diameter. If diameter d is given: r = d ÷ 2. Using d gives π×d²×h = 4πr²h — four times too large.`,
         });
       }
     }
@@ -808,6 +937,48 @@ const detectError = (studentAnswer, correctAnswer, question) => {
           hintLead: `${ans} is a number that appears in the question itself. The question asks you to find something — use the given values to work it out.`,
           remedialLead: `Don't copy a given value — set up the formula, substitute the known values, then solve for the unknown.`,
         });
+      }
+    }
+  }
+
+  // ── COST PROBLEMS ─────────────────────────────────────────────────────────
+  if (qType === 'cost_problem' || qType === 'word_problem') {
+    // Extract cost rate from question text: "at ₹5 per", "@ 10 per", "Rs. 7 per"
+    const rateMatch = qtext.match(/(?:at|@)\s*(?:₹|Rs\.?|INR)?\s*(\d+(?:\.\d+)?)\s*(?:per|\/)/i)
+                   || qtext.match(/(?:₹|Rs\.?|INR)\s*(\d+(?:\.\d+)?)\s*(?:per|\/)/i)
+                   || qtext.match(/(\d+(?:\.\d+)?)\s*rupees?\s*per/i);
+    const rate = rateMatch ? parseFloat(rateMatch[1]) : null;
+
+    if (rate && rate > 1 && correct !== 0) {
+      const measureOnly = correct / rate;
+      // Student gave area/perimeter without multiplying by rate
+      if (near(ans, measureOnly, Math.abs(measureOnly) * 0.05 + 0.5)) {
+        return pack({
+          type: 'cost_forgot_rate',
+          feedback: `⚠️ You found the area/perimeter correctly (≈${measureOnly.toFixed(1)}) but forgot to multiply by the rate (₹${rate} per unit).`,
+          hintLead: `Your answer looks like the area or perimeter — but the question asks for total cost. What do you multiply by to get cost?`,
+          remedialLead: `Total cost = measure × rate. You found the measure but stopped there. Multiply by ₹${rate} per unit to get the final answer.`,
+        });
+      }
+    }
+
+    // Detect wrong measure type: student used perimeter where area-based cost needed, or vice versa
+    // Compare with swapped formula result × rate
+    if (rate && rate > 1) {
+      const swappedArea  = getSwappedAreaAnswer(shape, question);
+      const swappedPerim = getSwappedPerimeterAnswer(shape, question);
+      const swappedAnswers = topic === 'area'
+        ? swappedPerim.map(p => p * rate)
+        : swappedArea.map(a => a * rate);
+      for (const sw of swappedAnswers) {
+        if (sw && near(ans, sw, Math.abs(sw) * 0.05 + 0.5) && !near(ans, correct, 0.5)) {
+          return pack({
+            type: 'cost_wrong_measure',
+            feedback: `⚠️ Your answer matches the cost using the wrong formula (${topic === 'area' ? 'perimeter' : 'area'} instead of ${topic}).`,
+            hintLead: `The question asks for cost based on ${topic}. Which formula gives ${topic} for a ${shape}?`,
+            remedialLead: `Cost = ${topic} × rate. You calculated the cost using the wrong measurement type — use the ${topic} formula.`,
+          });
+        }
       }
     }
   }

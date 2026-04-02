@@ -114,6 +114,41 @@ const ERROR_TYPE_LABEL = {
   reverse_square_divided:       'Divided area by 4 instead of taking the square root',
   reverse_rect_forgot_subtract: 'Halved the perimeter correctly but forgot to subtract the known side',
   reverse_gave_input:           'Entered a value given in the question instead of computing the unknown',
+
+  // Extended perimeter — Square
+  square_three_sides_perimeter: 'Counted 3 sides instead of 4 (answer = 3 × side)',
+  square_one_side_only:         'Wrote the side length itself as the perimeter (counted 1 side)',
+
+  // Extended perimeter — Rectangle
+  rect_two_lengths_only:        'Added only two lengths (2 × l) — forgot the two breadths',
+  rect_two_breadths_only:       'Added only two breadths (2 × b) — forgot the two lengths',
+
+  // Extended area — Rectangle
+  rect_triangle_area:           'Used triangle area formula (½ × l × b) instead of l × b for rectangle',
+  rect_side_squared:            'Squared one side (l² or b²) — treated the rectangle as a square',
+
+  // Extended area — Circle
+  circle_diameter_as_radius_area: 'Used full diameter as the radius in the area formula → result is 4× too large',
+
+  // Extended SA — Cube
+  cube_three_faces_sa:          'Computed area of only 3 faces (3a²) instead of 6a²',
+  cube_five_faces_sa:           'Computed area of only 5 faces (5a²) instead of 6a²',
+
+  // Extended SA — Cuboid
+  cuboid_lateral_sa_only:       'Computed only lateral SA = 2h(l+b) — missed the top and bottom faces (2lb)',
+
+  // Extended SA — Cylinder
+  cylinder_one_circle_sa:       'Added only one circular base (2πrh + πr²) — forgot the second circular cap',
+
+  // Extended Volume — Cube
+  cube_twelve_edges_volume:     'Multiplied 12 × edge — computed total edge length instead of volume (edge³)',
+
+  // Extended Volume — Cylinder
+  cylinder_diameter_as_radius_vol: 'Used full diameter as radius in volume formula → result is 4× too large',
+
+  // Cost problems
+  cost_forgot_rate:             'Calculated the area/perimeter correctly but forgot to multiply by the cost rate',
+  cost_wrong_measure:           'Used the wrong measurement type (e.g., area instead of perimeter) for cost calculation',
 };
 
 // ── Confidence levels per error type ─────────────────────────────────────────
@@ -181,6 +216,23 @@ const CONFIDENCE_LEVEL = {
   reverse_square_divided:       'high',
   reverse_rect_forgot_subtract: 'high',
   reverse_gave_input:           'high',
+
+  // Extended patterns — all value-matched → high
+  square_three_sides_perimeter:    'high',
+  square_one_side_only:            'high',
+  rect_two_lengths_only:           'high',
+  rect_two_breadths_only:          'high',
+  rect_triangle_area:              'high',
+  rect_side_squared:               'high',
+  circle_diameter_as_radius_area:  'high',
+  cube_three_faces_sa:             'high',
+  cube_five_faces_sa:              'high',
+  cuboid_lateral_sa_only:          'high',
+  cylinder_one_circle_sa:          'high',
+  cube_twelve_edges_volume:        'high',
+  cylinder_diameter_as_radius_vol: 'high',
+  cost_forgot_rate:                'high',
+  cost_wrong_measure:              'medium',
 };
 
 // ── Detected-pattern descriptions ────────────────────────────────────────────
@@ -299,6 +351,56 @@ const DETECTED_PATTERN = {
     'Student halved the perimeter to get (l + b) but then forgot to subtract the known side to isolate the unknown.',
   reverse_gave_input:
     'Student entered a number that appears in the question statement rather than computing the unknown quantity.',
+
+  // Extended perimeter — Square
+  square_three_sides_perimeter:
+    'Student computed 3 × side — counted three sides of the square instead of all four.',
+  square_one_side_only:
+    'Student submitted the side length itself as the answer — effectively counted only one side.',
+
+  // Extended perimeter — Rectangle
+  rect_two_lengths_only:
+    'Student computed 2 × length — included both lengths but forgot both breadths.',
+  rect_two_breadths_only:
+    'Student computed 2 × breadth — included both breadths but forgot both lengths.',
+
+  // Extended area — Rectangle
+  rect_triangle_area:
+    'Student halved the product (l × b ÷ 2) — applied the triangle area formula to a rectangle.',
+  rect_side_squared:
+    'Student squared one side (l² or b²) — treated the rectangle as a square instead of multiplying both dimensions.',
+
+  // Extended area — Circle
+  circle_diameter_as_radius_area:
+    'Student used the full diameter as the radius in πr² — giving an answer 4× the correct value.',
+
+  // Extended SA — Cube
+  cube_three_faces_sa:
+    'Student computed 3a² — counted only three faces of the cube instead of all six.',
+  cube_five_faces_sa:
+    'Student computed 5a² — counted five faces, missing one face of the cube.',
+
+  // Extended SA — Cuboid
+  cuboid_lateral_sa_only:
+    'Student computed only the lateral SA = 2h(l+b) — covered the four side walls but omitted the top and bottom faces (2lb).',
+
+  // Extended SA — Cylinder
+  cylinder_one_circle_sa:
+    'Student added only one circular base (2πrh + πr²) — forgot the second cap, getting TSA − πr².',
+
+  // Extended Volume — Cube
+  cube_twelve_edges_volume:
+    'Student computed 12 × edge — calculated the total edge length (12 edges) instead of volume (edge³).',
+
+  // Extended Volume — Cylinder
+  cylinder_diameter_as_radius_vol:
+    'Student used the full diameter as the radius in πr²h — giving a volume 4× the correct value.',
+
+  // Cost problems
+  cost_forgot_rate:
+    'Student computed the correct area or perimeter but forgot to multiply by the cost rate.',
+  cost_wrong_measure:
+    'Student used the wrong measurement type for the cost calculation (e.g., used area rate but perimeter was needed).',
 };
 
 // ── Main analyzer ─────────────────────────────────────────────────────────────
