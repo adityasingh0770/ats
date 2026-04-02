@@ -1,7 +1,8 @@
 /**
  * Personalized Hint Service — two hints per wrong attempt, then remedial.
- * Hint 1 = mistake pattern (+/−/×/÷, r vs d, perimeter vs area, etc.).
- * Hint 2 = same, plus the question’s formula from the bank when available (not shown on the question card).
+ * Hint 1: nudge toward the mistake (operations, r vs d, perimeter vs area, etc.).
+ * Hint 2: clearer fix; appends the bank formula on its own line when present (not on MCQ — see wrong_option).
+ * MCQ: both hints stress using the formula; the formula is appended when available.
  */
 
 const { formatStudentAnswerForUi } = require('./errorDetectionService');
@@ -17,11 +18,10 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
   const qType = String(question.type || 'direct_calculation');
   const f     = (question.formula && String(question.formula).trim()) || '';
 
-  /** Level 1 = pattern only. Level 2 = pattern + formula line (questions stay formula-free in the UI). */
   const pick = (a, b) => {
     const body = L === 1 ? a : b;
-    if (L === 2 && f && type !== 'invalid_input') {
-      return `${body}\n\nFormula: ${f}`;
+    if (L === 2 && f && type !== 'invalid_input' && type !== 'wrong_option') {
+      return `${body}\n\n${f}`;
     }
     return body;
   };
@@ -32,260 +32,260 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
 
     case 'square_two_sides_perimeter':
       return pick(
-        `Hmm — you got ${sn}. How many sides does a square have?`,
-        `You multiplied by 2 instead of 4. Perimeter of a square = 4 × side because all four sides are identical and must be counted.`
+        `You wrote ${sn}. A square has four equal sides — did you only double one side?`,
+        `Perimeter needs all four: 4 × side length, not 2 × side.`
       );
 
     case 'square_perimeter_subtract_instead_multiply':
       return pick(
-        `You wrote ${sn}. Did you subtract one number from the other, or multiply?`,
-        `You subtracted (${sn} comes from subtraction). Perimeter = 4 × side: multiply the side length by 4. Never subtract the 4 from the side.`
+        `You wrote ${sn}. Does that come from subtracting — e.g. side minus 4 — instead of scaling the side?`,
+        `The "4" means four equal sides: multiply side × 4. Don’t subtract 4 from the side.`
       );
 
     case 'square_area_instead_of_perimeter':
       return pick(
-        `Take a moment — is the question asking for the space inside the square, or the fence around it?`,
-        `side² gives area. You need perimeter, which is the total boundary: P = 4 × side. Four equal sides added together, not one side multiplied by itself.`
+        `Does this question want distance around the square, or the flat space inside?`,
+        `You used side × side (area). Perimeter is four times the side: add all four equal edges, same as 4 × side.`
       );
 
     // ── PERIMETER — Rectangle ───────────────────────────────────────────────
 
     case 'rect_multiply_instead_of_perimeter':
       return pick(
-        `Notice that you multiplied the two measurements — does that give the boundary or the inside of the rectangle?`,
-        `l × b = area. For perimeter you need all four sides: P = 2(l + b). Two lengths and two breadths, not a product.`
+        `Multiplying length × breadth fills the inside. Does the question ask for that or for the boundary?`,
+        `l × b is area. Perimeter walks all four sides: double (length + breadth).`
       );
 
     case 'rect_sum_only_perimeter':
       return pick(
-        `You got ${sn}. Does a rectangle have just two sides?`,
-        `l + b gives only two sides. The full perimeter includes all four: P = 2 × (l + b). You forgot to double it.`
+        `You got ${sn}. One length plus one breadth is only half the trip around.`,
+        `Double it: P = 2 × (l + b).`
       );
 
     case 'rect_perimeter_instead_of_area':
       return pick(
-        `The question asks for the space inside the rectangle — did you add the sides and double (perimeter-style) instead of multiplying length × breadth?`,
-        `2(l + b) is perimeter. Area = l × b — a single product of length and breadth, no doubling.`
+        `Inside the rectangle is one simple product of the two sides — did you use 2(l + b) instead?`,
+        `2(l + b) is perimeter. Area is length × breadth, once, no factor of 2.`
       );
 
     case 'perimeter_instead_of_area_rect':
       return pick(
-        `Re-read the last line — "area" or "perimeter"? Your answer hints at the wrong one.`,
-        `You used perimeter thinking: 2(l+b). But area = l × b. One multiplication, no factor of 2.`
+        `Check the question: does it say area or perimeter?`,
+        `Your number fits perimeter-style. Area = l × b — one multiply only.`
       );
 
     // ── PERIMETER — Circle ──────────────────────────────────────────────────
 
     case 'circle_forgot_multiply_by_2':
       return pick(
-        `Distance around a circle should scale like “once around the rim” — did you stop after π × r and drop a factor of 2?`,
-        `You computed πr, but circumference = 2πr. The 2 fixes “half a turn” versus the full boundary.`
+        `Full distance around the circle usually has a 2 with π and r. Did you stop at π × r?`,
+        `Use 2 × π × r for circumference — the 2 is the full turn, not half.`
       );
 
     case 'circle_area_for_circumference':
       return pick(
-        `This asks for distance around — did you square r and use πr² (inside-area style) instead of 2πr (around-once style)?`,
-        `πr² = area inside. Circumference = 2πr (no r²). You mixed inside-area steps with around-the-circle steps.`
+        `This is “around the circle.” Did you square r and use πr² (area logic)?`,
+        `Around = 2πr. Inside = πr². No squaring r here.`
       );
 
     case 'forgot_pi_circumference':
       return pick(
-        `Circles always involve π — did you only multiply 2 × radius and skip π?`,
-        `You got 2r. Around-the-circle needs 2 × π × r — multiply by (22/7) as well.`
+        `Did you leave π out and use only 2 × radius?`,
+        `Circumference needs π: 2 × π × r (e.g. π = 22/7).`
       );
 
     // ── AREA — Square ───────────────────────────────────────────────────────
 
     case 'square_perimeter_instead_of_area':
       return pick(
-        `What does "area" actually measure — the boundary line or the flat surface covered?`,
-        `4 × side is perimeter. Area = side × side = side². You need the square of the side, not four times it.`
+        `Area is flat space inside — not the length of the fence.`,
+        `4 × side is perimeter. Area = side × side.`
       );
 
     // ── AREA — Rectangle ───────────────────────────────────────────────────
 
     case 'area_instead_of_perimeter_rect':
       return pick(
-        `You got ${sn} — does the question ask for the boundary or the inside space?`,
-        `l × b is area (multiply). Perimeter doubles (l + b). You multiplied; this question needs the around-the-rectangle path.`
+        `You got ${sn}. Boundary or inside — which did the question ask for?`,
+        `l × b is inside. Around the rectangle is 2(l + b). You need the boundary.`
       );
 
     // ── AREA — Circle ───────────────────────────────────────────────────────
 
     case 'circle_circumference_for_area':
       return pick(
-        `Inside the circle needs r × r with π — did you use 2πr (around the circle) instead?`,
-        `2πr = distance around. Inside area = π × r × r. You used a “no r²” path where r should be squared.`
+        `Inside the circle needs r × r with π. Did you use 2πr (around) by mistake?`,
+        `Area = π × r². Circumference is different — no r² there.`
       );
 
     case 'circle_forgot_square_radius':
       return pick(
-        `For inside-area you need r × r before π — did you stop at π × r?`,
-        `You wrote πr. Inside area needs π × (r × r). Square r first, then multiply by π.`
+        `Circle area uses radius twice: r × r, then × π.`,
+        `You stopped at π × r. Do r × r first, then × π.`
       );
 
     case 'forgot_pi_area':
       return pick(
-        `You squared the radius — did you forget to multiply that r² by π?`,
-        `Inside area = π × r². Include (22/7) after you have r × r.`
+        `After r × r, circle area still needs π.`,
+        `Area = π × r² — multiply by (22/7) or the π you were told to use.`
       );
 
     // ── SURFACE AREA — Cube ─────────────────────────────────────────────────
 
     case 'cube_one_face_sa':
       return pick(
-        `You found the area of a face — but surface area covers every face. How many does a cube have?`,
-        `You computed a² (one face only). Total SA = 6a² — multiply by 6 to cover all six identical square faces.`
+        `One face is a square — how many faces does a closed cube have?`,
+        `Total surface = 6 × (face area). You had one face; multiply by 6.`
       );
 
     case 'cube_two_faces_sa':
       return pick(
-        `Interesting — you seem to have counted two faces. Is a cube open on the sides?`,
-        `2a² = top + bottom only (2 faces). TSA = 6a² because a cube has 6 identical square faces — include all of them.`
+        `Two faces aren’t enough for a whole box — what about the four sides?`,
+        `Top + bottom is 2 faces. Add four more: 6 equal faces → 6a².`
       );
 
     case 'cube_four_faces_sa':
       return pick(
-        `Got ${sn}. Quick check — does the question ask for total surface area or lateral surface area?`,
-        `LSA = 4a² (sides only). TSA = 6a² (all 6 faces). Re-read what the question asks for and choose the right one.`
+        `You got ${sn}. Total surface area or only the four side faces?`,
+        `Four faces = lateral only. Total = six faces → 6a² unless it asks for lateral only.`
       );
 
     case 'cube_volume_for_sa':
       return pick(
-        `Think about this: does "surface area" describe what's on the outside of a cube, or the space it holds inside?`,
-        `a³ is volume. Surface area = 6a² — six faces, each with area a². Volume and SA are completely different measurements.`
+        `Surface means paint on the outside; volume is air inside — different idea.`,
+        `You used edge³ (volume). Outside = six squares: 6a².`
       );
 
     case 'cube_linear_sa':
       return pick(
-        `Surface area is measured in square units — does your calculation produce a square unit?`,
-        `TSA = 6 × a × a = 6a². You computed 6 × a (linear). Each face is a square, so its area is a², not just a.`
+        `Surface area should end in square units — each face is a square.`,
+        `You may have done 6 × edge (length). Need 6 × edge × edge.`
       );
 
     // ── SURFACE AREA — Cuboid ───────────────────────────────────────────────
 
     case 'cuboid_no_factor_2_sa':
       return pick(
-        `You found ${sn}. Think about how many times each face of a cuboid appears.`,
-        `lb + bh + lh = half the TSA. Every face has an identical opposite face, so multiply by 2: TSA = 2(lb + bh + lh).`
+        `You got ${sn}. Each face has an identical opposite — does your sum count both?`,
+        `lb + bh + lh is half the story. Double it: TSA = 2(lb + bh + lh).`
       );
 
     case 'cuboid_volume_for_sa':
       return pick(
-        `Surface area and volume are easy to mix up — which one does this question actually ask for?`,
-        `l × b × h is volume. Surface area = 2(lb + bh + lh) — sum the three pairs of face areas and double them.`
+        `Filling the box vs wrapping it — which does the question want?`,
+        `l × b × h is volume. Wrapping = 2(lb + bh + lh).`
       );
 
     case 'cuboid_partial_sa':
       return pick(
-        `You covered the top and bottom — how many more pairs of faces does a cuboid have?`,
-        `TSA = 2lb + 2lh + 2bh. You included only 2lb (one pair). Add the other two pairs: 2lh (front+back) and 2bh (left+right).`
+        `Top and bottom are one pair — what other pairs of faces are there?`,
+        `Add front/back and left/right pairs: 2lb + 2lh + 2bh.`
       );
 
     // ── SURFACE AREA — Cylinder ─────────────────────────────────────────────
 
     case 'cylinder_lateral_only_sa':
       return pick(
-        `Got ${sn}. Does a closed cylinder have any flat parts, or just the curved wall?`,
-        `CSA = 2πrh (curved wall only). TSA = 2πrh + 2πr² = 2πr(r + h). You missed the two circular bases (2πr²).`
+        `Got ${sn}. A closed can has a curved label plus two round lids.`,
+        `Curved part alone misses the circles — add both bases.`
       );
 
     case 'cylinder_only_circles_sa':
       return pick(
-        `You found the area of the two circular ends — what about the surface wrapping around the side?`,
-        `2πr² = two circular bases only. TSA = 2πrh + 2πr² = 2πr(r+h). The curved surface area 2πrh was completely missing.`
+        `Two circles are only the ends — what about the curved wall?`,
+        `Add the wrap (curved surface) to the two caps.`
       );
 
     case 'cylinder_volume_for_sa':
       return pick(
-        `Is the question asking for the outer skin of the cylinder, or how much it can hold?`,
-        `Inside fill = circle area × height. Outer skin = wrap wall plus both round ends — not the inside multiply alone.`
+        `Outer skin vs space inside — which one is asked?`,
+        `Inside = base circle × height. Outside adds wall and both circles.`
       );
 
     case 'cylinder_forgot_factor_2_csa':
       return pick(
-        `Curved wrap uses “once around” × height — did you drop the same factor of 2 you need for full circumference?`,
-        `You used πrh. It should be 2πrh — the wall area is full turn (2πr) times h, not half.`
+        `The curved sheet is “once around” × height — same 2 as in 2πr.`,
+        `Wall area is 2πrh, not πrh.`
       );
 
     // ── VOLUME — Cube ───────────────────────────────────────────────────────
 
     case 'cube_sa_for_volume':
       return pick(
-        `Volume measures how much space a cube holds — is covering its outside faces the same as measuring that space?`,
-        `6a² is surface area. Volume = a³ — multiply the edge by itself three times, not six times squared.`
+        `Space inside the cube isn’t the same as area on all faces.`,
+        `6a² is outside. Inside = a × a × a.`
       );
 
     case 'cube_squared_for_volume':
       return pick(
-        `You squared the edge — but is a square face the same as the volume of a cube?`,
-        `a² = face area (2D). Volume = a³ = a × a × a. You need one more multiplication by a to reach the full 3D measure.`
+        `A single face is a²; the solid fills depth too.`,
+        `Multiply by a once more: volume = a³.`
       );
 
     case 'cube_linear_for_volume':
       return pick(
-        `Your answer looks like it might be a length, not a volume. What kind of units does volume have?`,
-        `Volume = a × a × a = a³. You computed something linear. Cube the edge — multiply it by itself three times.`
+        `Volume should feel “thick” — edge used three times, not once.`,
+        `Volume = edge × edge × edge.`
       );
 
     // ── VOLUME — Cuboid ─────────────────────────────────────────────────────
 
     case 'cuboid_forgot_height_volume':
       return pick(
-        `You used two of the three dimensions — but volume fills all three directions. Which one is missing?`,
-        `V = l × b × h. You multiplied only two dimensions (leaving one out). All three — length, breadth, and height — must appear in the product.`
+        `Volume stretches in three directions — is one dimension missing?`,
+        `Multiply length × breadth × height — all three.`
       );
 
     case 'cuboid_sa_for_volume':
       return pick(
-        `The question asks for the space inside the cuboid — did you accidentally calculate the outer covering?`,
-        `2(lb + bh + lh) is TSA. Volume = l × b × h — multiply all three dimensions once. Much simpler than surface area.`
+        `Space inside vs total paper to wrap — which did they ask?`,
+        `2(lb+bh+lh) wraps the box. Inside = l × b × h.`
       );
 
     case 'cuboid_added_dims_volume':
       return pick(
-        `Interesting approach — but does adding the three measurements give a 3D volume?`,
-        `Volume = l × b × h (multiply). You computed l + b + h (add). Multiplication, not addition, produces the volume.`
+        `Adding l + b + h gives a length, not a filled box.`,
+        `Volume multiplies: l × b × h.`
       );
 
     // ── VOLUME — Cylinder ───────────────────────────────────────────────────
 
     case 'cylinder_forgot_height_volume':
       return pick(
-        `You found the flat circle area — volume needs the third direction. Did you stop before × height?`,
-        `Volume = base circle × height. After π × r × r, multiply once more by h.`
+        `After the circular base, depth still matters.`,
+        `Volume = (π × r × r) × height.`
       );
 
     case 'cylinder_csa_for_volume':
       return pick(
-        `Got ${sn}. “How much fits inside” is not the same as wrapping the wall — did you use 2πrh (wrap) instead of base × height?`,
-        `2πrh is outer wrap. Inside space = (π × r × r) × h — circle area, then stretch by height.`
+        `Got ${sn}. Wall wrap isn’t the same as “how much fits inside.”`,
+        `Use base area × height, not the curved wall alone.`
       );
 
     case 'cylinder_tsa_for_volume':
       return pick(
-        `You combined caps and wrap (all outside) — the question wants space inside. Which operation uses only base circle × height?`,
-        `Outer total used curved + both circles. Inside fill = πr² × h — drop the extra surface pieces.`
+        `You mixed every outer piece — the question may only want fill.`,
+        `Inside = πr²h. Drop caps-and-wrap if it’s volume.`
       );
 
     case 'cylinder_forgot_square_r':
       return pick(
-        `Base circle area needs r × r — did you only use one r before π and h?`,
-        `You likely did π × r × h. It should be π × (r × r) × h — square r inside the base first.`
+        `Base circle uses r twice before you multiply by height.`,
+        `π × r × r × h — not π × r × h.`
       );
 
     // ── OPERATION CONFUSION ─────────────────────────────────────────────────
 
     case 'multiply_instead_of_add':
       return pick(
-        `Your number fits a product (×) — did the problem want you to add those two pieces first (+)?`,
-        `Do the addition inside the story first; only multiply afterward if the situation calls for scaling or repeated strips — not × where + belongs.`
+        `Your result looks like a product — should those two numbers be added first?`,
+        `Add where the story joins lengths or parts; multiply when you scale or repeat.`
       );
 
     case 'add_instead_of_multiply':
       return pick(
-        `Your number fits a sum (+) — did the problem need a product (×) of those same pieces?`,
-        `Replace + with × for the pair that should grow together (area, scaling, “all of each”), then redo the rest.`
+        `Your result looks like a sum — should those two numbers be multiplied?`,
+        `Try × for “all of this and all of that” in one step (area, scaling, etc.).`
       );
 
     // ── RADIUS / DIAMETER ───────────────────────────────────────────────────
@@ -296,9 +296,9 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
       const looksDouble = !isNaN(ans) && !isNaN(correct) && ans > correct * 1.5;
       return pick(
         looksDouble
-          ? `Your answer is much bigger than expected — using the full width (diameter) where only half (radius) should go into πr² or similar blows the answer up (often about 4× for area).`
-          : `Your answer is much smaller than expected — check the wording: if it gave diameter, you may need radius = half of that before squaring or multiplying by π.`,
-        `Halve diameter → r when the step needs r; if you already had r, don’t plug the full diameter in again.`
+          ? `Your answer is much too large — often that means diameter was used as radius (especially where r is squared).`
+          : `Your answer looks too small — check if you were given diameter but used it as r (or the reverse).`,
+        `Radius = diameter ÷ 2 when the wording gives the full width across the circle.`
       );
     }
 
@@ -306,57 +306,64 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
 
     case 'formula_swap':
       return pick(
-        `Your value fits one kind of job (fence-around vs inside-flat vs all faces vs space-filled) — does it match the word in the question?`,
-        `Around → add pairs then double; inside flat → multiply two sides; all paint faces → sum/double face areas; how much inside solid → multiply including height or cube edge. Pick the chain that matches the question words.`
+        `Your number fits one “job”: around the shape, flat inside, all faces, or space filled — does it match the question?`,
+        `Fence-around: add pairs, then double. Flat inside: one multiply of the two sides. Faces: sum/double face areas. Fill: product with height or edge³.`
       );
 
     // ── SA / VOLUME CONFUSION ───────────────────────────────────────────────
 
     case 'sa_volume_confusion':
       return pick(
-        `Did you add up outside skins (faces/wrap) when the question asked how much fits inside, or the opposite?`,
-        `Outside = add/multiply face areas. Inside = one 3D chunk (often base × height or edge³). Match which one you computed to what was asked.`
+        `Did you skin the solid when they asked how much fits — or the other way round?`,
+        `Outside = face areas (and wrap). Inside = one 3D chunk (often base × height or edge³).`
       );
 
     // ── UNIT ERROR ──────────────────────────────────────────────────────────
 
     case 'unit_error':
       return pick(
-        `The scale of your answer seems off — are all your lengths in the same unit before you calculate?`,
-        `Convert every length to cm or every length to m first, then redo +, ×, and squares. Don’t mix m and cm in one chain.`
+        `The size of your answer suggests mixed units — all cm, or all m?`,
+        `Convert every length to the same unit, then redo the calculation.`
       );
 
     // ── ARITHMETIC ──────────────────────────────────────────────────────────
 
     case 'arithmetic_mistake':
       return pick(
-        `Your approach looks right, but the final value is a little off — redo order of operations and fractions (e.g. 22/7) step by step.`,
-        `Rewrite the same operations in a column, one × or ÷ at a time — a single slip in bracket or π use changes ${sn}.`
+        `The idea looks right; the final number is slightly off.`,
+        `Redo each step in order — brackets, fractions like 22/7, and squaring — until ${sn} matches the chain.`
       );
 
     // ── PARTIAL FORMULA ─────────────────────────────────────────────────────
 
     case 'partial_formula':
       return pick(
-        `Your answer is smaller than expected — did you stop after one multiply when another (×2, +second part, ×height, or r²) was still needed?`,
-        `Walk the chain again: doubling, second pair of sides, squaring r, height, or extra faces — one of those steps is usually missing when the value is too low.`
+        `Your answer is lower than expected — a step may be unfinished (extra ×, double, height, r², or another face).`,
+        `Walk the full path again: perimeter doubles; area may need both sides; solids need all three dimensions or every face you need.`
       );
 
     // ── MCQ / TRUE-FALSE ────────────────────────────────────────────────────
 
     case 'wrong_option': {
       const letter = String(studentAnswer).toUpperCase().trim();
-      return pick(
-        `You chose ${letter}. Compute the number from the givens (+ / − / × / ÷ / square) before matching options.`,
-        `Redo with the numbers in the problem; the correct letter is whichever option equals that value — watch × vs + and r vs d.`
+      const fBlock = f ? `\n\n${f}` : '';
+      if (L === 1) {
+        return (
+          `You chose ${letter}. Work the numbers with the formula first, then pick the option that matches — not the other way round.` +
+          fBlock
+        );
+      }
+      return (
+        `Work step by step with the formula (order of operations, π, r² where needed). Exactly one option should equal your result.` +
+        fBlock
       );
     }
 
     case 'wrong_verdict': {
       const said = String(studentAnswer).trim();
       return pick(
-        `You said "${said}". Recompute the claim with the same operations (+ × ÷ √ r²) and see if it truly matches.`,
-        `If your recomputed value matches the statement → True; if not → False.`
+        `You said "${said}." Evaluate the statement yourself — does the math actually work out?`,
+        `Same value on both sides → True. A mismatch → False.`
       );
     }
 
@@ -364,200 +371,200 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
 
     case 'invalid_input':
       return pick(
-        `Please type only a number in the answer box — no units or extra words.`,
-        `Remove any letters, unit labels, or symbols from your answer. The system needs a plain number to check it.`
+        `Enter a plain number only (digits and maybe a decimal point).`,
+        `Remove units, words, and symbols — just the numeric answer.`
       );
 
     // ── REVERSE-FIND ─────────────────────────────────────────────────────────
 
     case 'reverse_gave_perimeter':
       return pick(
-        `You wrote the perimeter itself — but the question is asking you to find the side length from it.`,
-        `Side = Perimeter ÷ 4. You wrote the perimeter down instead of dividing it. One step left: divide by 4.`
+        `The perimeter is the clue — the answer should be one side.`,
+        `Side = perimeter ÷ 4 for a square.`
       );
 
     case 'reverse_square_half':
       return pick(
-        `You got ${sn}. A square has four equal sides — did you divide by the right number?`,
-        `A square has 4 sides, so side = Perimeter ÷ 4. You divided by 2 — that gives two sides' worth, not one.`
+        `You got ${sn}. Four equal sides share the perimeter — divide by 4, not 2.`,
+        `side = P ÷ 4.`
       );
 
     case 'reverse_multiplied':
       return pick(
-        `You multiplied — but the perimeter is already given. What operation undoes multiplication?`,
-        `If four equal sides make P, then one side = P ÷ 4. You multiplied by 4 instead of dividing — swap to ÷.`
+        `Perimeter is given — to get one side you undo the “×4”.`,
+        `Divide by 4: side = P ÷ 4.`
       );
 
     case 'reverse_gave_area':
       return pick(
-        `That number is the area that the question gave you — what do you need to do to it to get the side?`,
-        `side = √(area). You wrote the area value instead of taking its square root. One more step: √${sn}.`
+        `Area was given; the side is the reverse of squaring.`,
+        `side = √(area). If you wrote ${sn}, you may have stopped at the area instead of taking its square root.`
       );
 
     case 'reverse_square_divided':
       return pick(
-        `Dividing by 4 doesn't undo squaring — what operation does?`,
-        `To reverse s² = area, take the square root: side = √area. Dividing by 4 is not the inverse of squaring.`
+        `÷4 doesn’t undo a square — different inverse.`,
+        `side = √(area).`
       );
 
     case 'reverse_rect_forgot_subtract':
       return pick(
-        `Good start — you found half the perimeter. What do you do next to isolate the missing side?`,
-        `Half the perimeter = l + b. You know one side, so subtract it: missing side = (P ÷ 2) − known side. You stopped one step early.`
+        `Half the perimeter is length + breadth — one piece is known.`,
+        `Missing side = (P ÷ 2) minus the side you already know.`
       );
 
     case 'reverse_gave_input':
       return pick(
-        `That value is already in the question — you need to compute the unknown, not copy a given number.`,
-        `Use the givens with + / × / ÷ / √ to reach the quantity the question names — don’t paste a number you already read.`
+        `That number is already in the text — the task is to find something else.`,
+        `Compute the unknown from the givens; don’t restate a value you read.`
       );
 
     // ── EXTENDED PERIMETER — Square ──────────────────────────────────────────
 
     case 'square_three_sides_perimeter':
       return pick(
-        `Close — you multiplied by 3. How many sides does a square actually have?`,
-        `P = 4 × side. You used 3 — one side was missed. All four sides are equal and must all be counted.`
+        `Three sides isn’t a full square — how many edges on the boundary?`,
+        `Use 4 × side, not 3.`
       );
 
     case 'square_one_side_only':
       return pick(
-        `You wrote the side length — but perimeter goes all the way around. How many sides need to be counted?`,
-        `P = 4 × side. You gave just the side value (× 1). Multiply by 4 to include all four equal sides.`
+        `Perimeter is the whole walk around — not one edge.`,
+        `4 × side.`
       );
 
     // ── EXTENDED PERIMETER — Rectangle ───────────────────────────────────────
 
     case 'rect_two_lengths_only':
       return pick(
-        `You've counted both long sides — but a rectangle has another pair too. Which sides are missing?`,
-        `P = 2l + 2b. You computed 2l — the two breadths (each = b) are still missing. Add 2b to complete the perimeter.`
+        `Both long sides, but the two short sides are missing.`,
+        `Perimeter = 2l + 2b — add the breadth pair.`
       );
 
     case 'rect_two_breadths_only':
       return pick(
-        `You've counted both short sides — but the longer pair is missing. What are those sides called?`,
-        `P = 2l + 2b. You computed 2b — the two lengths (each = l) are not included. Add 2l to get the full perimeter.`
+        `Both short sides, but the two long sides are missing.`,
+        `Add the length pair: 2l + 2b.`
       );
 
     // ── EXTENDED AREA — Rectangle ────────────────────────────────────────────
 
     case 'rect_triangle_area':
       return pick(
-        `You halved the result — but is a rectangle the same shape as a triangle?`,
-        `Rectangle area = l × b (no ÷ 2). Halving is for triangles: Area = ½ × base × height. Remove the division.`
+        `A rectangle isn’t a triangle — no halving of l × b.`,
+        `Area = l × b. Drop any ÷2.`
       );
 
     case 'rect_side_squared':
       return pick(
-        `You squared one side — rectangles need both different sides in one area step (multiply length × breadth).`,
-        `Area = l × b. You used l×l or b×b; multiply the two different edges instead.`
+        `You used one side twice (a square). A rectangle has two different sides in the product.`,
+        `Area = length × breadth.`
       );
 
     // ── EXTENDED AREA — Circle ───────────────────────────────────────────────
 
     case 'circle_diameter_as_radius_area':
       return pick(
-        `Your answer is much larger than expected — did you check whether you used radius or diameter?`,
-        `A = π × r × r. If diameter d is given: r = d ÷ 2. You appear to have used d as r, giving πd² = 4πr². Halve the diameter first.`
+        `Answer much too big — often diameter was used as r in πr².`,
+        `Use r = diameter ÷ 2, then π × r × r.`
       );
 
     // ── EXTENDED SA — Cube ───────────────────────────────────────────────────
 
     case 'cube_three_faces_sa':
       return pick(
-        `You multiplied by 3 — can you picture all the faces of a cube and count them?`,
-        `TSA = 6a². You multiplied by 3 instead of 6. A cube has six identical square faces — count all six.`
+        `Six faces on a cube — not three.`,
+        `Total = 6 × (one face area).`
       );
 
     case 'cube_five_faces_sa':
       return pick(
-        `So close — you included 5 faces. How many faces does a cube have in total?`,
-        `TSA = 6a². You multiplied by 5 — just one face short. Count all six faces and multiply by a².`
+        `Five faces leaves one face out.`,
+        `All six: 6a².`
       );
 
     // ── EXTENDED SA — Cuboid ─────────────────────────────────────────────────
 
     case 'cuboid_lateral_sa_only':
       return pick(
-        `You found the area of the four side walls — does the question ask for total SA or lateral SA only?`,
-        `LSA = 2h(l+b) (sides only). TSA = 2(lb+bh+lh) = LSA + 2lb. Add the top and bottom pair (2lb) to get TSA.`
+        `Four walls only, or top and bottom too?`,
+        `If total outside is asked, add the top and bottom to the four walls.`
       );
 
     // ── EXTENDED SA — Cylinder ───────────────────────────────────────────────
 
     case 'cylinder_one_circle_sa':
       return pick(
-        `You included the curved surface and one circle — but a cylinder has two circular ends. Which one is missing?`,
-        `TSA = 2πrh + 2πr². You added only one πr² instead of two. Both circular ends are equal — add πr² one more time.`
+        `One round end plus the wrap — the other end is still missing.`,
+        `Both circular caps count equally.`
       );
 
     // ── EXTENDED VOLUME — Cube ───────────────────────────────────────────────
 
     case 'cube_twelve_edges_volume':
       return pick(
-        `That value looks like 12 × edge (total edge length) — volume is edge × edge × edge, not “how many edges”.`,
-        `Use the same edge three times with ×: a × a × a — not 12 × a.`
+        `12 × edge is total edge length, not space inside.`,
+        `Volume = edge × edge × edge.`
       );
 
     // ── EXTENDED VOLUME — Cylinder ───────────────────────────────────────────
 
     case 'cylinder_diameter_as_radius_vol':
       return pick(
-        `Volume is way too big — using full diameter everywhere you meant radius makes r effectively doubled and volume about 4× too large.`,
-        `Halve the given width once → r; then use r × r in the base before × h.`
+        `Volume far too large — diameter-as-r inflates r² by 4×.`,
+        `r = diameter ÷ 2 before πr²h.`
       );
 
     // ── COST PROBLEMS ────────────────────────────────────────────────────────
 
     case 'cost_forgot_rate':
       return pick(
-        `You have the measurement — but the question asks for the total cost. What one more step is needed?`,
-        `Total cost = area (or perimeter) × cost rate. You stopped at the measurement. Multiply by the rate given in the question.`
+        `You likely have metres or m² — cost still needs the price per unit.`,
+        `Multiply your length or area by the rate (₹/m or ₹/m²).`
       );
 
     case 'cost_wrong_measure':
       return pick(
-        `Re-read what the question is charging for — is it charging per unit of area, or per unit of length?`,
-        `Per m² → multiply cost by inside-flat amount (area-style ×). Per m → multiply cost by around-the-fence amount (perimeter-style). You paired cost with the wrong kind of number.`
+        `Is the rate per metre of fence or per square metre of floor?`,
+        `Match: per m² → area then × rate; per m → perimeter/length then × rate.`
       );
 
     // ── Generic algebraic (+/−/×/÷ confusion from question numbers) ─────────
 
     case 'algebraic_subtract_instead_multiply':
       return pick(
-        `You wrote ${sn}. Does that value come from subtracting two numbers that should grow the total together instead?`,
-        `Your answer fits “one amount minus another.” Here those pieces should be multiplied, not subtracted — swap − for × using the same numbers.`
+        `You wrote ${sn}. Could that be from subtracting when the numbers should combine with ×?`,
+        `Use multiplication for the same pair — not subtraction.`
       );
 
     case 'algebraic_divide_instead_multiply':
       return pick(
-        `You have ${sn}. Did you divide two quantities where the problem expects you to combine them into one larger amount?`,
-        `Your result lines up with a ÷ b pattern. The next step needs a product (×), not a quotient — multiply those two values instead.`
+        `You have ${sn}. Did you divide where the problem needs a product?`,
+        `Multiply those two values instead of dividing.`
       );
 
     case 'algebraic_multiply_instead_divide':
       return pick(
-        `${sn} is pretty large — could you have multiplied when the numbers actually need to be split or scaled down?`,
-        `Your value matches a × b style step. Here you should share or ratio the amounts: use division (÷) where you used multiplication.`
+        `${sn} looks inflated — did you multiply where you should split or share?`,
+        `Try ÷ instead of × for that step.`
       );
 
     case 'algebraic_add_instead_divide':
       return pick(
-        `You entered ${sn}. Does that come from adding, when the story is really about splitting something evenly or finding “how many fit”?`,
-        `Your answer looks like a sum. This situation calls for division — use ÷ on the relevant pair instead of +.`
+        `You entered ${sn}. Does that look like a sum when “how many fit” or equal shares need ÷?`,
+        `Divide the right total by the right part — don’t add them.`
       );
 
     case 'algebraic_divide_instead_add':
       return pick(
-        `You got ${sn}. Could that be from dividing two parts that were supposed to be totaled?`,
-        `Your number matches a ÷ step. Those two amounts should be added first (+), not divided — combine them, then finish any later steps.`
+        `You got ${sn}. Did you divide two pieces that should be combined first?`,
+        `Add the parts (+), then continue if there’s another step.`
       );
 
     case 'algebraic_subtract_instead_add':
       return pick(
-        `${sn} — is that what you get after taking away, when the question really wants a combined total?`,
-        `Your result matches subtraction. Here you need the sum of those parts (+), not the difference — add them and continue.`
+        `${sn} fits subtraction — did the question ask for a total of parts?`,
+        `Add the amounts instead of subtracting.`
       );
 
     // ── DEFAULT ──────────────────────────────────────────────────────────────
@@ -566,18 +573,19 @@ function buildPersonalizedHint(question, errorInfo, studentAnswer, level) {
       const isReverse = qType === 'reverse_find' || qType === 'fill_in_blank';
       const lead = errorInfo?.hintLead;
       if (lead && String(lead).trim()) {
+        const clean = String(lead).replace(/^⚠️\s*|^❌\s*/, '').replace(/\s*Formula:.*$/i, '').trim();
         return pick(
-          `You got ${sn}.`,
-          String(lead).replace(/\s*Formula:.*$/i, '').trim() || `Check each operation: + vs ×, ÷ vs −, squaring vs doubling, radius vs diameter.`
+          `You got ${sn}. Here’s a tighter read on what went wrong:`,
+          clean || `Re-check + vs ×, ÷ vs −, squaring, and radius vs diameter.`
         );
       }
       return pick(
         isReverse
-          ? `You got ${sn}. Work backward from the given total: undo × with ÷, undo squares with √, undo doubles with ÷2 — whatever matches how the total was built.`
-          : `You got ${sn}. Re-walk the problem: label each step as add, multiply, divide, or square — most slips are swapping +/× or using diameter where r was needed.`,
+          ? `You got ${sn}. You’re solving for something inside a relation — undo steps from the outside in.`
+          : `You got ${sn}. Walk the numbers again: watch × vs +, ÷ vs −, and r vs diameter.`,
         isReverse
-          ? `Isolate the unknown on one side by reversing one operation at a time from the outside in.`
-          : `Say each operation out loud before writing it; if the story says “around” vs “inside” or “faces” vs “fills”, match that to your operations.`
+          ? `Undo × with ÷, √ with ², etc., until the unknown is alone.`
+          : `Say each operation aloud; match “around,” “inside,” “faces,” or “fills” to the right chain.`
       );
     }
   }
