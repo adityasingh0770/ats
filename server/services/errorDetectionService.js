@@ -353,8 +353,8 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       type: 'wrong_option',
       feedback,
       hintLead: chosen
-        ? `Option ${letter} (${chosen}) doesn't match when you work through the formula. Try substituting the question's values into ${question.formula || 'the formula'} and compare each option.`
-        : `Think about the formula for ${shape} ${String(topic || '').replace('_', ' ')}. Work through it with the given values and see which option matches.`,
+        ? `Option ${letter} (${chosen}) doesn’t match the number you get from the givens — redo + / × / ÷ / square / π step by step and compare to each choice.`
+        : `Work the ${shape} ${String(topic || '').replace('_', ' ')} story with the numbers given; the matching option is the one that equals your chain.`,
       remedialLead: feedback,
     });
   }
@@ -362,11 +362,11 @@ const detectError = (studentAnswer, correctAnswer, question) => {
   // ── True/False ─────────────────────────────────────────────────────────────
   if (qType === 'true_false') {
     const said = String(studentAnswer).trim();
-    const feedback = `❌ You answered "${said}". ${question.reason || 'Review the statement with the formula and try again.'}`;
+    const feedback = `❌ You answered "${said}". ${question.reason || 'Redo the operations in the statement and compare to what it claims.'}`;
     return pack({
       type: 'wrong_verdict',
       feedback,
-      hintLead: `You said "${said}". Re-check the calculation in the statement against ${question.formula || 'the concept'} — does the number in the statement actually come out of the formula?`,
+      hintLead: `You said "${said}". Recompute the statement with + / × / ÷ / √ / r² — does the claimed value match your result?`,
       remedialLead: feedback,
     });
   }
@@ -1127,9 +1127,9 @@ const detectError = (studentAnswer, correctAnswer, question) => {
         if (sw && near(ans, sw, Math.abs(sw) * 0.05 + 0.5) && !near(ans, correct, 0.5)) {
           return pack({
             type: 'cost_wrong_measure',
-            feedback: `⚠️ Your answer matches the cost using the wrong formula (${topic === 'area' ? 'perimeter' : 'area'} instead of ${topic}).`,
-            hintLead: `The question asks for cost based on ${topic}. Which formula gives ${topic} for a ${shape}?`,
-            remedialLead: `Cost = ${topic} × rate. You calculated the cost using the wrong measurement type — use the ${topic} formula.`,
+            feedback: `⚠️ Your cost matches the wrong kind of measure (${topic === 'area' ? 'length-around' : 'inside-flat'} vs ${topic}).`,
+            hintLead: `Rate “per m²” pairs with inside-flat amount; “per m” pairs with around-the-fence amount — use the one that matches ${topic}.`,
+            remedialLead: `Multiply cost rate only by the measure the question priced — area-style vs perimeter-style.`,
           });
         }
       }
@@ -1175,9 +1175,9 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (a && near(ans, a, Math.abs(a) * TOL_RATIO)) {
         return pack({
           type: 'formula_swap',
-          feedback: '⚠️ Formula mix-up! You calculated the space inside instead of the boundary.',
-          hintLead: 'Your answer matches the area formula, not perimeter. Apply the perimeter formula step by step.',
-          remedialLead: 'Compare perimeter vs area for this shape — your answer fits the area idea.',
+          feedback: '⚠️ Mix-up: you combined the numbers like inside-flat (multiply two sides) but the question wants around-the-shape (add pair, then double).',
+          hintLead: 'Your value looks like length × breadth. Perimeter needs both lengths + both breadths — add l+b, then double.',
+          remedialLead: 'Inside vs fence-around use different operations; your answer fits the inside pattern.',
         });
       }
     }
@@ -1188,9 +1188,9 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       if (p && near(ans, p, Math.abs(p) * TOL_RATIO)) {
         return pack({
           type: 'formula_swap',
-          feedback: '⚠️ Formula mix-up! You calculated the boundary instead of the space inside.',
-          hintLead: 'Your answer matches the perimeter formula, not area. Apply the area formula step by step.',
-          remedialLead: 'You applied a boundary-length idea; this question needs the inside space (area).',
+          feedback: '⚠️ Mix-up: you added/doubled sides (fence-around) but the question wants inside-flat (one multiply of length × breadth).',
+          hintLead: 'Your value looks like perimeter work. Area = length × breadth for a rectangle — one product, no 2×(l+b).',
+          remedialLead: 'You used a boundary-style total; this question needs the flat inside.',
         });
       }
     }
@@ -1201,9 +1201,9 @@ const detectError = (studentAnswer, correctAnswer, question) => {
       correct !== 0 && Math.abs(ans - correct) > Math.abs(correct) * 0.5) {
     return pack({
       type: 'sa_volume_confusion',
-      feedback: '⚠️ Did you mix up Surface Area and Volume formulas? Re-read what the question is asking for.',
-      hintLead: 'Re-read the question — does it ask for the outer covering (surface area) or the space inside (volume)? They use very different formulas.',
-      remedialLead: 'Surface area and volume use different formulas for the same solid. Identify what the question asks first.',
+      feedback: '⚠️ Did you mix up outer covering (faces/wrap) with space inside (fill)?',
+      hintLead: 'Outer = add/multiply face areas. Inside = base × height or edge³-style product. Which did the words in the question ask for?',
+      remedialLead: 'Paint/all faces vs how much fits inside — different operation chains.',
     });
   }
 
@@ -1233,18 +1233,18 @@ const detectError = (studentAnswer, correctAnswer, question) => {
   if (ans > 0 && correct !== 0 && ans < Math.abs(correct) * 0.75) {
     return pack({
       type: 'partial_formula',
-      feedback: `⚠️ Partial formula! Your answer is smaller than expected — did you apply the complete formula? Formula: ${formula}`,
-      hintLead: `Your answer is lower than expected. Make sure you completed every part of the formula: ${formula}. Did you miss a step or factor?`,
-      remedialLead: `You may have stopped halfway through the formula or left out a factor. Write out ${formula} fully and substitute every symbol.`,
+      feedback: `⚠️ Your answer is smaller than expected — you may have skipped a multiply, a double, a second pair of sides, height, r², or an extra face.`,
+      hintLead: `Walk the full chain again: any missing ×2, +second part, ×height, square on r, or extra circle/face usually makes the value too low.`,
+      remedialLead: `Compare your steps to the story — perimeter-style needs all sides; area needs both dimensions; solids need every face or the full 3D product.`,
     });
   }
 
   // Final fallback
   return pack({
     type: 'wrong_answer',
-    feedback: `❌ Incorrect. The formula to use is: ${formula}. Review the concept and try again.`,
-    hintLead: `Try working through ${formula} step by step using the values from the question. Write down each step to spot where things go differently.`,
-    remedialLead: `Your answer doesn't match the expected result. Review ${formula} with the numbers given in the question.`,
+    feedback: `❌ Incorrect. Re-check each step: + vs ×, ÷ vs −, squaring, doubling, and whether lengths are radius or diameter.`,
+    hintLead: `Redo the problem slowly: say the operation before you write it. Many wrong answers come from one swapped operation or one r ↔ d mistake.`,
+    remedialLead: `Your answer doesn't match. Compare your chain of operations to what the question describes (around, inside flat, faces, or space filled).`,
   });
 };
 

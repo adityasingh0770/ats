@@ -15,7 +15,7 @@ async function resolveHint(question, _session, studentAnswer, errorInfo, hintLev
   return {
     level,
     content,
-    formula: question.formula,
+    formula: question.formula || null,
     source: 'rules',
     itsAnalysis: {
       error_type:       analysis.error_type,

@@ -11,7 +11,7 @@ const getHint = async (questionId, level, ctx = {}) => {
   return {
     level: validLevel,
     content,
-    formula: question.formula,
+    formula: question.formula || null,
   };
 };
 
