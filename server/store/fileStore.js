@@ -130,7 +130,7 @@ function getMastery(learner, conceptKey) {
 function updateConceptMastery(learner, conceptKey, score) {
   if (!learner.concept_mastery) learner.concept_mastery = {};
   const current = learner.concept_mastery[conceptKey] || 0;
-  learner.concept_mastery[conceptKey] = Math.min(1, Math.max(0, current * 0.7 + score * 0.3));
+  learner.concept_mastery[conceptKey] = Math.min(1, Math.max(0, current * 0.5 + score * 0.5));
 }
 
 // --- sessions ---

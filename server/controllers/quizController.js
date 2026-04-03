@@ -25,7 +25,7 @@ const SHAPES_BY_TOPIC = {
   surface_area: ['cube', 'cuboid', 'cylinder'],
   volume: ['cube', 'cuboid', 'cylinder'],
 };
-const SUBTOPIC_DONE_THRESHOLD = 0.10;
+const SUBTOPIC_DONE_THRESHOLD = 0.50;
 
 function topicLabel(t) {
   return String(t).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -38,20 +38,19 @@ const startQuiz = async (req, res) => {
 
     const learner = findLearnerByUserId(req.user._id);
 
-    // ── Progression gate: require 50% of previous topic's shapes done ──────────
+    // ── Progression gate: require 50% mastery in every shape of the previous topic ──
     const topicIdx = TOPIC_ORDER.indexOf(topic);
     if (topicIdx > 0) {
       const prevTopic = TOPIC_ORDER[topicIdx - 1];
       const prevShapes = SHAPES_BY_TOPIC[prevTopic];
-      const needed = Math.ceil(prevShapes.length * 0.5);
       const done = prevShapes.filter(
         (s) => getMastery(learner, `${prevTopic}_${s}`) >= SUBTOPIC_DONE_THRESHOLD
       ).length;
-      if (done < needed) {
+      if (done < prevShapes.length) {
         return res.status(403).json({
-          message: `Complete at least ${needed} of ${prevShapes.length} shapes in ${topicLabel(prevTopic)} before starting ${topicLabel(topic)}.`,
+          message: `Reach 50% mastery in all ${prevShapes.length} shapes of ${topicLabel(prevTopic)} before starting ${topicLabel(topic)}.`,
           code: 'TOPIC_LOCKED',
-          needed,
+          needed: prevShapes.length,
           done,
           prevTopic,
         });
@@ -192,21 +191,9 @@ const submitAnswer = async (req, res) => {
 
     const learner = findLearnerByUserId(req.user._id);
     let masteryAfter = session.masteryBefore;
-    if (isCorrect && learner) {
-      const conceptKey = `${session.topic}_${session.shape}`;
-      const answered = session.questionResults.length;
-      const correct = session.metrics.correct;
-      const newScore = calculateMastery({
-        correct,
-        totalAttempts: session.metrics.totalAttempts,
-        hintsUsed: session.metrics.hintsUsed,
-        questionsAnswered: answered,
-        confidenceScore: learner.confidence_score,
-        avgTimeSpent: answered > 0 ? session.metrics.timeSpent / answered : 60,
-        avgExpectedTime: question.expectedTime,
-      });
 
-      updateConceptMastery(learner, conceptKey, newScore);
+    // Update confidence and per-answer stats on every correct answer
+    if (isCorrect && learner) {
       learner.confidence_score = updateConfidenceScore(
         learner.confidence_score,
         isCorrect,
@@ -220,17 +207,30 @@ const submitAnswer = async (req, res) => {
         Math.max(0, (learner.accuracy * (learner.attempts - 1) + 1) / learner.attempts)
       );
       saveLearner(learner);
-      masteryAfter = getMastery(learner, conceptKey) || newScore;
     }
 
+    // Update concept mastery only once at session end, using the full session's stats
     if (isSessionComplete) {
       session.status = 'completed';
       session.endTime = new Date().toISOString();
-      session.masteryAfter = masteryAfter;
       if (learner) {
+        const conceptKey = `${session.topic}_${session.shape}`;
+        const answered = session.questionResults.length;
+        const newScore = calculateMastery({
+          correct: session.metrics.correct,
+          totalAttempts: session.metrics.totalAttempts,
+          hintsUsed: session.metrics.hintsUsed,
+          questionsAnswered: answered,
+          confidenceScore: learner.confidence_score,
+          avgTimeSpent: answered > 0 ? session.metrics.timeSpent / answered : 60,
+          avgExpectedTime: question.expectedTime,
+        });
+        updateConceptMastery(learner, conceptKey, newScore);
+        masteryAfter = getMastery(learner, conceptKey) || newScore;
         learner.total_sessions += 1;
         saveLearner(learner);
       }
+      session.masteryAfter = masteryAfter;
     }
 
     saveSession(session);

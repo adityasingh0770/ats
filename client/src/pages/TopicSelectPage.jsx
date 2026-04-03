@@ -114,7 +114,7 @@ export default function TopicSelectPage() {
                     {!unlocked && hint && <p className="text-[10px] text-[#888888] mt-0.5 leading-snug">{hint}</p>}
                     {isCurrentlyGating && (
                       <p className="text-[10px] text-amber-600 mt-0.5 leading-snug">
-                        Complete {needed - doneSoFar} more shape{needed - doneSoFar > 1 ? 's' : ''} here to unlock the next topic.
+                        Reach 50% mastery in {needed - doneSoFar} more shape{needed - doneSoFar > 1 ? 's' : ''} to unlock the next topic.
                       </p>
                     )}
                   </div>
