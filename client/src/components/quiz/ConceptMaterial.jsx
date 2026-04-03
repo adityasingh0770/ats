@@ -238,9 +238,6 @@ function GuidedSlideTeaser({ slide }) {
       <div className="rounded-2xl border border-[#E8E5E0] bg-[#FAFAF9] p-4 sm:p-5">
         <p className="text-[10px] text-[#888888] font-bold uppercase tracking-wide mb-2">Try in the quiz</p>
         <p className="text-sm font-semibold text-[#111111] leading-relaxed">{slide.problem}</p>
-        <p className="text-xs text-[#888888] mt-3">
-          After you start, work through the formula yourself—hints will appear if you get stuck.
-        </p>
       </div>
     </div>
   );
