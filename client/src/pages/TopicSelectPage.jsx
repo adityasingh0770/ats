@@ -123,8 +123,8 @@ export default function TopicSelectPage() {
                   )}
                 </div>
 
-                <div className="px-2 pb-1.5 pt-0">
-                  <div className="grid grid-cols-3 gap-0.5">
+                <div className="px-2 pb-2 pt-0">
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                     {t.shapes.map((shape, shapeIdx) => {
                       const ShapeIcon = shapeIcon(shape);
                       const canStart = unlocked;
@@ -139,7 +139,7 @@ export default function TopicSelectPage() {
                           transition={{ delay: topicIdx * 0.06 + shapeIdx * 0.03 }}
                           whileTap={canStart ? { scale: 0.98 } : {}}
                           onClick={() => canStart && navigate(`/quiz/${t.topic}/${shape}`)}
-                          className={`group py-1 px-1 rounded-md flex flex-row items-center justify-center gap-0.5 border transition-colors min-h-0 relative ${
+                          className={`group py-2.5 px-2 sm:py-3 sm:px-2.5 rounded-xl flex flex-row items-center justify-center gap-1.5 border transition-colors min-h-[44px] relative ${
                             canStart
                               ? shapeDone
                                 ? 'border-emerald-200 bg-emerald-50 hover:bg-emerald-100 cursor-pointer'
@@ -148,14 +148,14 @@ export default function TopicSelectPage() {
                           }`}
                         >
                           {shapeDone && canStart ? (
-                            <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
+                            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
                           ) : (
                             <ShapeIcon
-                              className={`w-2.5 h-2.5 shrink-0 ${canStart ? 'text-[#999999] group-hover:text-[#555555]' : 'text-[#D0D0D0]'}`}
+                              className={`w-5 h-5 shrink-0 ${canStart ? 'text-[#999999] group-hover:text-[#555555]' : 'text-[#D0D0D0]'}`}
                             />
                           )}
                           <span
-                            className={`text-[9px] font-semibold leading-tight truncate ${
+                            className={`text-xs sm:text-sm font-semibold leading-snug truncate ${
                               canStart
                                 ? shapeDone
                                   ? 'text-emerald-700'
