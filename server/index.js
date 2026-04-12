@@ -47,9 +47,15 @@ const clientDist = path.join(__dirname, '..', 'client', 'dist');
 const fs = require('fs');
 if (fs.existsSync(clientDist)) {
   const welcomePath = process.env.WELCOME_PATH || '/mensuration-grade-8';
-  // Old bookmarks / cached bundles may still hit these paths — redirect before static + SPA fallback
-  app.get(['/register', '/login'], (req, res) => {
-    res.redirect(302, welcomePath);
+  // Remove legacy auth URLs before static + SPA (must run on server — redeploy index.js after changing)
+  app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
+    const base = (req.path || '/').replace(/\/+$/, '') || '/';
+    if (base === '/login' || base === '/register') {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      return res.redirect(302, welcomePath);
+    }
+    next();
   });
   app.use(express.static(clientDist));
   // SPA fallback: any non-API GET returns index.html
@@ -65,6 +71,10 @@ const HOST = process.env.HOST || '0.0.0.0';
 const server = app.listen(PORT, HOST, () => {
   console.log(`MathMentor server running on ${HOST}:${PORT}`);
   console.log(`Node ${process.version}`);
+  if (fs.existsSync(clientDist)) {
+    const w = process.env.WELCOME_PATH || '/mensuration-grade-8';
+    console.log(`SPA from ${clientDist} — /login and /register redirect to ${w}`);
+  }
 });
 
 server.on('error', (err) => {
