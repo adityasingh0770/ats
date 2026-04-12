@@ -196,6 +196,36 @@ function initStore() {
   console.log(`📁 App data file: ${DATA_PATH}`);
 }
 
+// --- merge portal users ---
+function findOrCreateMergeUser(studentId) {
+  const mergeUserId = `merge_${studentId}`;
+  const data = load();
+  let dirty = false;
+
+  let user = data.users.find((u) => u._id === mergeUserId);
+  if (!user) {
+    user = {
+      _id: mergeUserId,
+      name: `Student ${studentId}`,
+      email: `merge_${studentId}@portal.local`,
+      passwordHash: '',
+      grade: 8,
+      isMergeUser: true,
+      createdAt: new Date().toISOString(),
+    };
+    data.users.push(user);
+    dirty = true;
+  }
+
+  if (!data.learners.find((l) => l.userId === mergeUserId)) {
+    data.learners.push(defaultLearner(mergeUserId));
+    dirty = true;
+  }
+
+  if (dirty) save(data);
+  return user;
+}
+
 module.exports = {
   initStore,
   DATA_PATH,
@@ -214,4 +244,5 @@ module.exports = {
   findSessionOne,
   findSessionsForUser,
   saveSession,
+  findOrCreateMergeUser,
 };

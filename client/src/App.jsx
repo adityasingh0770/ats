@@ -9,8 +9,9 @@ import QuizPage from './pages/QuizPage';
 import ResultPage from './pages/ResultPage';
 import SessionSummaryPage from './pages/SessionSummaryPage';
 import ProfilePage from './pages/ProfilePage';
+import ChapterEntryPage from './pages/ChapterEntryPage';
 import Navbar from './components/layout/Navbar';
-import { HOME_PATH } from './config/routes';
+import { HOME_PATH, CHAPTER_PATH } from './config/routes';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuthStore();
@@ -30,6 +31,8 @@ export default function App() {
         <Routes>
           <Route path={HOME_PATH} element={<LandingPage />} />
           <Route path="/" element={<Navigate to={HOME_PATH} replace />} />
+          {/* Merge portal entry — public, handles its own auth */}
+          <Route path={CHAPTER_PATH} element={<ChapterEntryPage />} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />

@@ -60,6 +60,7 @@ const completeSession = async (req, res) => {
       summary: {
         correct: session.questionResults.filter((r) => r.correct && r.attempts === 1).length,
         wrong: session.questionResults.filter((r) => !r.correct || r.attempts > 1).length,
+        questionsCorrectTotal: session.metrics?.correct ?? 0,
         totalAttempts: session.metrics.totalAttempts,
         hintsUsed: session.metrics.hintsUsed,
         timeSpentSeconds: session.metrics.timeSpent,

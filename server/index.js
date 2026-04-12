@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
@@ -32,6 +33,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/quiz', require('./routes/quizRoutes'));
 app.use('/api/session', require('./routes/sessionRoutes'));
+app.use('/api/merge', require('./routes/mergeRoutes'));
 
 app.get('/api/health', (req, res) =>
   res.json({
@@ -40,11 +42,23 @@ app.get('/api/health', (req, res) =>
   })
 );
 
+// --- Production SPA: serve built client if the dist folder exists ---
+const clientDist = path.join(__dirname, '..', 'client', 'dist');
+const fs = require('fs');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  // SPA fallback: any non-API GET returns index.html
+  app.get(/^\/(?!api\/).*/, (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
+
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 8787;
-const server = app.listen(PORT, () => {
-  console.log(`MathMentor server running on port ${PORT}`);
+const PORT = Number(process.env.PORT) || 3016;
+const HOST = process.env.HOST || '0.0.0.0';
+const server = app.listen(PORT, HOST, () => {
+  console.log(`MathMentor server running on ${HOST}:${PORT}`);
   console.log(`Node ${process.version}`);
 });
 

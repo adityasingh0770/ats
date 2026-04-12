@@ -1,5 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useLocation, Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { sendRecommendation } from '../services/recommendService';
+import { isMergeSession, getStoredRecommendation } from '../store/mergeStore';
+import RecommendationPanel from '../components/quiz/RecommendationPanel';
 import PageWrapper from '../components/layout/PageWrapper';
 import { MasteryProgress } from '../components/ui/ProgressBar';
 import Badge from '../components/ui/Badge';
@@ -20,6 +24,23 @@ import {
 export default function SessionSummaryPage() {
   const location = useLocation();
   const data = location.state;
+  const [recommendation, setRecommendation] = useState(getStoredRecommendation());
+  const [recommendLoading, setRecommendLoading] = useState(false);
+
+  useEffect(() => {
+    if (!data?.summary || !isMergeSession()) return;
+    let cancelled = false;
+    (async () => {
+      setRecommendLoading(true);
+      try {
+        const rec = await sendRecommendation(data.summary, 'exited_midway');
+        if (!cancelled && rec) setRecommendation(rec);
+      } finally {
+        if (!cancelled) setRecommendLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [data?.summary]);
 
   if (!data?.summary) {
     return <Navigate to="/dashboard" replace />;
@@ -134,6 +155,11 @@ export default function SessionSummaryPage() {
               ))}
             </ul>
           </motion.div>
+        )}
+
+        {/* Merge portal recommendation */}
+        {isMergeSession() && (
+          <RecommendationPanel recommendation={recommendation} loading={recommendLoading} />
         )}
 
         <div className="flex flex-col sm:flex-row gap-2 pt-2">

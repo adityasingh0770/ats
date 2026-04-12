@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { completeSession } from '../services/quizService';
+import { sendRecommendation } from '../services/recommendService';
+import { isMergeSession, getStoredRecommendation } from '../store/mergeStore';
+import RecommendationPanel from '../components/quiz/RecommendationPanel';
 import PageWrapper from '../components/layout/PageWrapper';
 import { MasteryProgress } from '../components/ui/ProgressBar';
 import Badge from '../components/ui/Badge';
@@ -13,19 +16,32 @@ export default function ResultPage() {
   const { sessionId } = useParams();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [recommendation, setRecommendation] = useState(getStoredRecommendation());
+  const [recommendLoading, setRecommendLoading] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       try {
         const data = await completeSession(sessionId);
         setResult(data);
+
+        // Send Recommendation API call (once per Merge session)
+        if (isMergeSession() && data?.summary) {
+          setRecommendLoading(true);
+          try {
+            const rec = await sendRecommendation(data.summary, 'completed');
+            if (rec) setRecommendation(rec);
+          } finally {
+            setRecommendLoading(false);
+          }
+        }
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetch();
+    load();
   }, [sessionId]);
 
   if (loading) return <FullPageLoader text="Calculating your results..." />;
@@ -152,6 +168,11 @@ export default function ResultPage() {
               </div>
             ))}
           </motion.div>
+        )}
+
+        {/* Merge portal recommendation */}
+        {isMergeSession() && (
+          <RecommendationPanel recommendation={recommendation} loading={recommendLoading} />
         )}
 
         {/* Actions */}
