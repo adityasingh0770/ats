@@ -46,6 +46,11 @@ app.get('/api/health', (req, res) =>
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 const fs = require('fs');
 if (fs.existsSync(clientDist)) {
+  const welcomePath = process.env.WELCOME_PATH || '/mensuration-grade-8';
+  // Old bookmarks / cached bundles may still hit these paths — redirect before static + SPA fallback
+  app.get(['/register', '/login'], (req, res) => {
+    res.redirect(302, welcomePath);
+  });
   app.use(express.static(clientDist));
   // SPA fallback: any non-API GET returns index.html
   app.get(/^\/(?!api\/).*/, (req, res) => {
