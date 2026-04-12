@@ -226,6 +226,39 @@ function findOrCreateMergeUser(studentId) {
   return user;
 }
 
+/** Anonymous browser user — stable per guest_key from client localStorage. */
+function findOrCreateGuestUser(rawKey) {
+  const safe = String(rawKey || 'anon')
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .slice(0, 80);
+  const userId = `guest_${safe}`;
+  const data = load();
+  let dirty = false;
+
+  let user = data.users.find((u) => u._id === userId);
+  if (!user) {
+    user = {
+      _id: userId,
+      name: 'Guest',
+      email: `guest_${safe}@local.mathmentor`,
+      passwordHash: '',
+      grade: 8,
+      isGuestUser: true,
+      createdAt: new Date().toISOString(),
+    };
+    data.users.push(user);
+    dirty = true;
+  }
+
+  if (!data.learners.find((l) => l.userId === userId)) {
+    data.learners.push(defaultLearner(userId));
+    dirty = true;
+  }
+
+  if (dirty) save(data);
+  return user;
+}
+
 module.exports = {
   initStore,
   DATA_PATH,
@@ -245,4 +278,5 @@ module.exports = {
   findSessionsForUser,
   saveSession,
   findOrCreateMergeUser,
+  findOrCreateGuestUser,
 };

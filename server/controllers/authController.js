@@ -5,6 +5,7 @@ const {
   createLearner,
   findLearnerByUserId,
   matchPassword,
+  findOrCreateGuestUser,
 } = require('../store/fileStore');
 const { handleError } = require('../utils/dbError');
 
@@ -28,7 +29,13 @@ const register = async (req, res) => {
     const token = generateToken(user._id);
     res.status(201).json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, grade: user.grade },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        grade: user.grade,
+        isGuestUser: !!user.isGuestUser,
+      },
     });
   } catch (err) {
     handleError(err, res);
@@ -50,11 +57,39 @@ const login = async (req, res) => {
     const token = generateToken(user._id);
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, grade: user.grade },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        grade: user.grade,
+        isGuestUser: !!user.isGuestUser,
+      },
     });
   } catch (err) {
     handleError(err, res);
   }
 };
 
-module.exports = { register, login };
+/** No password — used when the app runs without login (browser sends stable guest_key). */
+const guest = async (req, res) => {
+  try {
+    const guestKey = req.body?.guest_key;
+    const user = findOrCreateGuestUser(typeof guestKey === 'string' ? guestKey : '');
+
+    const token = generateToken(user._id);
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        grade: user.grade,
+        isGuestUser: !!user.isGuestUser,
+      },
+    });
+  } catch (err) {
+    handleError(err, res);
+  }
+};
+
+module.exports = { register, login, guest };

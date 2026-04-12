@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Brain, Zap, Target, ArrowRight, Ruler, Layers, Box, Package, Lock, GraduationCap } from 'lucide-react';
 import { warmupBackend } from '../services/apiClient';
+import { ensureGuestSession } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
 
 const highlights = [
@@ -20,10 +21,24 @@ const topics = [
 
 export default function LandingPage() {
   const token = useAuthStore((s) => s.token);
+  const navigate = useNavigate();
+  const [entering, setEntering] = useState(false);
 
   useEffect(() => {
     warmupBackend();
   }, []);
+
+  const handleEnter = async () => {
+    setEntering(true);
+    try {
+      await ensureGuestSession();
+      navigate('/topics');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEntering(false);
+    }
+  };
 
   return (
     <div className="min-h-screen pt-16 bg-[#F8F6F3]">
@@ -47,18 +62,18 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col items-center gap-3 pt-2">
-            <Link to="/register">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="btn-primary px-8 py-3 text-sm"
-              >
-                Enter <ArrowRight className="w-3.5 h-3.5" />
-              </motion.button>
-            </Link>
-            <Link to="/login" className="text-xs text-[#888888] hover:text-[#111111] transition-colors">
-              Already have an account? Log in
-            </Link>
+            <motion.button
+              type="button"
+              whileHover={{ scale: entering ? 1 : 1.02 }}
+              whileTap={{ scale: entering ? 1 : 0.98 }}
+              disabled={entering}
+              onClick={handleEnter}
+              className="btn-primary px-8 py-3 text-sm disabled:opacity-60"
+            >
+              {entering ? 'Starting…' : 'Enter'}
+              {!entering && <ArrowRight className="w-3.5 h-3.5" />}
+            </motion.button>
+            <p className="text-[11px] text-[#888888]">No account needed — jump straight into practice.</p>
           </div>
         </motion.div>
       </section>
@@ -111,22 +126,28 @@ export default function LandingPage() {
             );
           })}
         </div>
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-2">
           {token ? (
             <Link
               to="/topics"
               className="inline-flex items-center gap-2 text-sm font-bold text-[#FF6500] hover:text-[#E55500]"
             >
-              Go to your path <ArrowRight className="w-4 h-4" />
+              Continue to practice <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
-            <p className="text-[11px] text-[#888888]">
-              <Link to="/register" className="text-[#FF6500] font-semibold">
-                Create an account
-              </Link>{' '}
-              to start at step 1.
-            </p>
+            <button
+              type="button"
+              disabled={entering}
+              onClick={handleEnter}
+              className="text-sm font-bold text-[#FF6500] hover:text-[#E55500] disabled:opacity-60 inline-flex items-center gap-2"
+            >
+              {entering ? 'Starting…' : 'Continue to practice'}
+              {!entering && <ArrowRight className="w-4 h-4" />}
+            </button>
           )}
+          <p className="text-[11px] text-[#888888] max-w-sm mx-auto">
+            Progress is tied to this browser (local storage) so you can pick up where you left off.
+          </p>
         </div>
       </section>
 

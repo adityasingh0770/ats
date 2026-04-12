@@ -68,6 +68,7 @@ export default function ProfilePage() {
   const initials = profile?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
   const joinDate  = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—';
+  const isGuestProfile = !!profile?.isGuestUser;
 
   const stats = [
     { icon: Target,    label: 'Accuracy',   value: profile?.stats?.accuracy ? `${profile.stats.accuracy}%` : '—', color: '#F43F5E' },
@@ -108,7 +109,11 @@ export default function ProfilePage() {
           <div className="space-y-2">
             {[
               { icon: User,   label: 'Full Name', value: profile?.name },
-              { icon: Mail,   label: 'Email',     value: profile?.email },
+              {
+                icon: Mail,
+                label: isGuestProfile ? 'Profile' : 'Email',
+                value: isGuestProfile ? 'Practice profile on this browser (local storage)' : profile?.email,
+              },
               { icon: Shield, label: 'Grade',     value: `Grade ${profile?.grade || 8}` },
             ].map(item => {
               const Icon = item.icon;
@@ -174,24 +179,26 @@ export default function ProfilePage() {
                       placeholder="Your name" className="input-field pl-9" />
                   </div>
                 </div>
-                <div className="border-t border-[#E8E5E0] pt-3">
-                  <div className="text-xs text-[#888888] mb-2.5 flex items-center gap-1.5">
-                    <Lock className="w-3 h-3" /> Change Password <span className="text-[#CCCCCC]">(optional)</span>
+                {!isGuestProfile && (
+                  <div className="border-t border-[#E8E5E0] pt-3">
+                    <div className="text-xs text-[#888888] mb-2.5 flex items-center gap-1.5">
+                      <Lock className="w-3 h-3" /> Change Password <span className="text-[#CCCCCC]">(optional)</span>
+                    </div>
+                    <div className="space-y-2">
+                      {[
+                        { name: 'currentPassword', placeholder: 'Current password' },
+                        { name: 'newPassword',     placeholder: 'New password (min. 6 chars)' },
+                        { name: 'confirmPassword', placeholder: 'Confirm new password' },
+                      ].map(f => (
+                        <div key={f.name} className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#CCCCCC]" />
+                          <input type="password" name={f.name} value={form[f.name]} onChange={handleChange}
+                            placeholder={f.placeholder} className="input-field pl-9" />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    {[
-                      { name: 'currentPassword', placeholder: 'Current password' },
-                      { name: 'newPassword',     placeholder: 'New password (min. 6 chars)' },
-                      { name: 'confirmPassword', placeholder: 'Confirm new password' },
-                    ].map(f => (
-                      <div key={f.name} className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#CCCCCC]" />
-                        <input type="password" name={f.name} value={form[f.name]} onChange={handleChange}
-                          placeholder={f.placeholder} className="input-field pl-9" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
                 <div className="flex gap-2 pt-1">
                   <motion.button type="button" whileTap={{ scale: 0.97 }}
                     onClick={() => { setEditing(false); setError(''); setSuccess(''); }}

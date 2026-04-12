@@ -22,7 +22,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
 
-          <Link to={token ? '/dashboard' : HOME_PATH} className="flex items-center gap-2">
+          <Link to={token ? '/dashboard' : HOME_PATH} className="flex items-center gap-2" replace={false}>
             <div className="w-7 h-7 rounded-md flex items-center justify-center bg-[#FFD700]">
               <Zap className="w-3.5 h-3.5 text-black fill-black" />
             </div>
@@ -48,9 +48,10 @@ export default function Navbar() {
               <span className="text-xs text-[#888888] hidden sm:block ml-1.5 max-w-[72px] truncate">{user?.name}</span>
 
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleLogout}
+                title="Clear saved session on this device and return home"
                 className="flex items-center gap-1 text-[#AAAAAA] hover:text-red-500 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-red-50 ml-1">
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="text-xs hidden sm:block">Logout</span>
+                <span className="text-xs hidden sm:block">Exit</span>
               </motion.button>
             </div>
           ) : null}

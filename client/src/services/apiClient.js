@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getApiBaseURL } from '../config/api';
+import { HOME_PATH } from '../config/routes';
 import { useAuthStore } from '../store/authStore';
 
 /** Shared HTTP client: long timeout (Render cold start), auth header, 401 handling. */
@@ -19,11 +20,10 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     const url = String(err.config?.url || '');
-    const isAuthForm =
-      url.includes('/auth/login') || url.includes('/auth/register');
+    const isAuthForm = url.includes('/auth/guest');
     if (err.response?.status === 401 && !isAuthForm) {
       useAuthStore.getState().logout();
-      window.location.href = '/login';
+      window.location.href = HOME_PATH;
     }
     return Promise.reject(err);
   }

@@ -110,6 +110,7 @@ const getProfile = async (req, res) => {
       name: user.name,
       email: user.email,
       grade: user.grade,
+      isGuestUser: !!user.isGuestUser,
       createdAt: user.createdAt,
       stats: learner
         ? {
@@ -129,6 +130,10 @@ const updateProfile = async (req, res) => {
     const { name, currentPassword, newPassword } = req.body;
     const user = findUserById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    if (newPassword && !user.passwordHash) {
+      return res.status(400).json({ message: 'Password change is not available for this profile type.' });
+    }
 
     if (newPassword) {
       if (!currentPassword) {
