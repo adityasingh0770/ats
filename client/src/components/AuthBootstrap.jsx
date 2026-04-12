@@ -2,10 +2,11 @@ import { useLayoutEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ensureGuestSession } from '../services/authService';
-import { CHAPTER_PATH } from '../config/routes';
+import { CHAPTER_PATH, HOME_PATH } from '../config/routes';
 
 /**
  * Ensures a JWT exists for API calls without login/register.
+ * Skips on the welcome page so the user chooses Enter (then we create a guest session).
  * Skips when Merge opens /chapter?token=… (ChapterEntryPage obtains its own JWT).
  */
 export default function AuthBootstrap() {
@@ -15,6 +16,7 @@ export default function AuthBootstrap() {
 
   useLayoutEffect(() => {
     if (token) return;
+    if (location.pathname === HOME_PATH) return;
     if (location.pathname === CHAPTER_PATH && searchParams.get('token')) return;
 
     let cancelled = false;

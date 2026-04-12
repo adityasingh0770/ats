@@ -46,14 +46,14 @@ app.get('/api/health', (req, res) =>
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 const fs = require('fs');
 if (fs.existsSync(clientDist)) {
-  const welcomePath = process.env.WELCOME_PATH || '/mensuration-grade-8';
-  // Remove legacy auth URLs before static + SPA (must run on server — redeploy index.js after changing)
+  const postAuthPath = process.env.POST_AUTH_REDIRECT || '/dashboard';
+  // Legacy /login and /register URLs → dashboard (no signup; guest session is created in the SPA)
   app.use((req, res, next) => {
     if (req.method !== 'GET') return next();
     const base = (req.path || '/').replace(/\/+$/, '') || '/';
     if (base === '/login' || base === '/register') {
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-      return res.redirect(302, welcomePath);
+      return res.redirect(302, postAuthPath);
     }
     next();
   });
@@ -72,8 +72,8 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`MathMentor server running on ${HOST}:${PORT}`);
   console.log(`Node ${process.version}`);
   if (fs.existsSync(clientDist)) {
-    const w = process.env.WELCOME_PATH || '/mensuration-grade-8';
-    console.log(`SPA from ${clientDist} — /login and /register redirect to ${w}`);
+    const p = process.env.POST_AUTH_REDIRECT || '/dashboard';
+    console.log(`SPA from ${clientDist} — /login and /register redirect to ${p}`);
   }
 });
 

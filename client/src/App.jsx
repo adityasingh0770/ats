@@ -21,8 +21,8 @@ export default function App() {
           <Route path={HOME_PATH} element={<LandingPage />} />
           <Route path="/" element={<Navigate to={HOME_PATH} replace />} />
           <Route path={CHAPTER_PATH} element={<ChapterEntryPage />} />
-          <Route path="/login" element={<Navigate to={HOME_PATH} replace />} />
-          <Route path="/register" element={<Navigate to={HOME_PATH} replace />} />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/register" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/topics" element={<TopicSelectPage />} />
           <Route path="/quiz/:topic/:shape" element={<QuizPage />} />

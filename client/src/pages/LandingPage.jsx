@@ -70,10 +70,10 @@ export default function LandingPage() {
               onClick={handleEnter}
               className="btn-primary px-8 py-3 text-sm disabled:opacity-60"
             >
-              {entering ? 'Starting…' : 'Enter'}
+              {entering ? 'Starting…' : 'Go to dashboard'}
               {!entering && <ArrowRight className="w-3.5 h-3.5" />}
             </motion.button>
-            <p className="text-[11px] text-[#888888]">No account needed — jump straight into practice.</p>
+            <p className="text-[11px] text-[#888888]">No signup or login — your progress stays on this device.</p>
           </div>
         </motion.div>
       </section>
