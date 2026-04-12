@@ -32,7 +32,7 @@ export default function LandingPage() {
     setEntering(true);
     try {
       await ensureGuestSession();
-      navigate('/topics');
+      navigate('/dashboard');
     } catch (e) {
       console.error(e);
     } finally {
@@ -129,10 +129,10 @@ export default function LandingPage() {
         <div className="mt-6 text-center space-y-2">
           {token ? (
             <Link
-              to="/topics"
+              to="/dashboard"
               className="inline-flex items-center gap-2 text-sm font-bold text-[#FF6500] hover:text-[#E55500]"
             >
-              Continue to practice <ArrowRight className="w-4 h-4" />
+              Go to dashboard <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
             <button
@@ -141,7 +141,7 @@ export default function LandingPage() {
               onClick={handleEnter}
               className="text-sm font-bold text-[#FF6500] hover:text-[#E55500] disabled:opacity-60 inline-flex items-center gap-2"
             >
-              {entering ? 'Starting…' : 'Continue to practice'}
+              {entering ? 'Starting…' : 'Go to dashboard'}
               {!entering && <ArrowRight className="w-4 h-4" />}
             </button>
           )}
