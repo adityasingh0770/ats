@@ -1,0 +1,91 @@
+import { create } from 'zustand';
+
+export const useQuizStore = create((set, get) => ({
+  sessionId: null,
+  topic: null,
+  shape: null,
+  currentQuestion: null,
+  conceptMaterial: null,
+  phase: 'concept', // concept | quiz | remedial | complete
+  feedback: null,
+  hint: null,
+  hints: [], // accumulated hint strings for current question
+  hintLevel: 0,
+  remedialContent: null,
+  progress: { answered: 0, total: 8, correct: 0 },
+  currentDifficulty: 'beginner',
+  masteryBefore: 0,
+  masteryAfter: 0,
+  questionStartTime: null,
+  showHintSuggestion: false,
+  attemptCount: 0,
+
+  setSession: (data) =>
+    set({
+      sessionId: data.sessionId,
+      topic: data.topic,
+      shape: data.shape,
+      conceptMaterial: data.conceptMaterial,
+      currentQuestion: data.question,
+      currentDifficulty: data.difficulty,
+      masteryBefore: data.masteryBefore,
+      phase: 'concept',
+      feedback: null,
+      hint: null,
+      hints: [],
+      hintLevel: 0,
+      remedialContent: null,
+      progress: { answered: 0, total: 8, correct: 0 },
+      attemptCount: 0,
+    }),
+
+  startQuiz: () => set({ phase: 'quiz', questionStartTime: Date.now() }),
+
+  setFeedback: (feedback) => set({ feedback }),
+
+  /** Clear hints when student retries after a wrong attempt so new mistakes get fresh hints. */
+  clearQuestionHints: () => set({ hint: null, hints: [], hintLevel: 0 }),
+
+  setHint: (hint) => set((s) => ({
+    hint,
+    hintLevel: hint?.level || 0,
+    hints: hint?.content ? [...s.hints, hint.content] : s.hints,
+  })),
+
+  setRemedial: (remedialContent) => set({ remedialContent, phase: 'remedial' }),
+
+  setNextQuestion: (question, progress, difficulty, masteryUpdate) =>
+    set({
+      currentQuestion: question,
+      feedback: null,
+      hint: null,
+      hints: [],
+      hintLevel: 0,
+      remedialContent: null,
+      phase: 'quiz',
+      questionStartTime: Date.now(),
+      showHintSuggestion: false,
+      attemptCount: 0,
+      progress: progress || get().progress,
+      currentDifficulty: difficulty || get().currentDifficulty,
+      masteryAfter: masteryUpdate?.after || get().masteryAfter,
+    }),
+
+  setComplete: (masteryAfter) => set({ phase: 'complete', masteryAfter }),
+
+  resumeQuiz: () => set({ phase: 'quiz', remedialContent: null }),
+
+  incrementAttempt: () => set((s) => ({ attemptCount: s.attemptCount + 1 })),
+
+  setHintSuggestion: (v) => set({ showHintSuggestion: v }),
+
+  reset: () =>
+    set({
+      sessionId: null, topic: null, shape: null, currentQuestion: null,
+      conceptMaterial: null, phase: 'concept', feedback: null,
+      hint: null, hints: [], hintLevel: 0, remedialContent: null,
+      progress: { answered: 0, total: 8, correct: 0 },
+      currentDifficulty: 'beginner', masteryBefore: 0, masteryAfter: 0,
+      questionStartTime: null, showHintSuggestion: false, attemptCount: 0,
+    }),
+}));

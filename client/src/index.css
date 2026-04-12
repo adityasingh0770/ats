@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Variables ───────────────────────────────────────── */
+:root {
+  --bg:          #F8F6F3;
+  --card:        #FFFFFF;
+  --border:      #E8E5E0;
+  --border2:     #D8D4CE;
+  --text:        #111111;
+  --text-muted:  #888888;
+  --text-soft:   #AAAAAA;
+  --orange:      #FF6500;
+  --orange-dim:  #FF8333;
+  --yellow:      #FFD700;
+  --shadow:      0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #F0EDE8; }
+  ::-webkit-scrollbar-thumb { background: #D0CCC6; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #B8B4AE; }
+}
+
+@layer components {
+
+  /* ── Cards ─────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-hover { transition: box-shadow 0.15s, border-color 0.15s; }
+  .card-hover:hover { box-shadow: var(--shadow-md); border-color: var(--border2); }
+
+  /* ── Primary button  (orange) ───────── */
+  .btn-primary {
+    background: var(--orange);
+    color: #fff;
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    transition: all 0.15s;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .btn-primary:hover {
+    background: var(--orange-dim);
+    box-shadow: 0 4px 14px rgba(255,101,0,0.3);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active  { transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ── Secondary button ───────────────── */
+  .btn-secondary {
+    background: #fff;
+    color: var(--text);
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    transition: all 0.15s;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .btn-secondary:hover { background: #F5F3F0; border-color: var(--orange); color: var(--orange); }
+  .btn-secondary:active { transform: scale(0.97); }
+
+  /* ── Input ──────────────────────────── */
+  .input-field {
+    background: #FFFFFF;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .input-field::placeholder { color: #B8B4AE; }
+  .input-field:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(255,101,0,0.12);
+  }
+
+  /* ── Navbar ─────────────────────────── */
+  .glass {
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  }
+
+  /* ── Solid accent text ──────────────── */
+  .gradient-text {
+    color: var(--orange);
+  }
+
+  /* ── Badges ─────────────────────────── */
+  .badge-beginner     { background: #DCFCE7; color: #16A34A; border: 1px solid #BBF7D0; }
+  .badge-intermediate { background: #FFF7ED; color: #EA580C; border: 1px solid #FED7AA; }
+  .badge-advanced     { background: #F3F0FF; color: #7C3AED; border: 1px solid #DDD6FE; }
+}
+
+@layer utilities {
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+}

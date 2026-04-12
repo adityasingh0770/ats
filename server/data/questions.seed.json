@@ -1,0 +1,1171 @@
+[
+  {
+    "qid": "PS-B-1", "topic": "perimeter", "shape": "square", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the perimeter of a square with side 5 cm.",
+    "answer": 20, "unit": "cm", "formula": "P = 4 × s", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "15": "square_three_sides_perimeter",
+      "25": "square_area_instead_of_perimeter",
+      "10": "square_two_sides_perimeter",
+      "5": "square_one_side_only"
+    },
+    "hints": {
+      "level1": "A square has 4 equal sides. Perimeter means the total distance around the shape.",
+      "level2": "Formula: P = 4 × s. Here, s = 5 cm. Multiply 4 by the side length.",
+      "level3": "Step 1: Write the formula → P = 4 × s\nStep 2: Substitute s = 5 → P = 4 × 5\nStep 3: Calculate → P = 20 cm"
+    }
+  },
+  {
+    "qid": "PS-B-2", "topic": "perimeter", "shape": "square", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "A square tile has a side of 9 cm. Find its perimeter.",
+    "answer": 36, "unit": "cm", "formula": "P = 4 × s", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "27": "square_three_sides_perimeter",
+      "81": "square_area_instead_of_perimeter",
+      "18": "square_two_sides_perimeter",
+      "9": "square_one_side_only"
+    },
+    "hints": {
+      "level1": "All 4 sides of a square are equal. Add all four sides together.",
+      "level2": "Formula: P = 4 × s. Here s = 9 cm.",
+      "level3": "Step 1: P = 4 × s\nStep 2: P = 4 × 9\nStep 3: P = 36 cm"
+    }
+  },
+  {
+    "qid": "PS-I-1", "topic": "perimeter", "shape": "square", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "The perimeter of a square is 52 cm. Find the length of each side.",
+    "answer": 13, "unit": "cm", "formula": "s = P ÷ 4", "expectedTime": 60,
+    "commonWrongAnswers": {
+      "52": "reverse_gave_perimeter",
+      "26": "reverse_square_half",
+      "208": "reverse_multiplied"
+    },
+    "hints": {
+      "level1": "If you know the perimeter, divide by 4 to find the side (since all sides are equal).",
+      "level2": "Formula: s = P ÷ 4. Here, P = 52 cm. Divide 52 by 4.",
+      "level3": "Step 1: s = P ÷ 4\nStep 2: s = 52 ÷ 4\nStep 3: s = 13 cm"
+    }
+  },
+  {
+    "qid": "PS-I-2", "topic": "perimeter", "shape": "square", "difficulty": "intermediate",
+    "type": "cost_problem",
+    "question": "A square park has a perimeter of 200 m. What is the cost of fencing it at ₹12 per metre?",
+    "answer": 2400, "unit": "₹", "formula": "Cost = P × rate", "expectedTime": 75,
+    "commonWrongAnswers": {
+      "200": "cost_forgot_rate",
+      "12": "cost_forgot_rate",
+      "50": "partial_formula"
+    },
+    "hints": {
+      "level1": "The perimeter is already given. Multiply by the rate per metre.",
+      "level2": "Cost = Perimeter × rate per metre. P = 200 m, rate = ₹12/m.",
+      "level3": "Step 1: Cost = P × rate\nStep 2: Cost = 200 × 12\nStep 3: Cost = ₹2400"
+    }
+  },
+  {
+    "qid": "PS-A-1", "topic": "perimeter", "shape": "square", "difficulty": "advanced",
+    "type": "cost_problem",
+    "question": "A square garden has perimeter 48 m. Find the cost of fencing it at ₹15 per metre.",
+    "answer": 720, "unit": "₹", "formula": "Cost = P × rate", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "48": "cost_forgot_rate",
+      "15": "cost_forgot_rate",
+      "12": "partial_formula",
+      "63": "add_instead_of_multiply"
+    },
+    "hints": {
+      "level1": "The perimeter is given directly. You just need to calculate the total fencing cost.",
+      "level2": "Cost = Perimeter × rate. P = 48 m, rate = ₹15 per metre.",
+      "level3": "Step 1: Cost = P × rate\nStep 2: Cost = 48 × 15\nStep 3: Cost = ₹720"
+    }
+  },
+  {
+    "qid": "PS-A-2", "topic": "perimeter", "shape": "square", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "A square field has side 1.5 m. Find its perimeter in centimetres.",
+    "answer": 600, "unit": "cm", "formula": "P = 4 × s (convert to cm)", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "6": "unit_error",
+      "1.5": "square_one_side_only",
+      "150": "partial_formula"
+    },
+    "hints": {
+      "level1": "First find the perimeter in metres, then convert to centimetres (1 m = 100 cm).",
+      "level2": "P = 4 × 1.5 = 6 m. Now convert: 6 m × 100 = 600 cm.",
+      "level3": "Step 1: P = 4 × 1.5 = 6 m\nStep 2: Convert → 6 × 100 = 600 cm\nStep 3: Perimeter = 600 cm"
+    }
+  },
+  {
+    "qid": "PR-B-1", "topic": "perimeter", "shape": "rectangle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the perimeter of a rectangle with length 8 cm and breadth 5 cm.",
+    "answer": 26, "unit": "cm", "formula": "P = 2(l + b)", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "13": "rect_sum_only_perimeter",
+      "40": "area_instead_of_perimeter_rect",
+      "16": "rect_two_lengths_only",
+      "10": "rect_two_breadths_only"
+    },
+    "hints": {
+      "level1": "A rectangle has 2 pairs of equal sides. Add all four sides.",
+      "level2": "Formula: P = 2(l + b). Here l = 8 cm, b = 5 cm.",
+      "level3": "Step 1: P = 2(l + b)\nStep 2: P = 2(8 + 5)\nStep 3: P = 2 × 13 = 26 cm"
+    }
+  },
+  {
+    "qid": "PR-B-2", "topic": "perimeter", "shape": "rectangle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "A rectangle has length 12 cm and breadth 7 cm. Find its perimeter.",
+    "answer": 38, "unit": "cm", "formula": "P = 2(l + b)", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "19": "rect_sum_only_perimeter",
+      "84": "area_instead_of_perimeter_rect",
+      "24": "rect_two_lengths_only",
+      "14": "rect_two_breadths_only"
+    },
+    "hints": {
+      "level1": "Perimeter of a rectangle = 2 × (length + breadth).",
+      "level2": "P = 2(l + b). l = 12, b = 7. Add them first, then multiply by 2.",
+      "level3": "Step 1: P = 2(12 + 7)\nStep 2: P = 2 × 19\nStep 3: P = 38 cm"
+    }
+  },
+  {
+    "qid": "PR-I-1", "topic": "perimeter", "shape": "rectangle", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "A rectangle has perimeter 40 cm and length 12 cm. Find the breadth.",
+    "answer": 8, "unit": "cm", "formula": "b = P/2 − l", "expectedTime": 60,
+    "commonWrongAnswers": {
+      "20": "reverse_rect_forgot_subtract",
+      "28": "arithmetic_mistake",
+      "40": "reverse_gave_perimeter",
+      "10": "reverse_square_half"
+    },
+    "hints": {
+      "level1": "You know the perimeter and length. Rearrange the perimeter formula to find breadth.",
+      "level2": "P = 2(l + b) → l + b = P/2 → b = P/2 − l. P = 40, l = 12.",
+      "level3": "Step 1: l + b = 40/2 = 20\nStep 2: b = 20 − 12\nStep 3: b = 8 cm"
+    }
+  },
+  {
+    "qid": "PR-I-2", "topic": "perimeter", "shape": "rectangle", "difficulty": "intermediate",
+    "type": "cost_problem",
+    "question": "A rectangular field is 50 m × 30 m. Find the cost of fencing it at ₹20 per metre.",
+    "answer": 3200, "unit": "₹", "formula": "Cost = P × rate", "expectedTime": 75,
+    "commonWrongAnswers": {
+      "160": "cost_forgot_rate",
+      "1500": "cost_wrong_measure",
+      "30000": "cost_wrong_measure",
+      "80": "rect_sum_only_perimeter"
+    },
+    "hints": {
+      "level1": "First find the perimeter of the rectangular field, then multiply by the rate.",
+      "level2": "P = 2(50 + 30) = 160 m. Cost = 160 × 20.",
+      "level3": "Step 1: P = 2(50 + 30) = 2 × 80 = 160 m\nStep 2: Cost = 160 × 20\nStep 3: Cost = ₹3200"
+    }
+  },
+  {
+    "qid": "PR-A-1", "topic": "perimeter", "shape": "rectangle", "difficulty": "advanced",
+    "type": "cost_problem",
+    "question": "A rectangular park is 120 m × 80 m. Find the cost of building a fence at ₹25 per metre.",
+    "answer": 10000, "unit": "₹", "formula": "Cost = 2(l + b) × rate", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "400": "cost_forgot_rate",
+      "9600": "cost_wrong_measure",
+      "200": "rect_sum_only_perimeter",
+      "5000": "cost_wrong_measure"
+    },
+    "hints": {
+      "level1": "Find perimeter first, then multiply by ₹25.",
+      "level2": "P = 2(120 + 80) = 400 m. Cost = 400 × 25.",
+      "level3": "Step 1: P = 2(120 + 80) = 2 × 200 = 400 m\nStep 2: Cost = 400 × 25\nStep 3: Cost = ₹10000"
+    }
+  },
+  {
+    "qid": "PR-A-2", "topic": "perimeter", "shape": "rectangle", "difficulty": "advanced",
+    "type": "reverse_find",
+    "question": "A rectangle has perimeter 60 cm and breadth 10 cm. Find its length.",
+    "answer": 20, "unit": "cm", "formula": "l = P/2 − b", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "30": "reverse_rect_forgot_subtract",
+      "50": "arithmetic_mistake",
+      "60": "reverse_gave_perimeter",
+      "15": "reverse_square_half"
+    },
+    "hints": {
+      "level1": "Rearrange the perimeter formula: l + b = P/2, so l = P/2 − b.",
+      "level2": "P/2 = 30. l = 30 − 10 = 20.",
+      "level3": "Step 1: l + b = P/2 = 60/2 = 30\nStep 2: l = 30 − b = 30 − 10\nStep 3: l = 20 cm"
+    }
+  },
+  {
+    "qid": "PC-B-1", "topic": "perimeter", "shape": "circle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the circumference of a circle with radius 7 cm. (Use π = 22/7)",
+    "answer": 44, "unit": "cm", "formula": "C = 2πr", "expectedTime": 50,
+    "commonWrongAnswers": {
+      "154": "circle_area_for_circumference",
+      "22": "circle_forgot_multiply_by_2",
+      "14": "forgot_pi_circumference"
+    },
+    "hints": {
+      "level1": "The circumference of a circle is its perimeter. Use the formula C = 2πr.",
+      "level2": "C = 2 × (22/7) × 7. The 7s will cancel out.",
+      "level3": "Step 1: C = 2πr = 2 × (22/7) × 7\nStep 2: = 2 × 22 (the 7s cancel)\nStep 3: = 44 cm"
+    }
+  },
+  {
+    "qid": "PC-B-2", "topic": "perimeter", "shape": "circle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the circumference of a circle with radius 14 cm. (Use π = 22/7)",
+    "answer": 88, "unit": "cm", "formula": "C = 2πr", "expectedTime": 50,
+    "commonWrongAnswers": {
+      "616": "circle_area_for_circumference",
+      "44": "circle_forgot_multiply_by_2",
+      "28": "forgot_pi_circumference"
+    },
+    "hints": {
+      "level1": "Use C = 2πr. The radius is 14 cm.",
+      "level2": "C = 2 × (22/7) × 14. Simplify: 14 ÷ 7 = 2.",
+      "level3": "Step 1: C = 2 × (22/7) × 14\nStep 2: = 2 × 22 × 2 (14 ÷ 7 = 2)\nStep 3: = 88 cm"
+    }
+  },
+  {
+    "qid": "PC-I-1", "topic": "perimeter", "shape": "circle", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the circumference of a circle with diameter 21 cm. (Use π = 22/7)",
+    "answer": 66, "unit": "cm", "formula": "C = πd", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "132": "radius_diameter_confusion",
+      "33": "circle_forgot_multiply_by_2",
+      "21": "reverse_gave_input"
+    },
+    "hints": {
+      "level1": "When diameter is given, use C = πd directly (or find r first: r = d/2).",
+      "level2": "C = πd = (22/7) × 21. Or: r = 21/2 = 10.5, C = 2 × (22/7) × 10.5.",
+      "level3": "Step 1: C = πd = (22/7) × 21\nStep 2: = 22 × 3 (21 ÷ 7 = 3)\nStep 3: = 66 cm"
+    }
+  },
+  {
+    "qid": "PC-I-2", "topic": "perimeter", "shape": "circle", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the circumference of a circle with radius 3.5 cm. (Use π = 22/7)",
+    "answer": 22, "unit": "cm", "formula": "C = 2πr", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "38.5": "circle_area_for_circumference",
+      "11": "circle_forgot_multiply_by_2",
+      "7": "forgot_pi_circumference"
+    },
+    "hints": {
+      "level1": "Use C = 2πr. Here r = 3.5 cm.",
+      "level2": "C = 2 × (22/7) × 3.5. Note: 3.5 = 7/2.",
+      "level3": "Step 1: C = 2 × (22/7) × 3.5\nStep 2: = 2 × (22/7) × (7/2)\nStep 3: = 22 cm"
+    }
+  },
+  {
+    "qid": "PC-A-1", "topic": "perimeter", "shape": "circle", "difficulty": "advanced",
+    "type": "reverse_find",
+    "question": "A circular track has circumference 132 cm. Find its radius. (Use π = 22/7)",
+    "answer": 21, "unit": "cm", "formula": "r = C / (2π)", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "132": "reverse_gave_perimeter",
+      "42": "radius_diameter_confusion",
+      "6": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "You know the circumference. Rearrange C = 2πr to find r.",
+      "level2": "r = C / (2π) = 132 / (2 × 22/7) = 132 / (44/7) = 132 × 7 / 44.",
+      "level3": "Step 1: r = C / (2π) = 132 ÷ (44/7)\nStep 2: = 132 × 7 / 44 = 924 / 44\nStep 3: = 21 cm"
+    }
+  },
+  {
+    "qid": "PC-A-2", "topic": "perimeter", "shape": "circle", "difficulty": "advanced",
+    "type": "reverse_find",
+    "question": "A wheel covers 220 m in one full rotation. Find its diameter. (Use π = 22/7)",
+    "answer": 70, "unit": "m", "formula": "d = C / π", "expectedTime": 100,
+    "commonWrongAnswers": {
+      "220": "reverse_gave_perimeter",
+      "35": "radius_diameter_confusion",
+      "10": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "One full rotation = circumference of the wheel. Use C = πd and solve for d.",
+      "level2": "d = C / π = 220 / (22/7) = 220 × 7 / 22.",
+      "level3": "Step 1: d = C/π = 220 ÷ (22/7)\nStep 2: = 220 × 7/22 = 1540/22\nStep 3: = 70 m"
+    }
+  },
+  {
+    "qid": "AS-B-1", "topic": "area", "shape": "square", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the area of a square with side 6 cm.",
+    "answer": 36, "unit": "cm²", "formula": "A = s²", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "24": "square_perimeter_instead_of_area",
+      "12": "square_two_sides_perimeter",
+      "6": "square_one_side_only"
+    },
+    "hints": {
+      "level1": "The area of a square = side × side. Both sides are equal.",
+      "level2": "Formula: A = s². Here s = 6 cm. Square the side.",
+      "level3": "Step 1: A = s²\nStep 2: A = 6²\nStep 3: A = 36 cm²"
+    }
+  },
+  {
+    "qid": "AS-B-2", "topic": "area", "shape": "square", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "A square carpet has side 11 cm. Find its area.",
+    "answer": 121, "unit": "cm²", "formula": "A = s²", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "44": "square_perimeter_instead_of_area",
+      "22": "square_two_sides_perimeter",
+      "11": "square_one_side_only"
+    },
+    "hints": {
+      "level1": "Area of square = side × side.",
+      "level2": "A = s² = 11² = 11 × 11.",
+      "level3": "Step 1: A = s² = 11²\nStep 2: = 11 × 11\nStep 3: = 121 cm²"
+    }
+  },
+  {
+    "qid": "AS-I-1", "topic": "area", "shape": "square", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "The area of a square is 64 cm². Find its perimeter.",
+    "answer": 32, "unit": "cm", "formula": "s = √A, then P = 4s", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "64": "reverse_gave_area",
+      "8": "partial_formula",
+      "256": "reverse_multiplied",
+      "16": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "First find the side from area (s = √A), then use perimeter formula.",
+      "level2": "s = √64 = 8 cm. Then P = 4 × 8.",
+      "level3": "Step 1: s = √A = √64 = 8 cm\nStep 2: P = 4 × s = 4 × 8\nStep 3: P = 32 cm"
+    }
+  },
+  {
+    "qid": "AS-I-2", "topic": "area", "shape": "square", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "The area of a square is 225 cm². Find the length of its side.",
+    "answer": 15, "unit": "cm", "formula": "s = √A", "expectedTime": 60,
+    "commonWrongAnswers": {
+      "225": "reverse_gave_area",
+      "56.25": "reverse_square_divided",
+      "900": "reverse_multiplied",
+      "112.5": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Area = side². So side = √(Area).",
+      "level2": "s = √225. What number times itself gives 225?",
+      "level3": "Step 1: s = √A = √225\nStep 2: 15 × 15 = 225\nStep 3: s = 15 cm"
+    }
+  },
+  {
+    "qid": "AS-A-1", "topic": "area", "shape": "square", "difficulty": "advanced",
+    "type": "cost_problem",
+    "question": "A square floor has side 25 cm. Find the cost of tiling it at ₹8 per cm².",
+    "answer": 5000, "unit": "₹", "formula": "Cost = A × rate", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "625": "cost_forgot_rate",
+      "200": "cost_wrong_measure",
+      "800": "cost_wrong_measure"
+    },
+    "hints": {
+      "level1": "Find the area of the square floor first, then multiply by the cost per cm².",
+      "level2": "A = 25² = 625 cm². Cost = 625 × 8.",
+      "level3": "Step 1: A = s² = 25² = 625 cm²\nStep 2: Cost = 625 × 8\nStep 3: Cost = ₹5000"
+    }
+  },
+  {
+    "qid": "AS-A-2", "topic": "area", "shape": "square", "difficulty": "advanced",
+    "type": "cost_problem",
+    "question": "A square field has area 144 m². Find the cost of ploughing it at ₹50 per m².",
+    "answer": 7200, "unit": "₹", "formula": "Cost = A × rate", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "144": "cost_forgot_rate",
+      "12": "partial_formula",
+      "600": "cost_wrong_measure"
+    },
+    "hints": {
+      "level1": "The area is already given. Multiply directly by the rate.",
+      "level2": "Cost = A × rate = 144 × 50.",
+      "level3": "Step 1: A = 144 m² (given)\nStep 2: Cost = 144 × 50\nStep 3: Cost = ₹7200"
+    }
+  },
+  {
+    "qid": "AR-B-1", "topic": "area", "shape": "rectangle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the area of a rectangle with length 9 cm and breadth 4 cm.",
+    "answer": 36, "unit": "cm²", "formula": "A = l × b", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "26": "perimeter_instead_of_area_rect",
+      "13": "rect_sum_only_perimeter",
+      "9": "partial_formula"
+    },
+    "hints": {
+      "level1": "Area of a rectangle = length × breadth.",
+      "level2": "A = l × b = 9 × 4.",
+      "level3": "Step 1: A = l × b\nStep 2: A = 9 × 4\nStep 3: A = 36 cm²"
+    }
+  },
+  {
+    "qid": "AR-B-2", "topic": "area", "shape": "rectangle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "A rectangle has length 15 cm and breadth 8 cm. Find its area.",
+    "answer": 120, "unit": "cm²", "formula": "A = l × b", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "46": "perimeter_instead_of_area_rect",
+      "23": "rect_sum_only_perimeter"
+    },
+    "hints": {
+      "level1": "Multiply length by breadth to get the area.",
+      "level2": "A = l × b = 15 × 8.",
+      "level3": "Step 1: A = l × b\nStep 2: A = 15 × 8\nStep 3: A = 120 cm²"
+    }
+  },
+  {
+    "qid": "AR-I-1", "topic": "area", "shape": "rectangle", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "A rectangle has area 48 cm² and length 8 cm. Find its breadth.",
+    "answer": 6, "unit": "cm", "formula": "b = A ÷ l", "expectedTime": 60,
+    "commonWrongAnswers": {
+      "40": "arithmetic_mistake",
+      "384": "reverse_multiplied",
+      "24": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "You know area and length. Divide area by length to get breadth.",
+      "level2": "b = A ÷ l = 48 ÷ 8.",
+      "level3": "Step 1: A = l × b → b = A ÷ l\nStep 2: b = 48 ÷ 8\nStep 3: b = 6 cm"
+    }
+  },
+  {
+    "qid": "AR-I-2", "topic": "area", "shape": "rectangle", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "A rectangle has area 132 cm² and length 12 cm. Find its breadth.",
+    "answer": 11, "unit": "cm", "formula": "b = A ÷ l", "expectedTime": 60,
+    "commonWrongAnswers": {
+      "120": "arithmetic_mistake",
+      "1584": "reverse_multiplied",
+      "66": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Divide area by length to find breadth.",
+      "level2": "b = 132 ÷ 12.",
+      "level3": "Step 1: b = A ÷ l\nStep 2: b = 132 ÷ 12\nStep 3: b = 11 cm"
+    }
+  },
+  {
+    "qid": "AR-A-1", "topic": "area", "shape": "rectangle", "difficulty": "advanced",
+    "type": "cost_problem",
+    "question": "A room is 5 m × 4 m. Find the cost of carpeting it at ₹120 per m².",
+    "answer": 2400, "unit": "₹", "formula": "Cost = l × b × rate", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "20": "cost_forgot_rate",
+      "2160": "cost_wrong_measure"
+    },
+    "hints": {
+      "level1": "Find the area of the room, then multiply by the cost per m².",
+      "level2": "A = 5 × 4 = 20 m². Cost = 20 × 120.",
+      "level3": "Step 1: A = l × b = 5 × 4 = 20 m²\nStep 2: Cost = 20 × 120\nStep 3: Cost = ₹2400"
+    }
+  },
+  {
+    "qid": "AR-A-2", "topic": "area", "shape": "rectangle", "difficulty": "advanced",
+    "type": "reverse_find",
+    "question": "A rectangular plot has area 240 m² and breadth 12 m. Find its length.",
+    "answer": 20, "unit": "m", "formula": "l = A ÷ b", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "2880": "reverse_multiplied",
+      "228": "arithmetic_mistake",
+      "120": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Rearrange A = l × b to find l: l = A ÷ b.",
+      "level2": "l = 240 ÷ 12.",
+      "level3": "Step 1: l = A ÷ b\nStep 2: l = 240 ÷ 12\nStep 3: l = 20 m"
+    }
+  },
+  {
+    "qid": "AC-B-1", "topic": "area", "shape": "circle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the area of a circle with radius 7 cm. (Use π = 22/7)",
+    "answer": 154, "unit": "cm²", "formula": "A = πr²", "expectedTime": 55,
+    "commonWrongAnswers": {
+      "44": "circle_circumference_for_area",
+      "22": "circle_forgot_square_radius",
+      "49": "forgot_pi_area",
+      "616": "circle_diameter_as_radius_area"
+    },
+    "hints": {
+      "level1": "The area of a circle uses the radius squared. Formula: A = πr².",
+      "level2": "A = (22/7) × 7². Square the radius first.",
+      "level3": "Step 1: A = πr² = (22/7) × 7²\nStep 2: = (22/7) × 49\nStep 3: = 22 × 7 = 154 cm²"
+    }
+  },
+  {
+    "qid": "AC-B-2", "topic": "area", "shape": "circle", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the area of a circle with radius 14 cm. (Use π = 22/7)",
+    "answer": 616, "unit": "cm²", "formula": "A = πr²", "expectedTime": 55,
+    "commonWrongAnswers": {
+      "88": "circle_circumference_for_area",
+      "44": "circle_forgot_square_radius",
+      "196": "forgot_pi_area",
+      "308": "rect_triangle_area"
+    },
+    "hints": {
+      "level1": "Use A = πr². Square the radius first, then multiply by π.",
+      "level2": "A = (22/7) × 14² = (22/7) × 196.",
+      "level3": "Step 1: A = (22/7) × 14²\nStep 2: 14² = 196, (22/7) × 196 = 22 × 28\nStep 3: = 616 cm²"
+    }
+  },
+  {
+    "qid": "AC-I-1", "topic": "area", "shape": "circle", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the area of a circle with diameter 28 cm. (Use π = 22/7)",
+    "answer": 616, "unit": "cm²", "formula": "A = π(d/2)²", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "2464": "circle_diameter_as_radius_area",
+      "88": "circle_circumference_for_area",
+      "308": "rect_triangle_area"
+    },
+    "hints": {
+      "level1": "Diameter is given. First find radius: r = diameter ÷ 2.",
+      "level2": "r = 28/2 = 14 cm. Then A = (22/7) × 14².",
+      "level3": "Step 1: r = d/2 = 28/2 = 14 cm\nStep 2: A = (22/7) × 14² = (22/7) × 196\nStep 3: = 22 × 28 = 616 cm²"
+    }
+  },
+  {
+    "qid": "AC-I-2", "topic": "area", "shape": "circle", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the area of a circle with radius 21 cm. (Use π = 22/7)",
+    "answer": 1386, "unit": "cm²", "formula": "A = πr²", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "132": "circle_circumference_for_area",
+      "66": "circle_forgot_square_radius",
+      "441": "forgot_pi_area",
+      "693": "rect_triangle_area"
+    },
+    "hints": {
+      "level1": "Apply the formula A = πr² with r = 21.",
+      "level2": "A = (22/7) × 21² = (22/7) × 441.",
+      "level3": "Step 1: A = (22/7) × 21²\nStep 2: 21² = 441, 441 ÷ 7 = 63\nStep 3: 22 × 63 = 1386 cm²"
+    }
+  },
+  {
+    "qid": "AC-A-1", "topic": "area", "shape": "circle", "difficulty": "advanced",
+    "type": "reverse_find",
+    "question": "A circular garden has area 1386 m². Find its circumference. (Use π = 22/7)",
+    "answer": 132, "unit": "m", "formula": "Find r from A = πr², then C = 2πr", "expectedTime": 110,
+    "commonWrongAnswers": {
+      "1386": "reverse_gave_area",
+      "21": "partial_formula",
+      "42": "radius_diameter_confusion"
+    },
+    "hints": {
+      "level1": "First find r using A = πr², then calculate circumference C = 2πr.",
+      "level2": "r² = A/π = 1386 ÷ (22/7) = 1386 × 7/22 = 441. So r = 21 m.",
+      "level3": "Step 1: r² = 1386 × 7/22 = 441 → r = 21 m\nStep 2: C = 2πr = 2 × (22/7) × 21\nStep 3: = 44 × 3 = 132 m"
+    }
+  },
+  {
+    "qid": "AC-A-2", "topic": "area", "shape": "circle", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "Find the area of a circle with radius 35 cm. (Use π = 22/7)",
+    "answer": 3850, "unit": "cm²", "formula": "A = πr²", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "220": "circle_circumference_for_area",
+      "110": "circle_forgot_square_radius",
+      "1225": "forgot_pi_area",
+      "1925": "rect_triangle_area"
+    },
+    "hints": {
+      "level1": "Apply A = πr² with r = 35.",
+      "level2": "A = (22/7) × 35² = (22/7) × 1225.",
+      "level3": "Step 1: 35² = 1225\nStep 2: (22/7) × 1225 = 22 × 175\nStep 3: = 3850 cm²"
+    }
+  },
+  {
+    "qid": "SAC-B-1", "topic": "surface_area", "shape": "cube", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the total surface area of a cube with side 4 cm.",
+    "answer": 96, "unit": "cm²", "formula": "TSA = 6s²", "expectedTime": 55,
+    "commonWrongAnswers": {
+      "16": "cube_one_face_sa",
+      "64": "cube_volume_for_sa",
+      "32": "cube_two_faces_sa",
+      "24": "cube_linear_sa"
+    },
+    "hints": {
+      "level1": "A cube has 6 equal square faces. Find the area of one face and multiply by 6.",
+      "level2": "TSA = 6 × s² = 6 × 4². Square the side first.",
+      "level3": "Step 1: TSA = 6s²\nStep 2: = 6 × 4² = 6 × 16\nStep 3: = 96 cm²"
+    }
+  },
+  {
+    "qid": "SAC-B-2", "topic": "surface_area", "shape": "cube", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "A cube has side 5 cm. Find its total surface area.",
+    "answer": 150, "unit": "cm²", "formula": "TSA = 6s²", "expectedTime": 55,
+    "commonWrongAnswers": {
+      "25": "cube_one_face_sa",
+      "125": "cube_volume_for_sa",
+      "50": "cube_two_faces_sa",
+      "100": "cube_four_faces_sa",
+      "30": "cube_linear_sa"
+    },
+    "hints": {
+      "level1": "All 6 faces of a cube are identical squares. TSA = 6 × (area of one face).",
+      "level2": "TSA = 6s² = 6 × 25.",
+      "level3": "Step 1: TSA = 6s² = 6 × 5²\nStep 2: = 6 × 25\nStep 3: = 150 cm²"
+    }
+  },
+  {
+    "qid": "SAC-I-1", "topic": "surface_area", "shape": "cube", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "The total surface area of a cube is 216 cm². Find the length of its side.",
+    "answer": 6, "unit": "cm", "formula": "s = √(TSA/6)", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "36": "reverse_square_divided",
+      "216": "reverse_gave_input",
+      "54": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Rearrange TSA = 6s² to find s: s² = TSA/6, then take square root.",
+      "level2": "s² = 216/6 = 36. s = √36.",
+      "level3": "Step 1: s² = TSA/6 = 216/6 = 36\nStep 2: s = √36\nStep 3: s = 6 cm"
+    }
+  },
+  {
+    "qid": "SAC-I-2", "topic": "surface_area", "shape": "cube", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "The total surface area of a cube is 384 cm². Find the length of its side.",
+    "answer": 8, "unit": "cm", "formula": "s = √(TSA/6)", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "64": "reverse_square_divided",
+      "384": "reverse_gave_input",
+      "96": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "s² = TSA/6. Divide, then square root.",
+      "level2": "s² = 384/6 = 64. s = √64.",
+      "level3": "Step 1: s² = 384 / 6 = 64\nStep 2: s = √64\nStep 3: s = 8 cm"
+    }
+  },
+  {
+    "qid": "SAC-A-1", "topic": "surface_area", "shape": "cube", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "Find the total surface area of a cube with side 10 cm.",
+    "answer": 600, "unit": "cm²", "formula": "TSA = 6s²", "expectedTime": 60,
+    "commonWrongAnswers": {
+      "100": "cube_one_face_sa",
+      "1000": "cube_volume_for_sa",
+      "400": "cube_four_faces_sa",
+      "60": "cube_linear_sa"
+    },
+    "hints": {
+      "level1": "Apply TSA = 6s² with s = 10.",
+      "level2": "TSA = 6 × 10² = 6 × 100.",
+      "level3": "Step 1: TSA = 6 × 10²\nStep 2: = 6 × 100\nStep 3: = 600 cm²"
+    }
+  },
+  {
+    "qid": "SAC-A-2", "topic": "surface_area", "shape": "cube", "difficulty": "advanced",
+    "type": "reverse_find",
+    "question": "The total surface area of a cube is 54 cm². Find the side length.",
+    "answer": 3, "unit": "cm", "formula": "s = √(TSA/6)", "expectedTime": 80,
+    "commonWrongAnswers": {
+      "9": "reverse_square_divided",
+      "54": "reverse_gave_input",
+      "13.5": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "s² = TSA/6.",
+      "level2": "s² = 54/6 = 9. Take square root.",
+      "level3": "Step 1: s² = 54/6 = 9\nStep 2: s = √9\nStep 3: s = 3 cm"
+    }
+  },
+  {
+    "qid": "SACB-B-1", "topic": "surface_area", "shape": "cuboid", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the total surface area of a cuboid with l = 5 cm, b = 4 cm, h = 3 cm.",
+    "answer": 94, "unit": "cm²", "formula": "TSA = 2(lb + bh + hl)", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "47": "cuboid_no_factor_2_sa",
+      "60": "cuboid_volume_for_sa",
+      "24": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "A cuboid has 3 pairs of rectangular faces. TSA = 2(lb + bh + hl).",
+      "level2": "Calculate lb = 20, bh = 12, hl = 15. Sum them and multiply by 2.",
+      "level3": "Step 1: lb = 5×4 = 20, bh = 4×3 = 12, hl = 3×5 = 15\nStep 2: TSA = 2(20 + 12 + 15) = 2 × 47\nStep 3: = 94 cm²"
+    }
+  },
+  {
+    "qid": "SACB-B-2", "topic": "surface_area", "shape": "cuboid", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the total surface area of a cuboid with l = 6 cm, b = 4 cm, h = 2 cm.",
+    "answer": 88, "unit": "cm²", "formula": "TSA = 2(lb + bh + hl)", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "44": "cuboid_no_factor_2_sa",
+      "48": "cuboid_volume_for_sa",
+      "24": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Use TSA = 2(lb + bh + hl).",
+      "level2": "lb = 24, bh = 8, hl = 12.",
+      "level3": "Step 1: lb = 6×4 = 24, bh = 4×2 = 8, hl = 2×6 = 12\nStep 2: TSA = 2(24 + 8 + 12) = 2 × 44\nStep 3: = 88 cm²"
+    }
+  },
+  {
+    "qid": "SACB-I-1", "topic": "surface_area", "shape": "cuboid", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the TSA of a cuboid with l = 8 cm, b = 5 cm, h = 6 cm.",
+    "answer": 236, "unit": "cm²", "formula": "TSA = 2(lb + bh + hl)", "expectedTime": 75,
+    "commonWrongAnswers": {
+      "118": "cuboid_no_factor_2_sa",
+      "240": "cuboid_volume_for_sa",
+      "156": "cuboid_lateral_sa_only"
+    },
+    "hints": {
+      "level1": "Apply TSA = 2(lb + bh + hl) carefully.",
+      "level2": "lb = 40, bh = 30, hl = 48.",
+      "level3": "Step 1: lb = 8×5 = 40, bh = 5×6 = 30, hl = 6×8 = 48\nStep 2: TSA = 2(40 + 30 + 48) = 2 × 118\nStep 3: = 236 cm²"
+    }
+  },
+  {
+    "qid": "SACB-I-2", "topic": "surface_area", "shape": "cuboid", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the TSA of a cuboid with l = 10 cm, b = 8 cm, h = 5 cm.",
+    "answer": 340, "unit": "cm²", "formula": "TSA = 2(lb + bh + hl)", "expectedTime": 75,
+    "commonWrongAnswers": {
+      "170": "cuboid_no_factor_2_sa",
+      "400": "cuboid_volume_for_sa",
+      "180": "cuboid_lateral_sa_only"
+    },
+    "hints": {
+      "level1": "Use the formula TSA = 2(lb + bh + hl).",
+      "level2": "lb = 80, bh = 40, hl = 50.",
+      "level3": "Step 1: lb = 80, bh = 40, hl = 50\nStep 2: TSA = 2(80 + 40 + 50) = 2 × 170\nStep 3: = 340 cm²"
+    }
+  },
+  {
+    "qid": "SACB-A-1", "topic": "surface_area", "shape": "cuboid", "difficulty": "advanced",
+    "type": "cost_problem",
+    "question": "A closed box has l = 20 cm, b = 15 cm, h = 10 cm. Find the cost of painting its outer surface at ₹2 per cm².",
+    "answer": 2600, "unit": "₹", "formula": "Cost = TSA × rate", "expectedTime": 110,
+    "commonWrongAnswers": {
+      "1300": "cost_forgot_rate",
+      "650": "cuboid_no_factor_2_sa",
+      "6000": "cost_wrong_measure"
+    },
+    "hints": {
+      "level1": "Find the TSA first, then multiply by ₹2 per cm².",
+      "level2": "TSA = 2(lb + bh + hl). lb = 300, bh = 150, hl = 200.",
+      "level3": "Step 1: TSA = 2(300 + 150 + 200) = 2 × 650 = 1300 cm²\nStep 2: Cost = 1300 × 2\nStep 3: = ₹2600"
+    }
+  },
+  {
+    "qid": "SACB-A-2", "topic": "surface_area", "shape": "cuboid", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "Find the TSA of a cuboid with l = 12 cm, b = 10 cm, h = 8 cm.",
+    "answer": 592, "unit": "cm²", "formula": "TSA = 2(lb + bh + hl)", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "296": "cuboid_no_factor_2_sa",
+      "960": "cuboid_volume_for_sa",
+      "352": "cuboid_lateral_sa_only"
+    },
+    "hints": {
+      "level1": "Use TSA = 2(lb + bh + hl).",
+      "level2": "lb = 120, bh = 80, hl = 96.",
+      "level3": "Step 1: lb = 120, bh = 80, hl = 96\nStep 2: TSA = 2(120 + 80 + 96) = 2 × 296\nStep 3: = 592 cm²"
+    }
+  },
+  {
+    "qid": "SACY-B-1", "topic": "surface_area", "shape": "cylinder", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the curved surface area of a cylinder with radius 7 cm and height 10 cm. (Use π = 22/7)",
+    "answer": 440, "unit": "cm²", "formula": "CSA = 2πrh", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "220": "cylinder_forgot_factor_2_csa",
+      "1540": "cylinder_volume_for_sa",
+      "308": "cylinder_only_circles_sa",
+      "748": "formula_swap"
+    },
+    "hints": {
+      "level1": "Curved Surface Area (CSA) of cylinder = 2πrh. Don't include the top and bottom circles.",
+      "level2": "CSA = 2 × (22/7) × 7 × 10. The 7s cancel.",
+      "level3": "Step 1: CSA = 2πrh = 2 × (22/7) × 7 × 10\nStep 2: = 2 × 22 × 10 (7s cancel)\nStep 3: = 440 cm²"
+    }
+  },
+  {
+    "qid": "SACY-B-2", "topic": "surface_area", "shape": "cylinder", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the CSA of a cylinder with radius 14 cm and height 5 cm. (Use π = 22/7)",
+    "answer": 440, "unit": "cm²", "formula": "CSA = 2πrh", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "220": "cylinder_forgot_factor_2_csa",
+      "3080": "cylinder_volume_for_sa",
+      "616": "partial_formula"
+    },
+    "hints": {
+      "level1": "CSA = 2πrh.",
+      "level2": "CSA = 2 × (22/7) × 14 × 5. Simplify: 14 ÷ 7 = 2.",
+      "level3": "Step 1: CSA = 2 × (22/7) × 14 × 5\nStep 2: = 2 × 22 × 2 × 5\nStep 3: = 440 cm²"
+    }
+  },
+  {
+    "qid": "SACY-I-1", "topic": "surface_area", "shape": "cylinder", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the total surface area of a cylinder with radius 7 cm and height 10 cm. (Use π = 22/7)",
+    "answer": 748, "unit": "cm²", "formula": "TSA = 2πr(r + h)", "expectedTime": 80,
+    "commonWrongAnswers": {
+      "440": "cylinder_lateral_only_sa",
+      "1540": "cylinder_volume_for_sa",
+      "308": "cylinder_only_circles_sa",
+      "594": "cylinder_one_circle_sa"
+    },
+    "hints": {
+      "level1": "TSA of cylinder = CSA + 2 circular ends = 2πr(r + h).",
+      "level2": "TSA = 2 × (22/7) × 7 × (7 + 10) = 44 × 17.",
+      "level3": "Step 1: TSA = 2πr(r + h) = 2 × (22/7) × 7 × 17\nStep 2: = 44 × 17\nStep 3: = 748 cm²"
+    }
+  },
+  {
+    "qid": "SACY-I-2", "topic": "surface_area", "shape": "cylinder", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the TSA of a cylinder with radius 7 cm and height 3 cm. (Use π = 22/7)",
+    "answer": 440, "unit": "cm²", "formula": "TSA = 2πr(r + h)", "expectedTime": 80,
+    "commonWrongAnswers": {
+      "132": "cylinder_lateral_only_sa",
+      "462": "cylinder_volume_for_sa",
+      "308": "cylinder_only_circles_sa",
+      "286": "cylinder_one_circle_sa"
+    },
+    "hints": {
+      "level1": "TSA = 2πr(r + h).",
+      "level2": "TSA = 2 × (22/7) × 7 × (7 + 3) = 44 × 10.",
+      "level3": "Step 1: r + h = 7 + 3 = 10\nStep 2: TSA = 2 × (22/7) × 7 × 10 = 44 × 10\nStep 3: = 440 cm²"
+    }
+  },
+  {
+    "qid": "SACY-A-1", "topic": "surface_area", "shape": "cylinder", "difficulty": "advanced",
+    "type": "cost_problem",
+    "question": "A cylindrical tank has radius 14 m and height 5 m. Find the cost of painting its curved surface at ₹10 per m². (Use π = 22/7)",
+    "answer": 4400, "unit": "₹", "formula": "Cost = CSA × rate", "expectedTime": 110,
+    "commonWrongAnswers": {
+      "440": "cost_forgot_rate",
+      "44": "arithmetic_mistake",
+      "1672": "cost_wrong_measure"
+    },
+    "hints": {
+      "level1": "Find the Curved Surface Area (CSA) first, then multiply by the rate.",
+      "level2": "CSA = 2 × (22/7) × 14 × 5 = 440 m². Cost = 440 × 10.",
+      "level3": "Step 1: CSA = 2 × (22/7) × 14 × 5 = 440 m²\nStep 2: Cost = 440 × 10\nStep 3: = ₹4400"
+    }
+  },
+  {
+    "qid": "SACY-A-2", "topic": "surface_area", "shape": "cylinder", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "Find the TSA of a cylinder with radius 7 cm and height 15 cm. (Use π = 22/7)",
+    "answer": 968, "unit": "cm²", "formula": "TSA = 2πr(r + h)", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "660": "cylinder_lateral_only_sa",
+      "2310": "cylinder_volume_for_sa",
+      "814": "cylinder_one_circle_sa"
+    },
+    "hints": {
+      "level1": "TSA = 2πr(r + h).",
+      "level2": "r + h = 22. TSA = 2 × (22/7) × 7 × 22.",
+      "level3": "Step 1: r + h = 7 + 15 = 22\nStep 2: TSA = 2 × (22/7) × 7 × 22 = 44 × 22\nStep 3: = 968 cm²"
+    }
+  },
+  {
+    "qid": "VC-B-1", "topic": "volume", "shape": "cube", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cube with side 5 cm.",
+    "answer": 125, "unit": "cm³", "formula": "V = s³", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "150": "cube_sa_for_volume",
+      "25": "cube_squared_for_volume",
+      "60": "cube_twelve_edges_volume"
+    },
+    "hints": {
+      "level1": "Volume of a cube = side × side × side = s³.",
+      "level2": "V = 5³ = 5 × 5 × 5.",
+      "level3": "Step 1: V = s³ = 5³\nStep 2: = 5 × 5 × 5 = 25 × 5\nStep 3: = 125 cm³"
+    }
+  },
+  {
+    "qid": "VC-B-2", "topic": "volume", "shape": "cube", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "A cube has side 3 cm. Find its volume.",
+    "answer": 27, "unit": "cm³", "formula": "V = s³", "expectedTime": 45,
+    "commonWrongAnswers": {
+      "54": "cube_sa_for_volume",
+      "9": "cube_squared_for_volume",
+      "36": "cube_twelve_edges_volume"
+    },
+    "hints": {
+      "level1": "V = s × s × s.",
+      "level2": "V = 3³ = 3 × 3 × 3.",
+      "level3": "Step 1: V = 3³\nStep 2: = 3 × 3 × 3 = 9 × 3\nStep 3: = 27 cm³"
+    }
+  },
+  {
+    "qid": "VC-I-1", "topic": "volume", "shape": "cube", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "The volume of a cube is 512 cm³. Find the length of its side.",
+    "answer": 8, "unit": "cm", "formula": "s = ∛V", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "512": "reverse_gave_input",
+      "64": "reverse_square_divided",
+      "256": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "V = s³, so s = cube root of V. Find what number cubed gives 512.",
+      "level2": "8³ = 8 × 8 × 8 = 512. So s = 8.",
+      "level3": "Step 1: s = ∛V = ∛512\nStep 2: Try: 8 × 8 × 8 = 512 ✓\nStep 3: s = 8 cm"
+    }
+  },
+  {
+    "qid": "VC-I-2", "topic": "volume", "shape": "cube", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "The volume of a cube is 27 cm³. Find the length of its side.",
+    "answer": 3, "unit": "cm", "formula": "s = ∛V", "expectedTime": 60,
+    "commonWrongAnswers": {
+      "27": "reverse_gave_input",
+      "9": "reverse_square_divided"
+    },
+    "hints": {
+      "level1": "s = ∛V. Find the cube root of 27.",
+      "level2": "3 × 3 × 3 = 27. So s = 3 cm.",
+      "level3": "Step 1: s = ∛27\nStep 2: 3 × 3 × 3 = 27\nStep 3: s = 3 cm"
+    }
+  },
+  {
+    "qid": "VC-A-1", "topic": "volume", "shape": "cube", "difficulty": "advanced",
+    "type": "word_problem",
+    "question": "How many small cubes of side 2 cm can be cut from a cube of side 8 cm?",
+    "answer": 64, "unit": "cubes", "formula": "Count = (big side / small side)³", "expectedTime": 100,
+    "commonWrongAnswers": {
+      "4": "partial_formula",
+      "16": "cube_squared_for_volume",
+      "32": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Find how many small cubes fit along each edge, then cube that number.",
+      "level2": "Along each edge: 8 ÷ 2 = 4 cubes. Total = 4³ = 4 × 4 × 4.",
+      "level3": "Step 1: Number along one edge = 8/2 = 4\nStep 2: Total = 4³ = 4 × 4 × 4\nStep 3: = 64 cubes"
+    }
+  },
+  {
+    "qid": "VC-A-2", "topic": "volume", "shape": "cube", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cube with side 6 cm.",
+    "answer": 216, "unit": "cm³", "formula": "V = s³", "expectedTime": 50,
+    "commonWrongAnswers": {
+      "36": "cube_squared_for_volume",
+      "72": "cube_twelve_edges_volume",
+      "24": "cube_linear_for_volume"
+    },
+    "hints": {
+      "level1": "V = s³.",
+      "level2": "V = 6³ = 6 × 6 × 6.",
+      "level3": "Step 1: V = 6³\nStep 2: 6 × 6 = 36, 36 × 6 = 216\nStep 3: V = 216 cm³"
+    }
+  },
+  {
+    "qid": "VCB-B-1", "topic": "volume", "shape": "cuboid", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cuboid with l = 6 cm, b = 4 cm, h = 3 cm.",
+    "answer": 72, "unit": "cm³", "formula": "V = l × b × h", "expectedTime": 50,
+    "commonWrongAnswers": {
+      "108": "cuboid_sa_for_volume",
+      "24": "cuboid_forgot_height_volume",
+      "13": "cuboid_added_dims_volume"
+    },
+    "hints": {
+      "level1": "Volume of cuboid = length × breadth × height.",
+      "level2": "V = l × b × h = 6 × 4 × 3.",
+      "level3": "Step 1: V = l × b × h\nStep 2: = 6 × 4 × 3 = 24 × 3\nStep 3: = 72 cm³"
+    }
+  },
+  {
+    "qid": "VCB-B-2", "topic": "volume", "shape": "cuboid", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "A cuboid has l = 8 cm, b = 5 cm, h = 2 cm. Find its volume.",
+    "answer": 80, "unit": "cm³", "formula": "V = l × b × h", "expectedTime": 50,
+    "commonWrongAnswers": {
+      "132": "cuboid_sa_for_volume",
+      "40": "cuboid_forgot_height_volume",
+      "15": "cuboid_added_dims_volume"
+    },
+    "hints": {
+      "level1": "Multiply length, breadth, and height.",
+      "level2": "V = 8 × 5 × 2.",
+      "level3": "Step 1: V = 8 × 5 × 2\nStep 2: = 40 × 2\nStep 3: = 80 cm³"
+    }
+  },
+  {
+    "qid": "VCB-I-1", "topic": "volume", "shape": "cuboid", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "A cuboid has volume 120 cm³, length 10 cm, and breadth 4 cm. Find its height.",
+    "answer": 3, "unit": "cm", "formula": "h = V / (l × b)", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "12": "arithmetic_mistake",
+      "480": "reverse_multiplied",
+      "30": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Rearrange V = l × b × h to find h: h = V ÷ (l × b).",
+      "level2": "h = 120 ÷ (10 × 4) = 120 ÷ 40.",
+      "level3": "Step 1: h = V ÷ (l × b)\nStep 2: = 120 ÷ (10 × 4) = 120 ÷ 40\nStep 3: = 3 cm"
+    }
+  },
+  {
+    "qid": "VCB-I-2", "topic": "volume", "shape": "cuboid", "difficulty": "intermediate",
+    "type": "reverse_find",
+    "question": "A cuboid has volume 240 cm³, length 8 cm, breadth 5 cm. Find its height.",
+    "answer": 6, "unit": "cm", "formula": "h = V / (l × b)", "expectedTime": 70,
+    "commonWrongAnswers": {
+      "30": "arithmetic_mistake",
+      "1200": "reverse_multiplied",
+      "48": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "h = V ÷ (l × b).",
+      "level2": "h = 240 ÷ (8 × 5) = 240 ÷ 40.",
+      "level3": "Step 1: h = V ÷ (l × b) = 240 ÷ 40\nStep 2: = 6 cm\nStep 3: h = 6 cm"
+    }
+  },
+  {
+    "qid": "VCB-A-1", "topic": "volume", "shape": "cuboid", "difficulty": "advanced",
+    "type": "word_problem",
+    "question": "A swimming pool is 50 m × 15 m × 2 m. A pipe fills it at 25 m³ per minute. How many minutes to fill it?",
+    "answer": 60, "unit": "minutes", "formula": "Time = Volume / rate", "expectedTime": 110,
+    "commonWrongAnswers": {
+      "1500": "cost_forgot_rate",
+      "37500": "reverse_multiplied",
+      "30": "arithmetic_mistake"
+    },
+    "hints": {
+      "level1": "Find the volume of the pool, then divide by the filling rate.",
+      "level2": "V = 50 × 15 × 2 = 1500 m³. Time = 1500 ÷ 25.",
+      "level3": "Step 1: V = 50 × 15 × 2 = 1500 m³\nStep 2: Time = V ÷ rate = 1500 ÷ 25\nStep 3: = 60 minutes"
+    }
+  },
+  {
+    "qid": "VCB-A-2", "topic": "volume", "shape": "cuboid", "difficulty": "advanced",
+    "type": "reverse_find",
+    "question": "A cuboid box has volume 360 cm³, length 6 cm, breadth 6 cm. Find its height.",
+    "answer": 10, "unit": "cm", "formula": "h = V / (l × b)", "expectedTime": 80,
+    "commonWrongAnswers": {
+      "60": "arithmetic_mistake",
+      "2160": "reverse_multiplied"
+    },
+    "hints": {
+      "level1": "h = V ÷ (l × b).",
+      "level2": "h = 360 ÷ (6 × 6) = 360 ÷ 36.",
+      "level3": "Step 1: l × b = 6 × 6 = 36\nStep 2: h = 360 ÷ 36\nStep 3: = 10 cm"
+    }
+  },
+  {
+    "qid": "VCY-B-1", "topic": "volume", "shape": "cylinder", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cylinder with radius 7 cm and height 10 cm. (Use π = 22/7)",
+    "answer": 1540, "unit": "cm³", "formula": "V = πr²h", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "440": "cylinder_csa_for_volume",
+      "154": "cylinder_forgot_height_volume",
+      "748": "cylinder_tsa_for_volume"
+    },
+    "hints": {
+      "level1": "Volume of a cylinder = π × r² × h.",
+      "level2": "V = (22/7) × 7² × 10 = (22/7) × 49 × 10.",
+      "level3": "Step 1: V = (22/7) × 7² × 10\nStep 2: = (22/7) × 49 × 10 = 22 × 7 × 10\nStep 3: = 1540 cm³"
+    }
+  },
+  {
+    "qid": "VCY-B-2", "topic": "volume", "shape": "cylinder", "difficulty": "beginner",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cylinder with radius 7 cm and height 20 cm. (Use π = 22/7)",
+    "answer": 3080, "unit": "cm³", "formula": "V = πr²h", "expectedTime": 65,
+    "commonWrongAnswers": {
+      "880": "cylinder_csa_for_volume",
+      "154": "cylinder_forgot_height_volume",
+      "1188": "cylinder_tsa_for_volume"
+    },
+    "hints": {
+      "level1": "V = πr²h.",
+      "level2": "V = (22/7) × 49 × 20.",
+      "level3": "Step 1: V = (22/7) × 7² × 20\nStep 2: = 22 × 7 × 20\nStep 3: = 3080 cm³"
+    }
+  },
+  {
+    "qid": "VCY-I-1", "topic": "volume", "shape": "cylinder", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cylinder with radius 14 cm and height 5 cm. (Use π = 22/7)",
+    "answer": 3080, "unit": "cm³", "formula": "V = πr²h", "expectedTime": 75,
+    "commonWrongAnswers": {
+      "440": "cylinder_csa_for_volume",
+      "616": "cylinder_forgot_height_volume",
+      "1672": "cylinder_tsa_for_volume"
+    },
+    "hints": {
+      "level1": "Apply V = πr²h with r = 14.",
+      "level2": "V = (22/7) × 14² × 5. Note: 14² = 196.",
+      "level3": "Step 1: V = (22/7) × 196 × 5\nStep 2: = 22 × 28 × 5\nStep 3: = 3080 cm³"
+    }
+  },
+  {
+    "qid": "VCY-I-2", "topic": "volume", "shape": "cylinder", "difficulty": "intermediate",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cylinder with radius 3.5 cm and height 20 cm. (Use π = 22/7)",
+    "answer": 770, "unit": "cm³", "formula": "V = πr²h", "expectedTime": 80,
+    "commonWrongAnswers": {
+      "440": "cylinder_csa_for_volume",
+      "38.5": "cylinder_forgot_height_volume"
+    },
+    "hints": {
+      "level1": "V = πr²h. Note: 3.5 = 7/2.",
+      "level2": "r² = (7/2)² = 49/4. V = (22/7) × (49/4) × 20.",
+      "level3": "Step 1: r² = 3.5² = 12.25\nStep 2: V = (22/7) × 12.25 × 20 = 22 × 1.75 × 20\nStep 3: = 770 cm³"
+    }
+  },
+  {
+    "qid": "VCY-A-1", "topic": "volume", "shape": "cylinder", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "A cylindrical well has radius 7 m and depth 10 m. Find its volume. (Use π = 22/7)",
+    "answer": 1540, "unit": "m³", "formula": "V = πr²h", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "440": "cylinder_csa_for_volume",
+      "154": "cylinder_forgot_height_volume",
+      "748": "cylinder_tsa_for_volume"
+    },
+    "hints": {
+      "level1": "Treat depth as height. Apply V = πr²h.",
+      "level2": "V = (22/7) × 7² × 10.",
+      "level3": "Step 1: V = (22/7) × 49 × 10\nStep 2: = 22 × 7 × 10\nStep 3: = 1540 m³"
+    }
+  },
+  {
+    "qid": "VCY-A-2", "topic": "volume", "shape": "cylinder", "difficulty": "advanced",
+    "type": "direct_calculation",
+    "question": "Find the volume of a cylinder with radius 14 cm and height 15 cm. (Use π = 22/7)",
+    "answer": 9240, "unit": "cm³", "formula": "V = πr²h", "expectedTime": 90,
+    "commonWrongAnswers": {
+      "1320": "cylinder_csa_for_volume",
+      "616": "cylinder_forgot_height_volume",
+      "2552": "cylinder_tsa_for_volume"
+    },
+    "hints": {
+      "level1": "V = πr²h with r = 14, h = 15.",
+      "level2": "V = (22/7) × 196 × 15 = 22 × 28 × 15.",
+      "level3": "Step 1: V = (22/7) × 14² × 15\nStep 2: = 22 × 28 × 15\nStep 3: = 9240 cm³"
+    }
+  }
+]

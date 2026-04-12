@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+
+# App state (local JSON store — user data)
+server/data/app-state.json
+
+# Secrets — never commit (keep *.example templates tracked)
+.env
+**/.env
+.env.local
+.env.production.local
+.env.development.local
+**/.env.local
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+
+# SSH keys — never commit
+*.pem
+*.key
