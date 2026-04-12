@@ -47,16 +47,13 @@ const clientDist = path.join(__dirname, '..', 'client', 'dist');
 const fs = require('fs');
 if (fs.existsSync(clientDist)) {
   const postAuthPath = process.env.POST_AUTH_REDIRECT || '/dashboard';
-  // Legacy /login and /register URLs → dashboard (no signup; guest session is created in the SPA)
-  app.use((req, res, next) => {
-    if (req.method !== 'GET') return next();
-    const base = (req.path || '/').replace(/\/+$/, '') || '/';
-    if (base === '/login' || base === '/register') {
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-      return res.redirect(302, postAuthPath);
-    }
-    next();
-  });
+  // Legacy URLs (explicit routes — more reliable than path parsing with static + SPA)
+  const redirectLegacyAuth = (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.redirect(302, postAuthPath);
+  };
+  app.get(/^\/login\/?$/i, redirectLegacyAuth);
+  app.get(/^\/register\/?$/i, redirectLegacyAuth);
   app.use(express.static(clientDist));
   // SPA fallback: any non-API GET returns index.html
   app.get(/^\/(?!api\/).*/, (req, res) => {
