@@ -4,7 +4,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Brain, Zap, Target, ArrowRight, Ruler, Layers, Box, Package, Lock, GraduationCap } from 'lucide-react';
 import { warmupBackend } from '../services/apiClient';
 import { useAuthStore } from '../store/authStore';
+import { isMergeSession } from '../store/mergeStore';
 import { CHAPTER_PATH } from '../config/routes';
+import { MERGE_PORTAL_ORIGIN } from '../config/mergePortal';
 import { FullPageLoader } from '../components/ui/LoadingSpinner';
 
 const highlights = [
@@ -40,8 +42,23 @@ export default function LandingPage() {
     navigate(`${CHAPTER_PATH}?${searchParams.toString()}`, { replace: true });
   }, [mergeLaunch, navigate, searchParams]);
 
+  /**
+   * Same browser tab still has Merge session + our JWT (e.g. user opened home without query params).
+   * Skip marketing — go straight to practice (ET605: identity only via portal handoff).
+   */
+  useEffect(() => {
+    if (mergeLaunch) return;
+    if (token && isMergeSession()) {
+      navigate('/topics', { replace: true });
+    }
+  }, [mergeLaunch, token, navigate]);
+
   if (mergeLaunch) {
     return <FullPageLoader text="Connecting to MathMentor..." />;
+  }
+
+  if (token && isMergeSession()) {
+    return <FullPageLoader text="Opening your practice…" />;
   }
 
   return (
@@ -67,31 +84,37 @@ export default function LandingPage() {
 
           <div className="flex flex-col items-center gap-3 pt-2">
             {token ? (
-              <Link to="/dashboard">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="btn-primary px-8 py-3 text-sm"
-                >
-                  Continue to practice <ArrowRight className="w-3.5 h-3.5" />
-                </motion.button>
-              </Link>
+              <div className="flex flex-col items-center gap-2 w-full max-w-sm">
+                <Link to="/topics" className="w-full">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="btn-primary px-8 py-3 text-sm w-full"
+                  >
+                    Continue to your quiz <ArrowRight className="w-3.5 h-3.5" />
+                  </motion.button>
+                </Link>
+                <Link to="/dashboard">
+                  <span className="text-xs font-semibold text-[#888888] hover:text-[#555555]">Dashboard</span>
+                </Link>
+              </div>
             ) : (
               <motion.a
-                href="https://kaushik-dev.online"
-                target="_blank"
-                rel="noopener noreferrer"
+                href={MERGE_PORTAL_ORIGIN}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="btn-primary px-8 py-3 text-sm inline-flex items-center justify-center gap-1.5"
               >
-                Open Merge portal <ArrowRight className="w-3.5 h-3.5" />
+                Open chapter from Merge <ArrowRight className="w-3.5 h-3.5" />
               </motion.a>
             )}
             <p className="text-[11px] text-[#888888] max-w-sm mx-auto leading-relaxed">
-              <strong className="text-[#555555]">From the Merge portal:</strong> open this chapter using the portal’s
-              link — it must include <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
-              <span className="font-mono">session_id</span> in the URL (works on <span className="font-mono">/chapter</span> or this page; do not bookmark without those parameters).
+              <strong className="text-[#555555]">No separate MathMentor login.</strong> This site cannot see your Merge
+              session in another tab — your identity arrives only when Merge opens this chapter with{' '}
+              <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
+              <span className="font-mono">session_id</span> in the URL (see ET605). Use the button above to go to Merge,
+              then open <strong className="text-[#555555]">Grade 8 Mensuration</strong> from your dashboard so that URL
+              is generated for you.
             </p>
           </div>
         </motion.div>
@@ -148,20 +171,19 @@ export default function LandingPage() {
         <div className="mt-6 text-center space-y-2">
           {token ? (
             <Link
-              to="/dashboard"
+              to="/topics"
               className="inline-flex items-center gap-2 text-sm font-bold text-[#FF6500] hover:text-[#E55500]"
             >
-              Go to dashboard <ArrowRight className="w-4 h-4" />
+              Go to your learning path <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
             <p className="text-[11px] text-[#888888] max-w-sm mx-auto">
-              Sign in happens when you open your chapter from the Merge portal (the URL must include{' '}
-              <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
-              <span className="font-mono">session_id</span>).
+              Already on Merge in another tab? You still need to launch this chapter from Merge once so the address bar
+              includes your session parameters (browsers do not share logins across sites).
             </p>
           )}
           <p className="text-[11px] text-[#888888] max-w-sm mx-auto">
-            Progress is tied to this browser (local storage) so you can pick up where you left off.
+            After Merge connects you, progress is saved on this device until you exit.
           </p>
         </div>
       </section>
