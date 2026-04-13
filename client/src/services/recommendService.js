@@ -9,7 +9,7 @@ import {
   markRecommendationSent,
 } from '../store/mergeStore';
 
-// TODO: confirm canonical chapter_id with Merge / course team
+/** ET605 team table: grade8-mensuration container → canonical chapter_id for Merge recommend API. */
 const CHAPTER_ID = 'grade8_mensuration';
 const TOTAL_QUESTIONS = 8;
 const TOTAL_HINTS_EMBEDDED = TOTAL_QUESTIONS * 2; // 2 hints per question

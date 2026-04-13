@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useLearnerStore } from '../store/learnerStore';
 import { getDashboard } from '../services/quizService';
-import { ensureGuestSession } from '../services/authService';
 import PageWrapper from '../components/layout/PageWrapper';
 import TopicCard from '../components/dashboard/TopicCard';
 import StatsCard from '../components/dashboard/StatsCard';
@@ -33,7 +32,6 @@ export default function DashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        await ensureGuestSession();
         if (!cancelled) await fetchDashboard();
       } catch {
         if (!cancelled) setError('Could not start your session. Refresh and try again.');

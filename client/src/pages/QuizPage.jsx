@@ -32,6 +32,7 @@ export default function QuizPage() {
   const [showTerminateModal, setShowTerminateModal] = useState(false);
   const [terminating, setTerminating] = useState(false);
   const [celebrationBurstId, setCelebrationBurstId] = useState(0);
+  const [startError, setStartError] = useState(null);
 
   const {
     sessionId, currentQuestion, conceptMaterial, phase, feedback,
@@ -90,11 +91,24 @@ export default function QuizPage() {
 
   const initQuiz = async () => {
     setInitializing(true);
+    setStartError(null);
     try {
       const data = await startQuiz(topic, shape);
+      if (!data?.question) {
+        setStartError('No questions are available for this topic yet. Try another shape or return to your path.');
+        return;
+      }
       setSession({ ...data, topic, shape });
     } catch (err) {
       console.error('Failed to start quiz:', err);
+      const msg =
+        err.response?.data?.message ||
+        (err.response?.status === 403
+          ? 'This topic is still locked. Finish the previous topic first.'
+          : null) ||
+        err.message ||
+        'Could not start the quiz.';
+      setStartError(msg);
     } finally {
       setInitializing(false);
     }
@@ -191,6 +205,29 @@ export default function QuizPage() {
 
 
   if (initializing) return <FullPageLoader text="Preparing your quiz..." />;
+
+  if (startError) {
+    return (
+      <PageWrapper>
+        <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+          <p className="text-sm font-semibold text-[#111111]">We couldn&apos;t open this quiz</p>
+          <p className="text-xs text-[#666666] leading-relaxed">{startError}</p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
+            <button type="button" onClick={() => void initQuiz()} className="btn-primary px-5 py-2.5 text-sm">
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/topics')}
+              className="px-5 py-2.5 text-sm font-semibold rounded-xl border border-[#E8E5E0] text-[#555555] hover:bg-[#F5F3F0]"
+            >
+              Back to topics
+            </button>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   // Lock the input the moment ANY feedback appears — student must click Try Again or Skip
   const isAnswerLocked = !!feedback;

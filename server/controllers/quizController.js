@@ -1,5 +1,6 @@
 const {
   findLearnerByUserId,
+  createLearner,
   createSession,
   findSessionOne,
   saveSession,
@@ -36,7 +37,8 @@ const startQuiz = async (req, res) => {
     const { topic, shape } = req.body;
     if (!topic || !shape) return res.status(400).json({ message: 'Topic and shape are required.' });
 
-    const learner = findLearnerByUserId(req.user._id);
+    let learner = findLearnerByUserId(req.user._id);
+    if (!learner) learner = createLearner(req.user._id);
 
     // ── Progression gate: require 50% mastery in every shape of the previous topic ──
     const topicIdx = TOPIC_ORDER.indexOf(topic);

@@ -1,5 +1,6 @@
 const {
   findLearnerByUserId,
+  createLearner,
   findSessionsForUser,
   findUserById,
   matchPassword,
@@ -18,8 +19,8 @@ const calculateOverallMastery = (conceptMastery) => {
 
 const getDashboard = async (req, res) => {
   try {
-    const learner = findLearnerByUserId(req.user._id);
-    if (!learner) return res.status(404).json({ message: 'Learner model not found.' });
+    let learner = findLearnerByUserId(req.user._id);
+    if (!learner) learner = createLearner(req.user._id);
 
     const allSessions = findSessionsForUser(req.user._id, {
       statusIn: ['completed', 'terminated'],
