@@ -1,4 +1,4 @@
-import api from './apiClient';
+import api, { withNetworkRetries } from './apiClient';
 import { useAuthStore } from '../store/authStore';
 
 const GUEST_STORAGE_KEY = 'mathmentor-guest-key';
@@ -27,3 +27,15 @@ export async function ensureGuestSession() {
   if (useAuthStore.getState().token) return;
   useAuthStore.getState().setAuth(data.token, data.user);
 }
+
+export const login = async (email, password) => {
+  const { data } = await withNetworkRetries(() => api.post('/auth/login', { email, password }));
+  return data;
+};
+
+export const register = async (name, email, password) => {
+  const { data } = await withNetworkRetries(() =>
+    api.post('/auth/register', { name, email, password })
+  );
+  return data;
+};

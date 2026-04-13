@@ -15,11 +15,16 @@ import { formatTopicName, formatShapeName, topicColor } from '../utils/masteryCa
 import { X, AlertTriangle } from 'lucide-react';
 import CelebrationBurst from '../components/quiz/CelebrationBurst';
 import { playCorrectSoundFX, playIncorrectSoundFX } from '../utils/quizFeedbackAudio';
+import { sendRecommendationKeepAlive } from '../services/recommendService';
+import { isMergeSession } from '../store/mergeStore';
 
 export default function QuizPage() {
   const { topic, shape } = useParams();
   const navigate = useNavigate();
   const timeRef = useRef(null);
+  const cumulativeTimeMsRef = useRef(0);
+  const hintsConsumedRef = useRef(0);
+  const submitCountRef = useRef(0);
   const [initializing, setInitializing] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [lastResponse, setLastResponse] = useState(null);
@@ -38,9 +43,50 @@ export default function QuizPage() {
 
   useEffect(() => {
     reset();
+    cumulativeTimeMsRef.current = 0;
+    hintsConsumedRef.current = 0;
+    submitCountRef.current = 0;
     initQuiz();
     return () => reset();
   }, [topic, shape]);
+
+  useEffect(() => {
+    const onBeforeUnload = (event) => {
+      if (!sessionId || !isMergeSession()) return;
+      event.preventDefault();
+      event.returnValue = 'Your progress will be submitted as exited midway.';
+    };
+
+    const onUnload = () => {
+      if (!sessionId || !isMergeSession()) return;
+      const answered = progress.answered;
+      const correctFirstTry = progress.correct;
+      const wrongFirstTry = Math.max(0, answered - correctFirstTry);
+      const totalAttempts = Math.max(submitCountRef.current, answered + wrongFirstTry);
+      const hintsUsed = hintsConsumedRef.current;
+      const timeSpentSeconds = Math.round(cumulativeTimeMsRef.current / 1000);
+
+      void sendRecommendationKeepAlive(
+        {
+          questionsCompleted: answered,
+          questionsCorrectTotal: correctFirstTry,
+          wrong: Math.max(0, answered - correctFirstTry),
+          correct: correctFirstTry,
+          totalAttempts,
+          hintsUsed,
+          timeSpentSeconds,
+        },
+        'exited_midway'
+      );
+    };
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+    window.addEventListener('unload', onUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      window.removeEventListener('unload', onUnload);
+    };
+  }, [sessionId, progress.answered, progress.correct]);
 
   const initQuiz = async () => {
     setInitializing(true);
@@ -62,8 +108,13 @@ export default function QuizPage() {
     incrementAttempt();
     try {
       const res = await submitAnswer(sessionId, answer, timeSpent);
+      submitCountRef.current += 1;
+      cumulativeTimeMsRef.current += typeof timeSpent === 'number' ? timeSpent : 0;
       setLastResponse(res);
-      if (res.hint) setHint(res.hint);
+      if (res.hint) {
+        hintsConsumedRef.current += 1;
+        setHint(res.hint);
+      }
       if (res.action === 'remedial' && res.remedialContent) setRemedial(res.remedialContent);
       if (res.correct) {
         void playCorrectSoundFX();

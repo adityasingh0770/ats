@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { getApiBaseURL } from '../config/api';
-import { HOME_PATH } from '../config/routes';
+import { CHAPTER_PATH } from '../config/routes';
 import { useAuthStore } from '../store/authStore';
+import { clearMergeSession } from '../store/mergeStore';
 
 /** Shared HTTP client: long timeout (Render cold start), auth header, 401 handling. */
 const api = axios.create({
@@ -20,10 +21,16 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     const url = String(err.config?.url || '');
-    const isAuthForm = url.includes('/auth/guest');
-    if (err.response?.status === 401 && !isAuthForm) {
+    const isAuthBootstrap =
+      url.includes('/auth/guest') ||
+      url.includes('/auth/login') ||
+      url.includes('/auth/register') ||
+      url.includes('/merge/entry');
+
+    if (err.response?.status === 401 && !isAuthBootstrap) {
       useAuthStore.getState().logout();
-      window.location.href = HOME_PATH;
+      clearMergeSession();
+      window.location.href = CHAPTER_PATH;
     }
     return Promise.reject(err);
   }

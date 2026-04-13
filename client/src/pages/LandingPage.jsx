@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Brain, Zap, Target, ArrowRight, Ruler, Layers, Box, Package, Lock, GraduationCap } from 'lucide-react';
 import { warmupBackend } from '../services/apiClient';
-import { ensureGuestSession } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
+import { CHAPTER_PATH } from '../config/routes';
 
 const highlights = [
   { icon: Brain, text: 'Difficulty adjusts as you learn' },
@@ -21,24 +21,10 @@ const topics = [
 
 export default function LandingPage() {
   const token = useAuthStore((s) => s.token);
-  const navigate = useNavigate();
-  const [entering, setEntering] = useState(false);
 
   useEffect(() => {
     warmupBackend();
   }, []);
-
-  const handleEnter = async () => {
-    setEntering(true);
-    try {
-      await ensureGuestSession();
-      navigate('/dashboard');
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setEntering(false);
-    }
-  };
 
   return (
     <div className="min-h-screen pt-16 bg-[#F8F6F3]">
@@ -62,18 +48,19 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col items-center gap-3 pt-2">
-            <motion.button
-              type="button"
-              whileHover={{ scale: entering ? 1 : 1.02 }}
-              whileTap={{ scale: entering ? 1 : 0.98 }}
-              disabled={entering}
-              onClick={handleEnter}
-              className="btn-primary px-8 py-3 text-sm disabled:opacity-60"
-            >
-              {entering ? 'Starting…' : 'Go to dashboard'}
-              {!entering && <ArrowRight className="w-3.5 h-3.5" />}
-            </motion.button>
-            <p className="text-[11px] text-[#888888]">No signup or login — your progress stays on this device.</p>
+            <Link to={CHAPTER_PATH}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="btn-primary px-8 py-3 text-sm"
+              >
+                Continue from portal <ArrowRight className="w-3.5 h-3.5" />
+              </motion.button>
+            </Link>
+            <p className="text-[11px] text-[#888888] max-w-sm mx-auto leading-relaxed">
+              Open this chapter from the Merge portal so the URL includes <span className="font-mono">token</span>,{' '}
+              <span className="font-mono">student_id</span>, and <span className="font-mono">session_id</span>.
+            </p>
           </div>
         </motion.div>
       </section>
@@ -135,15 +122,12 @@ export default function LandingPage() {
               Go to dashboard <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
-            <button
-              type="button"
-              disabled={entering}
-              onClick={handleEnter}
-              className="text-sm font-bold text-[#FF6500] hover:text-[#E55500] disabled:opacity-60 inline-flex items-center gap-2"
-            >
-              {entering ? 'Starting…' : 'Go to dashboard'}
-              {!entering && <ArrowRight className="w-4 h-4" />}
-            </button>
+            <p className="text-[11px] text-[#888888]">
+              <Link to={CHAPTER_PATH} className="text-[#FF6500] font-semibold">
+                Open via Merge chapter link
+              </Link>{' '}
+              to start at step 1.
+            </p>
           )}
           <p className="text-[11px] text-[#888888] max-w-sm mx-auto">
             Progress is tied to this browser (local storage) so you can pick up where you left off.

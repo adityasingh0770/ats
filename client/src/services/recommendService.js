@@ -1,4 +1,5 @@
 import api from './apiClient';
+import { getApiBaseURL } from '../config/api';
 import {
   isMergeSession,
   getMergeToken,
@@ -149,4 +150,40 @@ export async function retryQueuedRecommendations() {
     }
   }
   localStorage.setItem(QUEUE_KEY, JSON.stringify(remaining));
+}
+
+/**
+ * Best-effort send while the page is unloading (tab close / refresh).
+ * Uses fetch(..., { keepalive: true }) so custom headers (X-Merge-Token) are preserved.
+ */
+export async function sendRecommendationKeepAlive(summary, sessionStatus) {
+  if (!isMergeSession()) return;
+  if (isRecommendationSent()) return;
+
+  const payload = buildPayload(summary, sessionStatus);
+  const validationError = validatePayload(payload);
+  if (validationError) {
+    console.error('[Recommend unload] Validation failed:', validationError);
+    return;
+  }
+
+  const mergeToken = getMergeToken();
+  if (!mergeToken) return;
+
+  const base = getApiBaseURL().replace(/\/$/, '');
+  try {
+    const res = await fetch(`${base}/merge/recommend`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Merge-Token': mergeToken,
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    });
+    // Avoid marking as sent unless the proxy accepted the request.
+    if (res.ok) markRecommendationSent(null);
+  } catch {
+    // ignore — best effort only
+  }
 }
