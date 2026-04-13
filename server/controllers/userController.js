@@ -68,7 +68,14 @@ const getDashboard = async (req, res) => {
     const overallScore = calculateOverallMastery(learner.concept_mastery);
 
     res.json({
-      student: { id: req.user._id, name: req.user.name, email: req.user.email },
+      student: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        ...(req.user.isMergeUser && req.user.portalStudentId
+          ? { student_id: req.user.portalStudentId }
+          : {}),
+      },
       overallMastery: {
         score: parseFloat(overallScore.toFixed(3)),
         level: classifyMastery(overallScore),
@@ -111,6 +118,8 @@ const getProfile = async (req, res) => {
       email: user.email,
       grade: user.grade,
       isGuestUser: !!user.isGuestUser,
+      isMergeUser: !!user.isMergeUser,
+      student_id: user.portalStudentId || null,
       createdAt: user.createdAt,
       stats: learner
         ? {

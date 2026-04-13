@@ -9,7 +9,7 @@ const { handleError } = require('../utils/dbError');
  */
 const mergeEntry = async (req, res) => {
   try {
-    const { student_id } = req.body;
+    const student_id = typeof req.body?.student_id === 'string' ? req.body.student_id.trim() : '';
     const mergeToken = (req.headers['x-merge-token'] || '').trim();
 
     if (!student_id) {
@@ -19,7 +19,7 @@ const mergeEntry = async (req, res) => {
       return res.status(400).json({ message: 'Merge token is required (X-Merge-Token header).' });
     }
 
-    const user = findOrCreateMergeUser(String(student_id));
+    const user = findOrCreateMergeUser(student_id);
 
     const token = jwt.sign(
       { id: user._id },

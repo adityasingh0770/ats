@@ -57,7 +57,7 @@ export default function QuizPage() {
       event.returnValue = 'Your progress will be submitted as exited midway.';
     };
 
-    const onUnload = () => {
+    const sendMidwayExit = () => {
       if (!sessionId || !isMergeSession()) return;
       const answered = progress.answered;
       const correctFirstTry = progress.correct;
@@ -81,10 +81,10 @@ export default function QuizPage() {
     };
 
     window.addEventListener('beforeunload', onBeforeUnload);
-    window.addEventListener('unload', onUnload);
+    window.addEventListener('pagehide', sendMidwayExit);
     return () => {
       window.removeEventListener('beforeunload', onBeforeUnload);
-      window.removeEventListener('unload', onUnload);
+      window.removeEventListener('pagehide', sendMidwayExit);
     };
   }, [sessionId, progress.answered, progress.correct]);
 

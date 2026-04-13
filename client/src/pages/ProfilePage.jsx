@@ -6,7 +6,7 @@ import PageWrapper from '../components/layout/PageWrapper';
 import { FullPageLoader } from '../components/ui/LoadingSpinner';
 import {
   User, Mail, Lock, CheckCircle, AlertCircle, PenLine,
-  Shield, Target, Lightbulb, Library, CalendarDays,
+  Shield, Target, Lightbulb, Library, CalendarDays, Hash,
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -69,6 +69,7 @@ export default function ProfilePage() {
   const joinDate  = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—';
   const isGuestProfile = !!profile?.isGuestUser;
+  const isMergeProfile = !!profile?.isMergeUser;
 
   const stats = [
     { icon: Target,    label: 'Accuracy',   value: profile?.stats?.accuracy ? `${profile.stats.accuracy}%` : '—', color: '#F43F5E' },
@@ -109,10 +110,16 @@ export default function ProfilePage() {
           <div className="space-y-2">
             {[
               { icon: User,   label: 'Full Name', value: profile?.name },
+              ...(profile?.student_id
+                ? [{ icon: Hash, label: 'Portal student_id', value: profile.student_id }]
+                : []),
               {
                 icon: Mail,
-                label: isGuestProfile ? 'Profile' : 'Email',
-                value: isGuestProfile ? 'Practice profile on this browser (local storage)' : profile?.email,
+                label: isGuestProfile && !isMergeProfile ? 'Profile' : 'Email',
+                value:
+                  isGuestProfile && !isMergeProfile
+                    ? 'Practice profile on this browser (local storage)'
+                    : profile?.email,
               },
               { icon: Shield, label: 'Grade',     value: `Grade ${profile?.grade || 8}` },
             ].map(item => {

@@ -1,7 +1,8 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
-import { clearMergeSession } from '../../store/mergeStore';
+import { clearMergeSession, isMergeSession, isRecommendationSent } from '../../store/mergeStore';
+import { sendRecommendation } from '../../services/recommendService';
 import { LayoutDashboard, BookOpen, LogOut, Zap } from 'lucide-react';
 import { HOME_PATH } from '../../config/routes';
 
@@ -10,7 +11,23 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (isMergeSession() && !isRecommendationSent()) {
+      const empty = {
+        questionsCompleted: 0,
+        questionsCorrectTotal: 0,
+        wrong: 0,
+        correct: 0,
+        totalAttempts: 0,
+        hintsUsed: 0,
+        timeSpentSeconds: 0,
+      };
+      try {
+        await sendRecommendation(empty, 'exited_midway');
+      } catch {
+        /* still leave the app */
+      }
+    }
     logout();
     clearMergeSession();
     navigate(HOME_PATH, { replace: true });

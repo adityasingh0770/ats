@@ -47,15 +47,28 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col items-center gap-3 pt-2">
-            <Link to="/dashboard">
-              <motion.button
+            {token ? (
+              <Link to="/dashboard">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-primary px-8 py-3 text-sm"
+                >
+                  Continue to practice <ArrowRight className="w-3.5 h-3.5" />
+                </motion.button>
+              </Link>
+            ) : (
+              <motion.a
+                href="https://kaushik-dev.online"
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="btn-primary px-8 py-3 text-sm"
+                className="btn-primary px-8 py-3 text-sm inline-flex items-center justify-center gap-1.5"
               >
-                Start practicing <ArrowRight className="w-3.5 h-3.5" />
-              </motion.button>
-            </Link>
+                Open Merge portal <ArrowRight className="w-3.5 h-3.5" />
+              </motion.a>
+            )}
             <p className="text-[11px] text-[#888888] max-w-sm mx-auto leading-relaxed">
               <strong className="text-[#555555]">From the Merge portal:</strong> open this chapter using the portal’s
               link — it must include <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
@@ -123,7 +136,9 @@ export default function LandingPage() {
             </Link>
           ) : (
             <p className="text-[11px] text-[#888888] max-w-sm mx-auto">
-              New here? Use <span className="font-semibold text-[#FF6500]">Start practicing</span> above, or return to the Merge portal and tap your chapter again so the full redirect URL loads.
+              Sign in happens when you open your chapter from the Merge portal (the URL must include{' '}
+              <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
+              <span className="font-mono">session_id</span>).
             </p>
           )}
           <p className="text-[11px] text-[#888888] max-w-sm mx-auto">

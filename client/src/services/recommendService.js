@@ -15,6 +15,9 @@ const TOTAL_QUESTIONS = 8;
 const TOTAL_HINTS_EMBEDDED = TOTAL_QUESTIONS * 2; // 2 hints per question
 const QUEUE_KEY = 'mathmentor-recommend-queue';
 
+/** Prevents duplicate in-flight exit/completion sends (e.g. pagehide + legacy handlers). */
+let recommendSendLock = false;
+
 /**
  * Build the Recommendation API payload from a session summary.
  *
@@ -95,36 +98,47 @@ function queuePayload(payload) {
 export async function sendRecommendation(summary, sessionStatus) {
   if (!isMergeSession()) return null;
   if (isRecommendationSent()) return null;
+  if (recommendSendLock) return null;
+  recommendSendLock = true;
 
   const payload = buildPayload(summary, sessionStatus);
   const validationError = validatePayload(payload);
   if (validationError) {
     console.error('[Recommend] Validation failed:', validationError);
+    recommendSendLock = false;
     return null;
   }
 
   const mergeToken = getMergeToken();
+  if (!mergeToken) {
+    recommendSendLock = false;
+    return null;
+  }
   const ATTEMPTS = 3;
   const DELAYS = [0, 1000, 2500];
 
-  for (let i = 0; i < ATTEMPTS; i++) {
-    if (DELAYS[i]) await new Promise((r) => setTimeout(r, DELAYS[i]));
-    try {
-      const { data } = await api.post('/merge/recommend', payload, {
-        headers: { 'X-Merge-Token': mergeToken },
-      });
-      markRecommendationSent(data);
-      return data;
-    } catch (err) {
-      console.warn(`[Recommend] Attempt ${i + 1} failed:`, err.message);
-      if (i === ATTEMPTS - 1) {
-        console.error('[Recommend] All attempts failed — queuing to localStorage.');
-        queuePayload(payload);
-        return null;
+  try {
+    for (let i = 0; i < ATTEMPTS; i++) {
+      if (DELAYS[i]) await new Promise((r) => setTimeout(r, DELAYS[i]));
+      try {
+        const { data } = await api.post('/merge/recommend', payload, {
+          headers: { 'X-Merge-Token': mergeToken },
+        });
+        markRecommendationSent(data);
+        return data;
+      } catch (err) {
+        console.warn(`[Recommend] Attempt ${i + 1} failed:`, err.message);
+        if (i === ATTEMPTS - 1) {
+          console.error('[Recommend] All attempts failed — queuing to localStorage.');
+          queuePayload(payload);
+          return null;
+        }
       }
     }
+    return null;
+  } finally {
+    recommendSendLock = false;
   }
-  return null;
 }
 
 /** Retry any queued payloads (e.g., called when the app next loads from Merge). */
@@ -159,16 +173,22 @@ export async function retryQueuedRecommendations() {
 export async function sendRecommendationKeepAlive(summary, sessionStatus) {
   if (!isMergeSession()) return;
   if (isRecommendationSent()) return;
+  if (recommendSendLock) return;
+  recommendSendLock = true;
 
   const payload = buildPayload(summary, sessionStatus);
   const validationError = validatePayload(payload);
   if (validationError) {
     console.error('[Recommend unload] Validation failed:', validationError);
+    recommendSendLock = false;
     return;
   }
 
   const mergeToken = getMergeToken();
-  if (!mergeToken) return;
+  if (!mergeToken) {
+    recommendSendLock = false;
+    return;
+  }
 
   const base = getApiBaseURL().replace(/\/$/, '');
   try {
@@ -185,5 +205,7 @@ export async function sendRecommendationKeepAlive(summary, sessionStatus) {
     if (res.ok) markRecommendationSent(null);
   } catch {
     // ignore — best effort only
+  } finally {
+    recommendSendLock = false;
   }
 }

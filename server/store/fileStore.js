@@ -198,7 +198,8 @@ function initStore() {
 
 // --- merge portal users ---
 function findOrCreateMergeUser(studentId) {
-  const mergeUserId = `merge_${studentId}`;
+  const sid = String(studentId || '').trim();
+  const mergeUserId = `merge_${sid}`;
   const data = load();
   let dirty = false;
 
@@ -206,14 +207,20 @@ function findOrCreateMergeUser(studentId) {
   if (!user) {
     user = {
       _id: mergeUserId,
-      name: `Student ${studentId}`,
-      email: `merge_${studentId}@portal.local`,
+      /** Display + API: exact portal student_id (e.g. STD-42), not a placeholder label. */
+      name: sid,
+      portalStudentId: sid,
+      email: `merge_${sid.replace(/[^a-zA-Z0-9._-]/g, '_')}@portal.local`,
       passwordHash: '',
       grade: 8,
       isMergeUser: true,
       createdAt: new Date().toISOString(),
     };
     data.users.push(user);
+    dirty = true;
+  } else if (user.name !== sid || user.portalStudentId !== sid) {
+    user.name = sid;
+    user.portalStudentId = sid;
     dirty = true;
   }
 
