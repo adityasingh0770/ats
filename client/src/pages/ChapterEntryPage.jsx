@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { initMergeSession } from '../store/mergeStore';
 import { retryQueuedRecommendations } from '../services/recommendService';
 import api from '../services/apiClient';
 import { FullPageLoader } from '../components/ui/LoadingSpinner';
 import { HOME_PATH } from '../config/routes';
+import { resolveMergeHandoff } from '../utils/mergeTokenParse';
+import { MERGE_DASHBOARD_URL } from '../config/mergePortal';
 
 /**
  * /chapter  — Merge portal redirect entry point.
@@ -17,25 +19,34 @@ export default function ChapterEntryPage() {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [error, setError] = useState(null);
+  const [incomplete, setIncomplete] = useState(null);
 
   useEffect(() => {
-    const token = params.get('token');
-    const studentId = params.get('student_id');
-    const sessionId = params.get('session_id');
-
-    if (!token || !studentId || !sessionId) {
+    const token = params.get('token')?.trim();
+    if (!token) {
       navigate(HOME_PATH, { replace: true });
       return;
     }
 
-    initMergeSession(token, studentId, sessionId);
+    const handoff = resolveMergeHandoff(params);
+    if (!handoff) {
+      setError(null);
+      setIncomplete(
+        'This link only had a token. MathMentor also needs your student and session identifiers. Open the chapter again from Merge using Launch Chapter next to Grade 8 Mensuration.'
+      );
+      return;
+    }
+
+    setIncomplete(null);
+    setError(null);
+    initMergeSession(handoff.token, handoff.studentId, handoff.sessionId);
 
     (async () => {
       try {
         const { data } = await api.post(
           '/merge/entry',
-          { student_id: studentId },
-          { headers: { 'X-Merge-Token': token } }
+          { student_id: handoff.studentId },
+          { headers: { 'X-Merge-Token': handoff.token } }
         );
         setAuth(data.token, data.user);
 
@@ -48,6 +59,27 @@ export default function ChapterEntryPage() {
       }
     })();
   }, [params, navigate, setAuth]);
+
+  if (incomplete) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-[#F8F6F3]">
+        <div className="text-center space-y-4 max-w-md">
+          <p className="text-sm text-[#444444] leading-relaxed">{incomplete}</p>
+          <a
+            href={MERGE_DASHBOARD_URL}
+            className="inline-flex items-center justify-center btn-primary px-6 py-2.5 text-sm"
+          >
+            Back to Merge dashboard
+          </a>
+          <div>
+            <Link to={HOME_PATH} className="text-xs text-[#888888] hover:text-[#555555]">
+              MathMentor home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (

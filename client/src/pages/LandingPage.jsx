@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Brain, Zap, Target, ArrowRight, Ruler, Layers, Box, Package, Lock, GraduationCap } from 'lucide-react';
@@ -6,7 +6,8 @@ import { warmupBackend } from '../services/apiClient';
 import { useAuthStore } from '../store/authStore';
 import { isMergeSession } from '../store/mergeStore';
 import { CHAPTER_PATH } from '../config/routes';
-import { MERGE_PORTAL_ORIGIN } from '../config/mergePortal';
+import { MERGE_DASHBOARD_URL } from '../config/mergePortal';
+import { resolveMergeHandoff } from '../utils/mergeTokenParse';
 import { FullPageLoader } from '../components/ui/LoadingSpinner';
 
 const highlights = [
@@ -27,20 +28,23 @@ export default function LandingPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const mergeLaunch =
-    !!searchParams.get('token') &&
-    !!searchParams.get('student_id') &&
-    !!searchParams.get('session_id');
+  const queryString = searchParams.toString();
+  const handoff = useMemo(() => resolveMergeHandoff(new URLSearchParams(queryString)), [queryString]);
+  const mergeLaunch = !!handoff;
 
   useEffect(() => {
     warmupBackend();
   }, []);
 
-  /** Portal may deep-link here with the same query string as /chapter — forward so entry runs. */
+  /** Portal may deep-link here (full query or token-only JWT) — forward to /chapter for entry. */
   useEffect(() => {
-    if (!mergeLaunch) return;
-    navigate(`${CHAPTER_PATH}?${searchParams.toString()}`, { replace: true });
-  }, [mergeLaunch, navigate, searchParams]);
+    if (!handoff) return;
+    const q = new URLSearchParams();
+    q.set('token', handoff.token);
+    q.set('student_id', handoff.studentId);
+    q.set('session_id', handoff.sessionId);
+    navigate(`${CHAPTER_PATH}?${q.toString()}`, { replace: true });
+  }, [handoff, navigate]);
 
   /**
    * Same browser tab still has Merge session + our JWT (e.g. user opened home without query params).
@@ -100,7 +104,7 @@ export default function LandingPage() {
               </div>
             ) : (
               <motion.a
-                href={MERGE_PORTAL_ORIGIN}
+                href={MERGE_DASHBOARD_URL}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="btn-primary px-8 py-3 text-sm inline-flex items-center justify-center gap-1.5"
@@ -112,9 +116,10 @@ export default function LandingPage() {
               <strong className="text-[#555555]">No separate MathMentor login.</strong> This site cannot see your Merge
               session in another tab — your identity arrives only when Merge opens this chapter with{' '}
               <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
-              <span className="font-mono">session_id</span> in the URL (see ET605). Use the button above to go to Merge,
-              then open <strong className="text-[#555555]">Grade 8 Mensuration</strong> from your dashboard so that URL
-              is generated for you.
+              <span className="font-mono">session_id</span> in the URL (see ET605).               Use the button to open your <strong className="text-[#555555]">Merge dashboard</strong>, find{' '}
+              <strong className="text-[#555555]">Grade 8 Mensuration</strong>, and tap{' '}
+              <strong className="text-[#555555]">Launch Chapter</strong> — that sends you here with a complete link
+              (token + student + session).
             </p>
           </div>
         </motion.div>
