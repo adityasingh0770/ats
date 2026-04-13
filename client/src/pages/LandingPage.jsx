@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Brain, Zap, Target, ArrowRight, Ruler, Layers, Box, Package, Lock, GraduationCap } from 'lucide-react';
 import { warmupBackend } from '../services/apiClient';
 import { useAuthStore } from '../store/authStore';
+import { CHAPTER_PATH } from '../config/routes';
+import { FullPageLoader } from '../components/ui/LoadingSpinner';
 
 const highlights = [
   { icon: Brain, text: 'Difficulty adjusts as you learn' },
@@ -20,10 +22,27 @@ const topics = [
 
 export default function LandingPage() {
   const token = useAuthStore((s) => s.token);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const mergeLaunch =
+    !!searchParams.get('token') &&
+    !!searchParams.get('student_id') &&
+    !!searchParams.get('session_id');
 
   useEffect(() => {
     warmupBackend();
   }, []);
+
+  /** Portal may deep-link here with the same query string as /chapter — forward so entry runs. */
+  useEffect(() => {
+    if (!mergeLaunch) return;
+    navigate(`${CHAPTER_PATH}?${searchParams.toString()}`, { replace: true });
+  }, [mergeLaunch, navigate, searchParams]);
+
+  if (mergeLaunch) {
+    return <FullPageLoader text="Connecting to MathMentor..." />;
+  }
 
   return (
     <div className="min-h-screen pt-16 bg-[#F8F6F3]">
@@ -72,7 +91,7 @@ export default function LandingPage() {
             <p className="text-[11px] text-[#888888] max-w-sm mx-auto leading-relaxed">
               <strong className="text-[#555555]">From the Merge portal:</strong> open this chapter using the portal’s
               link — it must include <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
-              <span className="font-mono">session_id</span> in the URL (do not bookmark plain <span className="font-mono">/chapter</span>).
+              <span className="font-mono">session_id</span> in the URL (works on <span className="font-mono">/chapter</span> or this page; do not bookmark without those parameters).
             </p>
           </div>
         </motion.div>
