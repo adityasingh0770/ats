@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Brain, Zap, Target, ArrowRight, Ruler, Layers, Box, Package, Lock, GraduationCap } from 'lucide-react';
 import { warmupBackend } from '../services/apiClient';
 import { useAuthStore } from '../store/authStore';
-import { CHAPTER_PATH } from '../config/routes';
 
 const highlights = [
   { icon: Brain, text: 'Difficulty adjusts as you learn' },
@@ -48,18 +47,19 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col items-center gap-3 pt-2">
-            <Link to={CHAPTER_PATH}>
+            <Link to="/dashboard">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="btn-primary px-8 py-3 text-sm"
               >
-                Continue from portal <ArrowRight className="w-3.5 h-3.5" />
+                Start practicing <ArrowRight className="w-3.5 h-3.5" />
               </motion.button>
             </Link>
             <p className="text-[11px] text-[#888888] max-w-sm mx-auto leading-relaxed">
-              Open this chapter from the Merge portal so the URL includes <span className="font-mono">token</span>,{' '}
-              <span className="font-mono">student_id</span>, and <span className="font-mono">session_id</span>.
+              <strong className="text-[#555555]">From the Merge portal:</strong> open this chapter using the portal’s
+              link — it must include <span className="font-mono">token</span>, <span className="font-mono">student_id</span>, and{' '}
+              <span className="font-mono">session_id</span> in the URL (do not bookmark plain <span className="font-mono">/chapter</span>).
             </p>
           </div>
         </motion.div>
@@ -122,11 +122,8 @@ export default function LandingPage() {
               Go to dashboard <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
-            <p className="text-[11px] text-[#888888]">
-              <Link to={CHAPTER_PATH} className="text-[#FF6500] font-semibold">
-                Open via Merge chapter link
-              </Link>{' '}
-              to start at step 1.
+            <p className="text-[11px] text-[#888888] max-w-sm mx-auto">
+              New here? Use <span className="font-semibold text-[#FF6500]">Start practicing</span> above, or return to the Merge portal and tap your chapter again so the full redirect URL loads.
             </p>
           )}
           <p className="text-[11px] text-[#888888] max-w-sm mx-auto">

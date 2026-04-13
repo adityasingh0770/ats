@@ -5,6 +5,7 @@ import { initMergeSession } from '../store/mergeStore';
 import { retryQueuedRecommendations } from '../services/recommendService';
 import api from '../services/apiClient';
 import { FullPageLoader } from '../components/ui/LoadingSpinner';
+import { HOME_PATH } from '../config/routes';
 
 /**
  * /chapter  — Merge portal redirect entry point.
@@ -23,7 +24,7 @@ export default function ChapterEntryPage() {
     const sessionId = params.get('session_id');
 
     if (!token || !studentId || !sessionId) {
-      setError('Missing required query parameters (token, student_id, session_id).');
+      navigate(HOME_PATH, { replace: true });
       return;
     }
 
@@ -38,7 +39,6 @@ export default function ChapterEntryPage() {
         );
         setAuth(data.token, data.user);
 
-        // Retry any previously queued recommendations from this student
         retryQueuedRecommendations().catch(() => {});
 
         navigate('/topics', { replace: true });
@@ -47,7 +47,7 @@ export default function ChapterEntryPage() {
         setError('Failed to authenticate with the portal. Please try again.');
       }
     })();
-  }, []);
+  }, [params, navigate, setAuth]);
 
   if (error) {
     return (

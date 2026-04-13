@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getApiBaseURL } from '../config/api';
-import { CHAPTER_PATH } from '../config/routes';
+import { HOME_PATH } from '../config/routes';
 import { useAuthStore } from '../store/authStore';
 import { clearMergeSession } from '../store/mergeStore';
 
@@ -30,7 +30,7 @@ api.interceptors.response.use(
     if (err.response?.status === 401 && !isAuthBootstrap) {
       useAuthStore.getState().logout();
       clearMergeSession();
-      window.location.href = CHAPTER_PATH;
+      window.location.href = HOME_PATH;
     }
     return Promise.reject(err);
   }

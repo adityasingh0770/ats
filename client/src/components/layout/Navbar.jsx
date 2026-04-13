@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { clearMergeSession } from '../../store/mergeStore';
 import { LayoutDashboard, BookOpen, LogOut, Zap } from 'lucide-react';
-import { HOME_PATH, CHAPTER_PATH } from '../../config/routes';
+import { HOME_PATH } from '../../config/routes';
 
 export default function Navbar() {
   const { token, user, logout } = useAuthStore();
@@ -13,7 +13,7 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     clearMergeSession();
-    navigate(CHAPTER_PATH);
+    navigate(HOME_PATH, { replace: true });
   };
   const isActive = (path) => location.pathname === path;
 
